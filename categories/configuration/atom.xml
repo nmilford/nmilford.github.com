@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Configuration | blog.milford.io]]></title>
   <link href="http://nmilford.github.com/categories/configuration/atom.xml" rel="self"/>
   <link href="http://nmilford.github.com/"/>
-  <updated>2012-09-21T22:52:41-04:00</updated>
+  <updated>2012-09-21T23:05:48-04:00</updated>
   <id>http://nmilford.github.com/</id>
   <author>
     <name><![CDATA[Nathan Milford]]></name>
@@ -18,7 +18,7 @@
     <link href="http://nmilford.github.com/2012/03/getting-a-basic-cobbler-server-going-on-centos/"/>
     <updated>2012-03-26T23:05:42-04:00</updated>
     <id>http://nmilford.github.com/2012/03/getting-a-basic-cobbler-server-going-on-centos</id>
-    <content type="html"><![CDATA[<p><img class="right" src="http://code.milford.io/images/automation.jpg"></p>
+    <content type="html"><![CDATA[<p><img class="right" src="/images/automation.jpg"></p>
 
 <p>I love <a href="https://github.com/cobbler/cobbler">Cobbler</a>.</p>
 
@@ -141,7 +141,7 @@ cobbler sync
 
 <p>And we’re good to go, now you can get to the cobbler server at http://cobbler.example.com/cobbler_web/</p>
 
-<p><img class="center" src="http://code.milford.io/images/cobblermain.png"></p>
+<p><img class="center" src="/images/cobblermain.png"></p>
 
 <p>From here we can work in the web interface as well as through the CLI.</p>
 
@@ -160,7 +160,7 @@ cobbler distro add \
 
 <p>And here is what it looks like in the web interface.</p>
 
-<p><img class="center" src="http://code.milford.io/images/distro.png"></p>
+<p><img class="center" src="/images/distro.png"></p>
 
 <p>Now add your local repos that we built in the <a href="http://link/to/old/article">previous article</a>.
 <code>
@@ -182,7 +182,7 @@ cobbler repo add \
 </code>
 Once again, the web interface.</p>
 
-<p><img class="center" src="http://code.milford.io/images/repo.png"></p>
+<p><img class="center" src="/images/repo.png"></p>
 
 <p>Now lets start building our kickstart templates. First, lets make some snippets that will be compiled into the main kickstart file.</p>
 
@@ -494,7 +494,7 @@ cobbler profile add \
 
 <p>And, again with the web interface….</p>
 
-<p><img class="center" src="http://code.milford.io/images/profile.png"></p>
+<p><img class="center" src="/images/profile.png"></p>
 
 <p>Sync it all with Cobbler.
 <code>
@@ -517,7 +517,7 @@ cobbler system add \
 
 <p>Here is the node in the web interface.</p>
 
-<p><img class="center" src="http://code.milford.io/images/node.png"></p>
+<p><img class="center" src="/images/node.png"></p>
 
 <p>There you have it. Enable PXE booting on the node and reboot it.</p>
 
