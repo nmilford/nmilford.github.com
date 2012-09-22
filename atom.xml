@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[blog.milford.io]]></title>
+  <link href="http://nmilford.github.com/atom.xml" rel="self"/>
+  <link href="http://nmilford.github.com/"/>
+  <updated>2012-09-21T22:29:34-04:00</updated>
+  <id>http://nmilford.github.com/</id>
+  <author>
+    <name><![CDATA[Nathan Milford]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+</feed>
