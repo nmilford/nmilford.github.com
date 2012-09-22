@@ -5,12 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Blog Archive - blog.milford.io</title>
+  <title>Cassandra Token Calculator - blog.milford.io</title>
   <meta name="author" content="Nathan Milford">
 
   
-  <meta name="description" content="Blog Archive 2012 Getting a Basic Cobbler server going on CentOS.
-Mar 26 2012 posted in Automation, Configuration Recent Posts Getting a Basic &hellip;">
+  <meta name="description" content="Cassandra Token Calculator May 11th, 2012 Number of Nodes in your cluster:&nbsp;&nbsp;&nbsp; More info about why you might need this calculator is &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -19,7 +18,7 @@ Mar 26 2012 posted in Automation, Configuration Recent Posts Getting a Basic &he
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://nmilford.github.com/blog/archives/">
+  <link rel="canonical" href="http://nmilford.github.com/cassandra-token-calculator/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -69,31 +68,77 @@ Mar 26 2012 posted in Automation, Configuration Recent Posts Getting a Basic &he
 <article role="article">
   
   <header>
-    <h1 class="entry-title">Blog Archive</h1>
-    
+    <h1 class="entry-title">Cassandra Token Calculator</h1>
+    <p class="meta">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-05-11T01:51:30-04:00" pubdate data-updated="true">May 11<span>th</span>, 2012</time></p>
   </header>
   
-  <div id="blog-archives">
+  <p><img class="center" src="http://dl.dropbox.com/u/163253/blog.milford.io/images/eyering.png"></p>
+
+<script src="/javascripts/BigInt.js"></script>
+
+
+<script src="/javascripts/cassRingCalc.js"></script>
+
+
+<p><form>
+Number of Nodes in your cluster:&nbsp;&nbsp;&nbsp;
+<input name="nodes" size=4>
+<input type="button" name="button" value="Calculate" onClick="cassRingCalc(this.form);"></p>
+
+<div id="results"></div>
+
+
+<p></form></p>
+
+<br>
+
+
+<p>More info about why you might need this calculator is available <a href="http://wiki.apache.org/cassandra/Operations#Load_balancing">here</a>.</p>
+
+<p>I wrote about it <a href="http://blog.milford.io/2011/05/in-which-i-discourse-on-java-bloat-and-cassandra-node-balancing/">here</a>.</p>
+
+  
+    <footer>
+      <p class="meta">
+        
+        
+
+
+
+
+
 
 
 
   
-  <h2>2012</h2>
 
-<article>
+
+<time datetime="2012-05-11T01:51:30-04:00" pubdate data-updated="true">May 11<span>th</span>, 2012</time>
+        
+      </p>
+      
+        <div class="sharing">
   
-<h1><a href="/2012/03/getting-a-basic-cobbler-server-going-on-centos/">Getting a Basic Cobbler server going on CentOS.</a></h1>
-<time datetime="2012-03-26T23:05:42-04:00" pubdate><span class='month'>Mar</span> <span class='day'>26</span> <span class='year'>2012</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/categories/automation/'>Automation</a>, <a class='category' href='/categories/configuration/'>Configuration</a></span>
-</footer>
-
-
-</article>
-
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://nmilford.github.com/cassandra-token-calculator/index.html" data-via="NathanMilford" data-counturl="http://nmilford.github.com/cassandra-token-calculator/index.html" >Tweet</a>
+  
+  
+  
 </div>
 
+      
+    </footer>
   
 </article>
 

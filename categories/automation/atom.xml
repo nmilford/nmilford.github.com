@@ -1,0 +1,533 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Automation | blog.milford.io]]></title>
+  <link href="http://nmilford.github.com/categories/automation/atom.xml" rel="self"/>
+  <link href="http://nmilford.github.com/"/>
+  <updated>2012-09-21T22:52:41-04:00</updated>
+  <id>http://nmilford.github.com/</id>
+  <author>
+    <name><![CDATA[Nathan Milford]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Getting a Basic Cobbler server going on CentOS.]]></title>
+    <link href="http://nmilford.github.com/2012/03/getting-a-basic-cobbler-server-going-on-centos/"/>
+    <updated>2012-03-26T23:05:42-04:00</updated>
+    <id>http://nmilford.github.com/2012/03/getting-a-basic-cobbler-server-going-on-centos</id>
+    <content type="html"><![CDATA[<p><img class="right" src="http://code.milford.io/images/automation.jpg"></p>
+
+<p>I love <a href="https://github.com/cobbler/cobbler">Cobbler</a>.</p>
+
+<p>Cobbler + Chef in my environment means that I can go from bare metal to an active cluster node in moments with little effort.</p>
+
+<p>It is a powerful system for managing kickstart profiles, pxeboot, power, dhcp, dns etc..</p>
+
+<p>Below are some notes to help get you going with just the basic feature set. It is a system you can easy go nuts with to automate a lot of your infrastructure.</p>
+
+<!-- more -->
+
+
+<p>Install it from EPEL.
+<code>
+yum -y install cobbler cobbler-web xinetd tftp
+</code></p>
+
+<p>Fix Authentication For The Web Interface.
+<code>
+sed -i 's/authn_denyall/authn_configfile/g' /etc/cobbler/modules.conf
+</code>
+Change the password for the ‘Cobbler’ administative user.
+<code>
+htdigest /etc/cobbler/users.digest "Cobbler" cobbler
+</code></p>
+
+<p>Set the Server Name.
+<code>
+sed -i 's/server: 127.0.0.1/server: cobbler.example.com/g' /etc/cobbler/settings
+</code></p>
+
+<p>Set kickstarted nodes to turn off pxeboot on sucessful install.
+<code>
+sed -i 's/pxe_just_once: 0/pxe_just_once: 1/g' /etc/cobbler/settings
+</code></p>
+
+<p>Setup Anamon to log installs to <code>/var/log/cobbler/anamon/&lt;hostname&gt;</code> on the cobbler server.
+<code>
+sed -i 's/anamon_enabled: 0/anamon_enabled: 1/g' /etc/cobbler/settings
+</code></p>
+
+<p>Although we’re not running dhcpd on this server but I find it answers well to fill this out regardless.
+<code>
+sed -i 's/next_server: 127.0.0.1/next_server: 192.168.1.1/g' /etc/cobbler/settings
+</code></p>
+
+<p>Fire cobblerd up.
+<code>
+/etc/init.d/cobblerd start
+</code></p>
+
+<p>Swap out the <code>cobbler_web.conf</code> with one that will attach to a cname.
+```
+mv /etc/httpd/conf.d/cobbler_web.{conf,dist}
+cat &lt;<EOF > /etc/httpd/conf.d/cobbler_web.conf
+<VirtualHost *:80>
+  ServerName cobbler.example.com
+  ServerAlias cobbler
+  SetEnvIf Request_URI ".<em>/op/events/user/.</em>" dontlog
+  CustomLog logs/access_log combined env=!dontlog</p>
+
+<p>  <Location "/cobbler_web"></p>
+
+<pre><code>SetHandler python-program
+PythonHandler django.core.handlers.modpython
+SetEnv DJANGO_SETTINGS_MODULE settings
+PythonDebug On
+PythonPath "['/usr/share/cobbler/web/'] + sys.path"
+AuthBasicAuthoritative Off
+AuthType basic
+AuthName "Cobbler"
+Require valid-user
+PythonAuthenHandler cobbler_web.views
+</code></pre>
+
+<p>  </Location>
+</VirtualHost>
+EOF
+```</p>
+
+<p>Restart httpd.
+<code>
+/etc/init.d/httpd restart
+</code></p>
+
+<p>To get tftpd going edit <code>/etc/xinetd.d/tftp</code>
+<code>
+set disable = no
+</code></p>
+
+<p>Restart xinetd.
+<code>
+/etc/init.d/xinetd restart
+</code></p>
+
+<p>Houskeeping items to pass the cobbler check (I’m not running debian).
+<code>
+cobbler get-loaders
+sed -i -e 's|@dists=.*|#@dists=|'  /etc/debmirror.conf
+sed -i -e 's|@arches=.*|#@arches=|'  /etc/debmirror.conf
+</code></p>
+
+<p>On your DHCP server make sure it is pointed at the cobbler server.
+<code>
+next-server IP.OF.COBBER.SERVER;
+filename "/pxelinux.0";
+</code></p>
+
+<p>Make it auto start.
+<code>
+chkconfig cobblerd on
+chkconfig xinetd on
+chkconfig httpd on
+</code></p>
+
+<p>Sync the cobbler config.
+<code>
+cobbler sync
+</code></p>
+
+<p>And we’re good to go, now you can get to the cobbler server at http://cobbler.example.com/cobbler_web/</p>
+
+<p><img class="center" src="http://code.milford.io/images/cobblermain.png"></p>
+
+<p>From here we can work in the web interface as well as through the CLI.</p>
+
+<p>Lets first setup a Distro.</p>
+
+<p>I run cobbler on the same node as I host my local CentOS Mirror (see this article) so to setup a distro I just need to tell Cobbler where to find the <code>vmlinuz</code> and <code>initrd.img</code> files.
+<code>
+cobbler distro add \
+  --arch=x86_64  \
+  --breed=redhat \
+  --os-version=rhel6 \
+  --name=CentOS6 \
+  --initrd=/path/to/repo/CentOS/6/os/x86_64/isolinux/initrd.img \
+  --kernel=/path/to/repo/CentOS/6/os/x86_64/isolinux/vmlinuz
+</code></p>
+
+<p>And here is what it looks like in the web interface.</p>
+
+<p><img class="center" src="http://code.milford.io/images/distro.png"></p>
+
+<p>Now add your local repos that we built in the <a href="http://link/to/old/article">previous article</a>.
+<code>
+cobbler repo add \
+  --arch=x86_64 \
+  --breed=yum \
+  --keep-updated=N \
+  --mirror=http://repo.example.com/CentOS/6/os/x86_64/ \
+  --name=CentOS6-Base
+</code></p>
+
+<p><code>
+cobbler repo add \
+  --arch=x86_64 \
+  --breed=yum \
+  --keep-updated=N \
+  --mirror=http://repo.example.com/CentOS/6/updates/x86_64/ \
+  --name=CentOS6-Updates
+</code>
+Once again, the web interface.</p>
+
+<p><img class="center" src="http://code.milford.io/images/repo.png"></p>
+
+<p>Now lets start building our kickstart templates. First, lets make some snippets that will be compiled into the main kickstart file.</p>
+
+<p>Place the pre-run trigger snippet here: <code>/var/lib/cobbler/snippets/kickstart_start</code>
+```</p>
+
+<h1>set system_name = $getVar('system_name','')</h1>
+
+<h1>set profile_name = $getVar('profile_name','')</h1>
+
+<h1>set breed = $getVar('breed','')</h1>
+
+<h1>set srv = $getVar('http_server','')</h1>
+
+<h1>set run_install_triggers = $str($getVar('run_install_triggers',''))</h1>
+
+<h1>set runpre = ""</h1>
+
+<h1>if $system_name != ''</h1>
+
+<pre><code>## RUN PRE TRIGGER
+#if $run_install_triggers in [ "1", "true", "yes", "y" ]
+    #if $breed == 'redhat'
+        #set runpre = "\nwget "http://%s/cblr/svc/op/trig/mode/pre/%s/%s" -O /dev/null" % (srv, "system", system_name)
+    #else if $breed == 'vmware'
+        #set runpre = "\nwget "http://%s/cblr/svc/op/trig/mode/pre/%s/%s" -O /dev/null" % (srv, "system", system_name)
+    #end if
+#end if
+</code></pre>
+
+<h1>else if $profile_name != ''</h1>
+
+<pre><code>## RUN PRE TRIGGER
+#if $run_install_triggers in [ "1", "true", "yes", "y" ]
+    #if $breed == 'redhat'
+        #set runpre = "\nwget "http://%s/cblr/svc/op/trig/mode/pre/%s/%s" -O /dev/null" % (srv, "profile", profile_name)
+    #else if $breed == 'vmware'
+        #set runpre = "\nwget "http://%s/cblr/svc/op/trig/mode/pre/%s/%s" -O /dev/null" % (srv, "profile", profile_name)
+    #end if
+#end if
+</code></pre>
+
+<h1>end if</h1>
+
+<h1>echo $runpre</h1>
+
+<p>```</p>
+
+<p>And the post triggers snippet here: <code>/var/lib/cobbler/snippets/kickstart_done</code>
+```</p>
+
+<h1>set system_name = $getVar('system_name','')</h1>
+
+<h1>set profile_name = $getVar('profile_name','')</h1>
+
+<h1>set breed = $getVar('breed','')</h1>
+
+<h1>set os_version = $getVar('os_version','')</h1>
+
+<h1>set srv = $getVar('http_server','')</h1>
+
+<h1>set kickstart = $getVar('kickstart','')</h1>
+
+<h1>set run_install_triggers = $str($getVar('run_install_triggers',''))</h1>
+
+<h1>set pxe_just_once = $str($getVar('pxe_just_once',''))</h1>
+
+<h1>set nopxe = ""</h1>
+
+<h1>set saveks = ""</h1>
+
+<h1>set runpost = ""</h1>
+
+<h1>if $system_name != ''</h1>
+
+<pre><code>## PXE JUST ONCE
+#if $pxe_just_once in [ "1", "true", "yes", "y" ]
+    #if $breed == 'redhat'
+        #set nopxe = "\nwget "http://%s/cblr/svc/op/nopxe/system/%s" -O /dev/null" % (srv, system_name)
+    #else if $breed == 'vmware' and $os_version == 'esx4'
+        #set nopxe = "\ncurl "http://%s/cblr/svc/op/nopxe/system/%s" -o /dev/null" % (srv, system_name)
+    #else if $breed == 'vmware' and $os_version == 'esxi4'
+        #set nopxe = "\nwget "http://%s/cblr/svc/op/nopxe/system/%s" -O /dev/null" % (srv, system_name)
+    #end if
+#end if
+## SAVE KICKSTART
+#if $kickstart != ''
+    #if $breed == 'redhat'
+        #set saveks = "\nwget "http://%s/cblr/svc/op/ks/%s/%s" -O /root/cobbler.ks" % (srv, "system", system_name)
+    #else if $breed == 'vmware' and $os_version == 'esx4'
+        #set saveks = "\ncurl "http://%s/cblr/svc/op/ks/%s/%s" -o /root/cobbler.ks" % (srv, "system", system_name)
+    #else if $breed == 'vmware' and $os_version == 'esxi4'
+        #set saveks = "\nwget "http://%s/cblr/svc/op/ks/%s/%s" -O /var/log/cobbler.ks" % (srv, "system", system_name)
+    #end if
+#end if
+## RUN POST TRIGGER
+#if $run_install_triggers in [ "1", "true", "yes", "y" ]
+    #if $breed == 'redhat'
+        #set runpost = "\nwget "http://%s/cblr/svc/op/trig/mode/post/%s/%s" -O /dev/null" % (srv, "system", system_name)
+    #else if $breed == 'vmware' and $os_version == 'esx4'
+        #set runpost = "\ncurl "http://%s/cblr/svc/op/trig/mode/post/%s/%s" -o /dev/null" % (srv, "system", system_name)
+    #else if $breed == 'vmware' and $os_version == 'esxi4'
+        #set runpost = "\nwget "http://%s/cblr/svc/op/trig/mode/post/%s/%s" -O /dev/null" % (srv, "system", system_name)
+    #end if
+#end if
+</code></pre>
+
+<h1>else if $profile_name != ''</h1>
+
+<pre><code>## SAVE KICKSTART
+#if $kickstart != ''
+    #if $breed == 'redhat'
+        #set saveks = "\nwget "http://%s/cblr/svc/op/ks/%s/%s" -O /root/cobbler.ks" % (srv, "profile", profile_name)
+    #else if $breed == 'vmware' and $os_version == 'esx4'
+        #set saveks = "\ncurl "http://%s/cblr/svc/op/ks/%s/%s" -o /root/cobbler.ks" % (srv, "profile", profile_name)
+    #else if $breed == 'vmware' and $os_version == 'esxi4'
+        #set saveks = "\nwget "http://%s/cblr/svc/op/ks/%s/%s" -O /var/log/cobbler.ks" % (srv, "profile", profile_name)
+    #end if
+#end if
+## RUN POST TRIGGER
+#if $run_install_triggers in [ "1", "true", "yes", "y" ]
+    #if $breed == 'redhat'
+        #set runpost = "\nwget "http://%s/cblr/svc/op/trig/mode/post/%s/%s" -O /dev/null" % (srv, "profile", profile_name)
+    #else if $breed == 'vmware' and $os_version == 'esx4'
+        #set runpost = "\ncurl "http://%s/cblr/svc/op/trig/mode/post/%s/%s" -o /dev/null" % (srv, "profile", profile_name)
+    #else if $breed == 'vmware' and $os_version == 'esxi4'
+        #set runpost = "\nwget "http://%s/cblr/svc/op/trig/mode/post/%s/%s" -O /dev/null" % (srv, "profile", profile_name)
+    #end if
+#end if
+</code></pre>
+
+<h1>end if</h1>
+
+<h1>echo $saveks</h1>
+
+<h1>echo $runpost</h1>
+
+<h1>echo $nopxe</h1>
+
+<p>```</p>
+
+<p>I also use cobbler to bootstrap chef. Drop it at <code>/var/lib/cobbler/snippets/chef-bootstrap</code>
+```</p>
+
+<h1>Chef Needs the clock to be synced.</h1>
+
+<p>cat &lt;<EOF_NTP >> /etc/ntp/step-tickers
+0.centos.pool.ntp.org
+1.centos.pool.ntp.org
+2.centos.pool.ntp.org
+EOF_NTP</p>
+
+<p>chkconfig ntpd on
+service ntpd start</p>
+
+<h1>MyRepo has the Opscode Chef full-stack installer RPM.</h1>
+
+<p>cat &lt;<EOF_REPO >> /etc/yum.repos.d/MyRepo.repo
+[MyRepos]
+name=MyRepo
+baseurl=http://repo.example.com/MyRepo/el/6/x86_64/
+enabled=1
+keepcache=0
+gpgcheck=0
+EOF_REPO</p>
+
+<p>yum -y install gcc chef-full</p>
+
+<h1>Installs some Gems I need.</h1>
+
+<p>/opt/opscode/embedded/bin/gem install mongrel --pre
+/opt/opscode/embedded/bin/gem install ruby-shadow
+mkdir /etc/chef
+cd /etc/chef
+curl -O http://chef.example.com/validation.pem
+curl -O http://chef.example.com/client.rb</p>
+
+<h1>Run chef-client to register the node</h1>
+
+<p>chef-client
+chkconfig --add chef-client
+chkconfig chef-client on
+service chef-client start</p>
+
+<h1>Run chef-client again setting up the node in our Base Profile.</h1>
+
+<p>cat &lt;<EOF > /var/tmp/role.json
+{ "run_list": [ "role[Base]" ] }
+EOF
+chef-client -j /var/tmp/role.json
+```</p>
+
+<p>Disk setup here. In a system’s profile you can pass disks=single or disks=mirror to pick a disk layout. I have different disk configs for MySQL servers, Hadoop nodes, web servers etc..</p>
+
+<p><code>/var/lib/cobbler/snippets/disk-setup</code>
+```
+clearpart --all --initlabel</p>
+
+<h1>if $disks == 'mirror'</h1>
+
+<p>bootloader --location=mbr --driveorder=sda,sdb
+part raid.01 --size=300 --asprimary --ondisk=sda
+part raid.11 --size=300 --asprimary --ondisk=sdb
+part raid.02 --size=1 --grow --asprimary --ondisk=sda
+part raid.12 --size=1 --grow --asprimary --ondisk=sdb
+raid /boot --fstype=ext3 --device md0 --level=RAID1 raid.01 raid.11
+raid pv.01 --fstype ext3 --device md1 --level=RAID1 raid.02 raid.12
+volgroup centos pv.01
+logvol /         --fstype ext3 --name=root     --vgname=centos --size=10240
+logvol /var      --fstype ext3 --name=var      --vgname=centos --size=10240
+logvol /home     --fstype ext3 --name=home     --vgname=centos --size=5120
+logvol /opt      --fstype ext3 --name=opt      --vgname=centos --size=5120
+logvol swap      --fstype swap --name=swap     --vgname=centos --size=4096</p>
+
+<h1>else</h1>
+
+<h1>if $disks == 'single'</h1>
+
+<p>bootloader --location=mbr --driveorder=sda
+part /boot --fstype ext3 --size=300 --asprimary --ondisk=sda
+part pv.01   --size=150 --grow --ondisk=sda
+volgroup centos pv.01
+logvol /         --fstype ext3 --name=root     --vgname=centos --size=10240
+logvol /var      --fstype ext3 --name=var      --vgname=centos --size=10240
+logvol /home     --fstype ext3 --name=home     --vgname=centos --size=5120
+logvol /opt      --fstype ext3 --name=opt      --vgname=centos --size=5120
+logvol swap      --fstype swap --name=swap     --vgname=centos --size=4096</p>
+
+<h1>end if</h1>
+
+<h1>end if</h1>
+
+<p>```
+I also seperate packages, since eventually I’ll setup an if/else tree for different node types.</p>
+
+<p><code>/var/lib/cobbler/snippets/packages</code>
+<code>
+@editors
+@core
+@base
+device-mapper-multipath
+-sysreport
+-sendmail
+-logwatch
+screen
+ntp
+net-snmp
+net-snmp-utils
+system-config-date
+system-switch-mail
+postfix
+nfs-utils
+sysstat
+yum-priorities
+</code>
+And finally, drop your kickstart with integrated snippets (you can generate a rootpw crypt thus: openssl passwd -1).</p>
+
+<p><code>/var/lib/cobbler/kickstarts/myCentOS6.ks</code>
+<code>
+authconfig --enableshadow --enablemd5
+rootpw --iscrypted $1$NDnhVSEW$YeKmfHm.Fi7rRKhjpO2bF1
+text
+skipx
+keyboard us
+lang en_US.UTF-8
+timezone  America/New_York
+firewall --disabled
+selinux --disabled
+url --url=$tree
+$yum_repo_stanza
+$SNIPPET('network_config')
+firstboot --disable
+reboot
+$SNIPPET('disk-setup')
+install
+%pre
+$SNIPPET('log_ks_pre')
+$kickstart_start
+$SNIPPET('pre_install_network_config')
+$SNIPPET('pre_anamon')
+%packages
+$SNIPPET('packages')
+%post
+$SNIPPET('log_ks_post')
+$yum_config_stanza
+$SNIPPET('post_install_kernel_options')
+$SNIPPET('post_install_network_config')
+$SNIPPET('func_register_if_enabled')
+$SNIPPET('download_config_files')
+$SNIPPET('koan_environment')
+$SNIPPET('redhat_register')
+$SNIPPET('cobbler_register')
+$SNIPPET('chef-bootstrap')
+yum -y upgrade
+$SNIPPET('post_anamon')
+$SNIPPET('kickstart_done')
+Most of those snippets come with Cobbler already.
+</code></p>
+
+<p>And now, lets make a profile.
+<code>
+cobbler profile add \
+  --kickstart=/var/lib/cobbler/kickstarts/myCentOS6.ks \
+  --repos="CentOS6-Base CentOS6-Updates" \
+  --nameservers="192.168.1.1 192.168.1.2"
+  --distro=CentOS6 \
+  --name=CentOS6-x86_64
+</code></p>
+
+<p>And, again with the web interface….</p>
+
+<p><img class="center" src="http://code.milford.io/images/profile.png"></p>
+
+<p>Sync it all with Cobbler.
+<code>
+cobbler sync
+</code></p>
+
+<p>And now we have all the pieces in place to add a node with a RAID1 mirror that will netboot on next boot.
+<code>
+cobbler system add \
+  --name=server01.example.com \
+  --profile=CentOS6-x86_64 \
+  --mac=1a:2b:3c:4d:5e:6f \
+  --ip=192.168.1.3 \
+  --subnet=255.255.255.0 \
+  --hostname=server01.example.com \
+  --ksmeta="disks=mirror" \
+  --netboot-enabled=Y \
+  --gateway=192.168.1.1
+</code></p>
+
+<p>Here is the node in the web interface.</p>
+
+<p><img class="center" src="http://code.milford.io/images/node.png"></p>
+
+<p>There you have it. Enable PXE booting on the node and reboot it.</p>
+
+<p>You can actually follow it’s install process from the Cobbler server
+<code>
+tail -f /var/log/cobbler/anamon/server01.example.com/*
+</code></p>
+
+<p>Within a few minutes your node will be complete.</p>
+]]></content>
+  </entry>
+  
+</feed>
