@@ -2,6 +2,34 @@
 <urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
     <url>
         <loc>
+            http://nmilford.github.com/2012/03/keepalived-for-mysql-high-availability-on-centos/
+        </loc>
+        <lastmod>2012-09-22T10:48:57-04:00</lastmod>
+    </url>
+    <url>
+        <loc>http://nmilford.github.com/2012/03/the-dell-c6100-and-ipmi-drac-megarac/</loc>
+        <lastmod>2012-09-22T10:49:32-04:00</lastmod>
+    </url>
+    <url>
+        <loc>
+            http://nmilford.github.com/2012/03/the-dell-c6220-and-an-ode-to-my-dell-dcs-team/
+        </loc>
+        <lastmod>2012-09-22T10:07:50-04:00</lastmod>
+    </url>
+    <url>
+        <loc>http://nmilford.github.com/2012/03/now-hiring-now-right-now-were-hiring-now/</loc>
+        <lastmod>2012-09-22T10:09:24-04:00</lastmod>
+    </url>
+    <url>
+        <loc>http://nmilford.github.com/2012/03/making-a-simple-yum-repository/</loc>
+        <lastmod>2012-09-22T10:07:13-04:00</lastmod>
+    </url>
+    <url>
+        <loc>http://nmilford.github.com/2012/03/making-a-local-centos-mirror/</loc>
+        <lastmod>2012-09-22T10:06:36-04:00</lastmod>
+    </url>
+    <url>
+        <loc>
             http://nmilford.github.com/2012/03/getting-a-basic-cobbler-server-going-on-centos/
         </loc>
         <lastmod>2012-09-21T23:05:39-04:00</lastmod>
@@ -12,11 +40,11 @@
     </url>
     <url>
         <loc>http://nmilford.github.com/blog/archives/</loc>
-        <lastmod>2012-09-21T23:05:39-04:00</lastmod>
+        <lastmod>2012-09-22T10:49:32-04:00</lastmod>
     </url>
     <url>
         <loc>http://nmilford.github.com/</loc>
-        <lastmod>2012-09-21T23:05:39-04:00</lastmod>
+        <lastmod>2012-09-22T10:49:32-04:00</lastmod>
     </url>
     <url>
         <loc>http://nmilford.github.com/about/</loc>

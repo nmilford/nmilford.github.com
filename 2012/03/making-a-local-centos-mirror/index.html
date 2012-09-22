@@ -1,0 +1,525 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Making a local CentOS mirror. - blog.milford.io</title>
+  <meta name="author" content="Nathan Milford">
+
+  
+  <meta name="description" content="Following up from my last post on creating a simple yum repository, here is how to setup a local CentOS mirror. This works much the same as with my &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://nmilford.github.com/2012/03/making-a-local-centos-mirror/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="blog.milford.io" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">blog.milford.io</a></h1>
+  
+    <h2>a personal knowledge dump.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:nmilford.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/cassandra-token-calculator">Cassandra Token Calculator</a></li>
+  <li><a href="/about">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Making a Local CentOS Mirror.</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-25T16:25:39-04:00" pubdate data-updated="true">Mar 25<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p><img class="center" src="/images/CentOS_amazing1.jpg"></p>
+
+<p>Following up from my <a href="http://link/to/last/post">last post</a> on creating a simple yum repository, here is how to setup a local CentOS mirror.</p>
+
+<!-- more -->
+
+
+<p>This works much the same as with my last article, and here I’ll make it so your personal repo and your CentOS mirror repo can co-exist.</p>
+
+<p>You’ll dump your CentOS mirror in /path/to/repo/CentOS, while your personal repo was put in /path/to/repo/MyRepo but the web root is at /path/to/repo/.</p>
+
+<p>I want both CentOS 5.8 and 6.2</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mkdir -p /path/to/repo/CentOS/{5.8,6.2}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Setup some links</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd /path/to/repo/CentOS/
+</span><span class='line'>ln -s 5.8 5
+</span><span class='line'>ln -s 6.2 6</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If you didn’t setup a personal repo like I did in my last article you can do the following.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum -y install httpd
+</span><span class='line'>cat &lt;&lt;EOF &gt; /etc/httpd/conf.d/repo.conf
+</span><span class='line'>&lt;VirtualHost *:80&gt;
+</span><span class='line'>ServerName repo.example.com
+</span><span class='line'>ServerAlias repo
+</span><span class='line'>ServerAdmin ops@example.com
+</span><span class='line'>DocumentRoot /path/to/repo/
+</span><span class='line'>ErrorLog logs/repo.example.com-error_log
+</span><span class='line'>CustomLog logs/repo.example.com-access_log common
+</span><span class='line'>&lt;Directory "/path/to/repo/*"&gt;
+</span><span class='line'>Options Indexes FollowSymLinks
+</span><span class='line'>Order allow,deny
+</span><span class='line'>Allow from all
+</span><span class='line'>&lt;/Directory&gt;
+</span><span class='line'>&lt;/VirtualHost&gt;
+</span><span class='line'>EOF</span></code></pre></td></tr></table></div></figure>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/httpd start</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now mirror the repos with rsync.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>rsync  -avrt --delete --exclude "local*" --exclude "isos" rsync://mirrors.rit.edu/centos/5.8/ /path/to/repo/CentOS/5.8/
+</span><span class='line'>rsync  -avrt --delete --exclude "local*" --exclude "isos" rsync://mirrors.rit.edu/centos/6.2/ /path/to/repo/CentOS/6.2/</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Here I have a little script I put in cron to do a nightly sync. Obviously you don’t need to update it with cron if you want to keep everything at a certain level and control upgrade levels centerally.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cat &lt;&lt;EOF &gt; /etc/cron.daily/updateCentosRepo.sh
+</span><span class='line'>#!/bin/bash
+</span><span class='line'>
+</span><span class='line'>if [ -d /path/to/repo/CentOS/5.8 ]; then
+</span><span class='line'>  rsync  -avrt --delete --exclude "local*" --exclude "isos" rsync://mirrors.rit.edu/centos/5.8/ /path/to/repo/CentOS/5.8/
+</span><span class='line'>else
+</span><span class='line'>  echo "Target directory /path/to/repo/CentOS/5.8 not present."
+</span><span class='line'>fi
+</span><span class='line'>
+</span><span class='line'>if [ -d /path/to/repo/CentOS/6.2 ]; then
+</span><span class='line'>  rsync  -avrt --delete --exclude "local*" --exclude "isos" rsync://mirrors.rit.edu/centos/6.2/ /path/to/repo/CentOS/6.2/
+</span><span class='line'>else
+</span><span class='line'>  echo "Target directory /path/to/repo/CentOS/6.2 not present."
+</span><span class='line'>fi
+</span><span class='line'>EOF</span></code></pre></td></tr></table></div></figure>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>chmod +x /etc/cron.daily/updateCentosRepo.sh</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now create a new CentOS-Base.repo</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cat &lt;&lt;EOF &gt;  /etc/yum.repos.d/CentOS-Base.repo
+</span><span class='line'>[base]
+</span><span class='line'>name=CentOS-$releasever - Base
+</span><span class='line'>baseurl=http://repo.example.com/CentOS/$releasever/os/$basearch/
+</span><span class='line'>enabled=1
+</span><span class='line'>gpgcheck=0
+</span><span class='line'>
+</span><span class='line'>[updates]
+</span><span class='line'>name=CentOS-$releasever - Updates
+</span><span class='line'>baseurl=http://repo.example.com/CentOS/$releasever/updates/$basearch/
+</span><span class='line'>enabled=1
+</span><span class='line'>gpgcheck=0
+</span><span class='line'>
+</span><span class='line'>[extras]
+</span><span class='line'>name=CentOS-$releasever - Extras
+</span><span class='line'>baseurl=http://repo.example.com/CentOS/$releasever/extras/$basearch/
+</span><span class='line'>enabled=1
+</span><span class='line'>gpgcheck=0
+</span><span class='line'>
+</span><span class='line'>[centosplus]
+</span><span class='line'>name=CentOS-$releasever - Plus
+</span><span class='line'>baseurl=http://repo.example.com/CentOS/$releasever/centosplus/$basearch/
+</span><span class='line'>enabled=1
+</span><span class='line'>gpgcheck=0
+</span><span class='line'>
+</span><span class='line'>[contrib]
+</span><span class='line'>name=CentOS-$releasever - Contrib
+</span><span class='line'>baseurl=http://repo.example.com/CentOS/$releasever/contrib/$basearch/
+</span><span class='line'>enabled=0
+</span><span class='line'>gpgcheck=0
+</span><span class='line'>
+</span><span class='line'>[cr]
+</span><span class='line'>name=CentOS-$releasever - CR
+</span><span class='line'>baseurl=http://repo.example.com/CentOS/$releasever/cr/$basearch/
+</span><span class='line'>enabled=1
+</span><span class='line'>gpgcheck=0
+</span><span class='line'>EOF</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now you’re setup to kickstart and update like a boss.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Nathan Milford</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-25T16:25:39-04:00" pubdate data-updated="true">Mar 25<span>th</span>, 2012</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/categories/configurations/'>Configurations</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://nmilford.github.com/2012/03/making-a-local-centos-mirror/" data-via="NathanMilford" data-counturl="http://nmilford.github.com/2012/03/making-a-local-centos-mirror/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/2012/03/making-a-simple-yum-repository/" title="Previous Post: Making a simple Yum repository.">&laquo; Making a simple Yum repository.</a>
+      
+      
+        <a class="basic-alignment right" href="/2012/03/getting-a-basic-cobbler-server-going-on-centos/" title="Next Post: Getting a Basic Cobbler server going on CentOS.">Getting a Basic Cobbler server going on CentOS. &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2012/03/getting-a-basic-cobbler-server-going-on-centos/">Getting a Basic Cobbler server going on CentOS.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/making-a-local-centos-mirror/">Making a local CentOS mirror.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/making-a-simple-yum-repository/">Making a simple Yum repository.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/now-hiring-now-right-now-were-hiring-now/">Now Hiring Now, Right Now We're Hiring Now.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/the-dell-c6220-and-an-ode-to-my-dell-dcs-team/">The Dell C6220 and an Ode to my Dell DCS Team.</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("NathanMilford", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/NathanMilford" class="twitter-follow-button" data-show-count="false">Follow @NathanMilford</a>
+  
+</section>
+
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/nmilford">@nmilford</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'nmilford',
+            count: 6,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Coderwall</h1>
+  <ul id="cw_badges">
+    <li class="loading">Status updating...</li>
+  </ul>
+
+  <script type="text/javascript">
+    var coderwall = (function(){
+      function render(options, badges){
+        var fragment = '',
+            t = $(options.target)[0],
+            height = 65,
+            width = 65,
+            index;
+
+        for (index in badges) {
+          fragment += '<a class="cw_badge"title="' + badges[index].description + '" href="http://coderwall.com/' + options.user + '">';
+          fragment +=   '<img alt="' + badges[index].description + '" height="' + width + '" width="' + height + '" src="' + badges[index].badge + '"/>';
+          fragment += '</a>';
+        }
+
+        t.innerHTML = fragment;
+      }
+      return {
+        showBadges: function(options){
+          $.ajax({
+              url: 'http://coderwall.com/' + options.user + '.json?callback=?'
+            , type: 'jsonp'
+            , error: function (err) { $(options.target + ' li.loading').addClass('error').text("Error loading feed"); }
+            , success: function(res) {
+                render(options, res.data.badges);
+            }
+          });
+        }
+      };
+    })();
+
+    $.domReady(function(){
+      if (!window.jXHR){
+        var jxhr = document.createElement('script');
+        jxhr.type = 'text/javascript';
+        jxhr.src = '/javascripts/libs/jXHR.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(jxhr, s);
+      }
+      if (!window.$){
+        var b = document.createElement('script');
+        b.type = 'text/javascript';
+        b.src = '/javascripts/ender.js';
+        var sc = document.getElementsByTagName('script')[0];
+        sc.parentNode.insertBefore(jxhr, s);
+      }
+      coderwall.showBadges({
+        user: 'nmilford',
+        target: '#cw_badges'
+      });
+    });
+  </script>
+  <style type="text/css">
+    .cw_badge img {
+      padding: 5px;
+      border: 0 none !important;
+      -moz-box-shadow: none !important;
+      -webkit-box-shadow: none !important;
+      -o-box-shadow: none !important;
+      box-shadow: none !important;
+    }
+  </style>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - Nathan Milford -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

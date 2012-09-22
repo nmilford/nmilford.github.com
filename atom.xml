@@ -4,7 +4,7 @@
   <title><![CDATA[blog.milford.io]]></title>
   <link href="http://nmilford.github.com/atom.xml" rel="self"/>
   <link href="http://nmilford.github.com/"/>
-  <updated>2012-09-21T23:05:48-04:00</updated>
+  <updated>2012-09-22T10:49:32-04:00</updated>
   <id>http://nmilford.github.com/</id>
   <author>
     <name><![CDATA[Nathan Milford]]></name>
@@ -778,6 +778,851 @@
 
 
 <p>Within a few minutes your node will be complete.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Making a local CentOS mirror.]]></title>
+    <link href="http://nmilford.github.com/2012/03/making-a-local-centos-mirror/"/>
+    <updated>2012-03-25T16:25:39-04:00</updated>
+    <id>http://nmilford.github.com/2012/03/making-a-local-centos-mirror</id>
+    <content type="html"><![CDATA[<p><img class="center" src="http://nmilford.github.com/images/CentOS_amazing1.jpg"></p>
+
+<p>Following up from my <a href="http://link/to/last/post">last post</a> on creating a simple yum repository, here is how to setup a local CentOS mirror.</p>
+
+<!-- more -->
+
+
+<p>This works much the same as with my last article, and here I’ll make it so your personal repo and your CentOS mirror repo can co-exist.</p>
+
+<p>You’ll dump your CentOS mirror in /path/to/repo/CentOS, while your personal repo was put in /path/to/repo/MyRepo but the web root is at /path/to/repo/.</p>
+
+<p>I want both CentOS 5.8 and 6.2</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mkdir -p /path/to/repo/CentOS/{5.8,6.2}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Setup some links</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd /path/to/repo/CentOS/
+</span><span class='line'>ln -s 5.8 5
+</span><span class='line'>ln -s 6.2 6</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If you didn’t setup a personal repo like I did in my last article you can do the following.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum -y install httpd
+</span><span class='line'>cat &lt;&lt;EOF &gt; /etc/httpd/conf.d/repo.conf
+</span><span class='line'>&lt;VirtualHost *:80&gt;
+</span><span class='line'>ServerName repo.example.com
+</span><span class='line'>ServerAlias repo
+</span><span class='line'>ServerAdmin ops@example.com
+</span><span class='line'>DocumentRoot /path/to/repo/
+</span><span class='line'>ErrorLog logs/repo.example.com-error_log
+</span><span class='line'>CustomLog logs/repo.example.com-access_log common
+</span><span class='line'>&lt;Directory "/path/to/repo/*"&gt;
+</span><span class='line'>Options Indexes FollowSymLinks
+</span><span class='line'>Order allow,deny
+</span><span class='line'>Allow from all
+</span><span class='line'>&lt;/Directory&gt;
+</span><span class='line'>&lt;/VirtualHost&gt;
+</span><span class='line'>EOF</span></code></pre></td></tr></table></div></figure>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/httpd start</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now mirror the repos with rsync.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>rsync  -avrt --delete --exclude "local*" --exclude "isos" rsync://mirrors.rit.edu/centos/5.8/ /path/to/repo/CentOS/5.8/
+</span><span class='line'>rsync  -avrt --delete --exclude "local*" --exclude "isos" rsync://mirrors.rit.edu/centos/6.2/ /path/to/repo/CentOS/6.2/</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Here I have a little script I put in cron to do a nightly sync. Obviously you don’t need to update it with cron if you want to keep everything at a certain level and control upgrade levels centerally.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cat &lt;&lt;EOF &gt; /etc/cron.daily/updateCentosRepo.sh
+</span><span class='line'>#!/bin/bash
+</span><span class='line'>
+</span><span class='line'>if [ -d /path/to/repo/CentOS/5.8 ]; then
+</span><span class='line'>  rsync  -avrt --delete --exclude "local*" --exclude "isos" rsync://mirrors.rit.edu/centos/5.8/ /path/to/repo/CentOS/5.8/
+</span><span class='line'>else
+</span><span class='line'>  echo "Target directory /path/to/repo/CentOS/5.8 not present."
+</span><span class='line'>fi
+</span><span class='line'>
+</span><span class='line'>if [ -d /path/to/repo/CentOS/6.2 ]; then
+</span><span class='line'>  rsync  -avrt --delete --exclude "local*" --exclude "isos" rsync://mirrors.rit.edu/centos/6.2/ /path/to/repo/CentOS/6.2/
+</span><span class='line'>else
+</span><span class='line'>  echo "Target directory /path/to/repo/CentOS/6.2 not present."
+</span><span class='line'>fi
+</span><span class='line'>EOF</span></code></pre></td></tr></table></div></figure>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>chmod +x /etc/cron.daily/updateCentosRepo.sh</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now create a new CentOS-Base.repo</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cat &lt;&lt;EOF &gt;  /etc/yum.repos.d/CentOS-Base.repo
+</span><span class='line'>[base]
+</span><span class='line'>name=CentOS-$releasever - Base
+</span><span class='line'>baseurl=http://repo.example.com/CentOS/$releasever/os/$basearch/
+</span><span class='line'>enabled=1
+</span><span class='line'>gpgcheck=0
+</span><span class='line'>
+</span><span class='line'>[updates]
+</span><span class='line'>name=CentOS-$releasever - Updates
+</span><span class='line'>baseurl=http://repo.example.com/CentOS/$releasever/updates/$basearch/
+</span><span class='line'>enabled=1
+</span><span class='line'>gpgcheck=0
+</span><span class='line'>
+</span><span class='line'>[extras]
+</span><span class='line'>name=CentOS-$releasever - Extras
+</span><span class='line'>baseurl=http://repo.example.com/CentOS/$releasever/extras/$basearch/
+</span><span class='line'>enabled=1
+</span><span class='line'>gpgcheck=0
+</span><span class='line'>
+</span><span class='line'>[centosplus]
+</span><span class='line'>name=CentOS-$releasever - Plus
+</span><span class='line'>baseurl=http://repo.example.com/CentOS/$releasever/centosplus/$basearch/
+</span><span class='line'>enabled=1
+</span><span class='line'>gpgcheck=0
+</span><span class='line'>
+</span><span class='line'>[contrib]
+</span><span class='line'>name=CentOS-$releasever - Contrib
+</span><span class='line'>baseurl=http://repo.example.com/CentOS/$releasever/contrib/$basearch/
+</span><span class='line'>enabled=0
+</span><span class='line'>gpgcheck=0
+</span><span class='line'>
+</span><span class='line'>[cr]
+</span><span class='line'>name=CentOS-$releasever - CR
+</span><span class='line'>baseurl=http://repo.example.com/CentOS/$releasever/cr/$basearch/
+</span><span class='line'>enabled=1
+</span><span class='line'>gpgcheck=0
+</span><span class='line'>EOF</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now you’re setup to kickstart and update like a boss.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Making a simple Yum repository.]]></title>
+    <link href="http://nmilford.github.com/2012/03/making-a-simple-yum-repository/"/>
+    <updated>2012-03-24T18:46:25-04:00</updated>
+    <id>http://nmilford.github.com/2012/03/making-a-simple-yum-repository</id>
+    <content type="html"><![CDATA[<p><img class="center" src="http://nmilford.github.com/images/yum.png"></p>
+
+<p>Here is some low hanging fruit to improve your RHEL environment and simplify your work&#8230; setup a simple Yum repository.</p>
+
+<!-- more -->
+
+
+<p>There is very little magic involved in getting a yum repository up and running. You just need a web server and <code>createrepo</code>.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum -y install createrepo httpd</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Give your repo a home.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mkdir -p /path/to/repo/MyRepo</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Go ahead and setup a vhost for the repo.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cat &lt;&lt;EOF &gt; /etc/httpd/conf.d/repo.conf
+</span><span class='line'>&lt;VirtualHost *:80&gt;
+</span><span class='line'>  ServerName repo.example.com
+</span><span class='line'>  ServerAlias repo
+</span><span class='line'>  ServerAdmin ops@example.com
+</span><span class='line'>  DocumentRoot /path/to/repo/
+</span><span class='line'>  ErrorLog logs/repo.example.com-error_log
+</span><span class='line'>  CustomLog logs/repo.example.com-access_log common
+</span><span class='line'>  &lt;Directory "/path/to/repo/*"&gt;
+</span><span class='line'>    Options Indexes FollowSymLinks
+</span><span class='line'>    Order allow,deny
+</span><span class='line'>    Allow from all
+</span><span class='line'>  &lt;/Directory&gt;
+</span><span class='line'>&lt;/VirtualHost&gt;
+</span><span class='line'>EOF</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And fire it up.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/httpd start</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, dump your RPMs there and run createrepo. It scans the RPMs in the directory and makes the proper metadata resources.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mv *.rpm /path/to/repo/MyRepo
+</span><span class='line'>createrepo /path/to/repo/MyRepo</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Everytime you add or remove rpms, re-run it.</p>
+
+<p>Now on each node drop a .repo file pointing at your repository.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cat &lt;&lt;EOF_REPO &gt; /etc/yum.repos.d/MyRepo.repo
+</span><span class='line'>[MyRepo]
+</span><span class='line'>name=MyRepo
+</span><span class='line'>baseurl=http://repo.example.com/MyRepo
+</span><span class='line'>enabled=1
+</span><span class='line'>gpgcheck=0
+</span><span class='line'>EOF_REPO</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You can also make a hierarchy like <code>/path/to/repo/MyRepo/5/x86_64</code> and in the .repo file’s baseurl directive add something like:</p>
+
+<p><code>baseurl=http://repo.example.com/MyRepo/$releasever/$basearch</code></p>
+
+<p>will exapnd to <code>http://repo.example.com/MyRepo/5/x86_64</code>.</p>
+
+<p>Now, you may want to setup priorities. If you want to host RPMs for stuff that may also be in other repos there may be conflicts. You can enforce a policy using yum priorities as to which repo wins out.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum -y install yum-priorities</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then in your repo files set a priority, 1-99 (1 having the highest priority) where repos with no priroty set defaults to 99.</p>
+
+<p>In my internal repo I set it to priority=1 and the MySQL 5.5.21 RPMs we grabbed from Oracle win out over the 5.0.95 RPMs in the CentOS updates repo.</p>
+
+<p>There are a lot of more fun options but the stuff above should be just enough to get you going.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Now Hiring Now, Right Now We're Hiring Now.]]></title>
+    <link href="http://nmilford.github.com/2012/03/now-hiring-now-right-now-were-hiring-now/"/>
+    <updated>2012-03-19T22:47:04-04:00</updated>
+    <id>http://nmilford.github.com/2012/03/now-hiring-now-right-now-were-hiring-now</id>
+    <content type="html"><![CDATA[<p><img class="center" src="http://nmilford.github.com/images/now_hiring_now.jpg"></p>
+
+<p>If you follow this blog, you can see I get to play with all sorts of awesome stuff.</p>
+
+<p><img class="center" src="http://nmilford.github.com/images/u_jelly_brah.jpg"></p>
+
+<p>Y U JELLY? No need to be.</p>
+
+<p>There is so much awesome stuff to do&#8230; I don&#8217;t have time to do all the awesome stuff there is to do.</p>
+
+<p>Come work with me and do awesome stuff.</p>
+
+<p>It&#8217;ll be awesome.</p>
+
+<ul>
+<li><a href="http://www.linkedin.com/jobs?viewJob=&amp;jobId=2730555">Awesome Web Operations Engineer</a></li>
+<li><a href="http://www.linkedin.com/jobs?viewJob=&amp;jobId=2730654">Awesome Junior Web Operations Engineer</a></li>
+<li><a href="http://www.linkedin.com/jobs?viewJob=&amp;jobId=2730735">Director of Awesome IT </a></li>
+</ul>
+
+
+<p><img class="center" src="http://nmilford.github.com/images/awesome.jpg"></p>
+
+<p>I do not apologize for my gratuitous use of the word awesome.  If you can&#8217;t take this much awesome, you probably couldn&#8217;t handle working at Outbrain.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[The Dell C6220 and an Ode to my Dell DCS Team.]]></title>
+    <link href="http://nmilford.github.com/2012/03/the-dell-c6220-and-an-ode-to-my-dell-dcs-team/"/>
+    <updated>2012-03-19T22:13:23-04:00</updated>
+    <id>http://nmilford.github.com/2012/03/the-dell-c6220-and-an-ode-to-my-dell-dcs-team</id>
+    <content type="html"><![CDATA[<p><img class="right" src="http://nmilford.github.com/images/xanadu.jpg"></p>
+
+<p>I&#8217;m pretty hard on vendors.</p>
+
+<p>I can be down right mean sometimes when arguing for what I think is right.  When I am fed buzzwords and technobabbel or smell BS I call them out on it.</p>
+
+<p>Free drinks, swag or fancy steak dinners won&#8217;t get my business. Price, performance and responsiveness to my input and problems will. (Though, I&#8217;ll certainly let you guys keep trying since I love steak).</p>
+
+<p>When I find technologies or vendors I like I latch on to them and nerdgush about them on this blog or to my peers. The C-Series servers are a good example. They&#8217;re pretty cool and allow me to hit my goals for pricing, density and other features, but the real value is the Dell Data Center Solutions team.  Other vendors may have good-enough products and better pricing, but they don&#8217;t have anything like these guys.</p>
+
+<!-- more -->
+
+
+<p>The thing I love most about the DCS team is that they listen and, moreover, they rapidly implement fixes and suggestions from their clients. In an organization as big and labyrinthine as Dell, they have this uncanny ability to get things done and advocate for their clients even when we&#8217;re not ordering tens of thousands of servers.</p>
+
+<p>Sure, I have my problems on occasion, but they&#8217;re the same little problems you have with any other vendor. The difference is they&#8217;re always responsive and bend over backwards to fix these things rather than leaving you feeling feeling powerless, frustrated and on hold.</p>
+
+<p>One time there was an order mixup on a RAID controller and one of my DCS guys (not a support engineer) happened to be near my Chicago data center where it should have ended up. He (miraculously) got ahold of one, showed up at my data center and installed it himself&#8230; like a bawse. These guys know what they sell :)</p>
+
+<p>Everytime I have a problem, absurd stuff like that goes down. They just get stuff done.</p>
+
+<p>Most importantly they take product feedback seriously.</p>
+
+<p>Evidence of that is in this video from Dell breaking down the C6100&#8217;s sucessor the C6220. Nearly every practical suggestion sent to DCS by myself (and other users whom I know) from the C6100 was implemented.</p>
+
+<iframe width="640" height="360" src="http://www.youtube.com/embed/tz7R_tAA0QI" frameborder="0" allowfullscreen></iframe>
+
+
+<p>Hotness.</p>
+
+<p>I can&#8217;t wait to get some of these on my racks.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[The Dell C6100 and IPMI / DRAC / MegaRAC]]></title>
+    <link href="http://nmilford.github.com/2012/03/the-dell-c6100-and-ipmi-drac-megarac/"/>
+    <updated>2012-03-18T11:12:54-04:00</updated>
+    <id>http://nmilford.github.com/2012/03/the-dell-c6100-and-ipmi-drac-megarac</id>
+    <content type="html"><![CDATA[<p><img class="left" src="http://nmilford.github.com/images/ipmi.jpg"></p>
+
+<p>Over the last year Google Analytics says I&#8217;ve been getting a lot of hits from search that indicate there are some folks who want to know how the C-series DRAC works.</p>
+
+<p>It is easy enough to setup like any other IPMI/DRAC system.</p>
+
+<p>First you&#8217;ll need to plug the IPMI/Management Ethernet port into your network (preferably an our of band (OOB) network seperate from your production network). In the BIOS, make sure the management port is set to &#8216;Dedicated&#8217;, earlier ones shipped with it set to &#8216;Shared&#8217; by default which precluded the dedicated IPMI port.</p>
+
+<!-- more -->
+
+
+<p>From the rear, the port can be found here:</p>
+
+<p><img class="center" src="http://nmilford.github.com/images/ipmi-cseries.jpg"></p>
+
+<p>On the node you&#8217;ll need ipmitool.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum -y install OpenIPMI OpenIPMI-tools</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Fire it up.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/ipmi start</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Set up IPMI on the node.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>ipmitool -I open lan set 1 ipsrc static
+</span><span class='line'>ipmitool -I open lan set 1 ipaddr IP.ADDR.YOU.WANT
+</span><span class='line'>ipmitool -I open lan set 1 netmask 255.255.255.0
+</span><span class='line'>ipmitool -I open lan set 1 defgw ipaddr GW.OF.OOB.NETWORK
+</span><span class='line'>ipmitool -I open lan set 1 access on
+</span><span class='line'>ipmitool -I open lan set 1 snmp SNMP_COMMUNITY_STRING
+</span><span class='line'>ipmitool -I open lan set 1 password SNMP PASSWORD
+</span><span class='line'>ipmitool -I open user set password 2 IPMI_PASSWORD</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Confirm it all took.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[root@node:~]# ipmitool lan print
+</span><span class='line'>Set in Progress         : Set Complete
+</span><span class='line'>Auth Type Support       : NONE MD2 MD5 PASSWORD 
+</span><span class='line'>Auth Type Enable        : Callback : NONE MD2 MD5 PASSWORD 
+</span><span class='line'>                        : User     : NONE MD2 MD5 PASSWORD 
+</span><span class='line'>                        : Operator : NONE MD2 MD5 PASSWORD 
+</span><span class='line'>                        : Admin    : NONE MD2 MD5 PASSWORD 
+</span><span class='line'>                        : OEM      : NONE MD2 MD5 PASSWORD 
+</span><span class='line'>IP Address Source       : Static Address
+</span><span class='line'>IP Address              : 10.10.10.10
+</span><span class='line'>Subnet Mask             : 255.255.255.0
+</span><span class='line'>MAC Address             : 12:34:46:78:90:ab
+</span><span class='line'>SNMP Community String   : oob_community_string
+</span><span class='line'>IP Header               : TTL=0x40 Flags=0x40 Precedence=0x00 TOS=0x08
+</span><span class='line'>BMC ARP Control         : ARP Responses Enabled, Gratuitous ARP Disabled
+</span><span class='line'>Gratituous ARP Intrvl   : 2.0 seconds
+</span><span class='line'>Default Gateway IP      : 10.10.10.1
+</span><span class='line'>Default Gateway MAC     : 00:00:00:00:00:00
+</span><span class='line'>Backup Gateway IP       : 0.0.0.0
+</span><span class='line'>Backup Gateway MAC      : 00:00:00:00:00:00
+</span><span class='line'>802.1q VLAN ID          : Disabled
+</span><span class='line'>802.1q VLAN Priority    : 0
+</span><span class='line'>RMCP+ Cipher Suites     : 0,1,2,3
+</span><span class='line'>Cipher Suite Priv Max   : uaaaXXXXXXXXXXX
+</span><span class='line'>                        :     X=Cipher Suite Unused
+</span><span class='line'>                        :     c=CALLBACK
+</span><span class='line'>                        :     u=USER
+</span><span class='line'>                        :     o=OPERATOR
+</span><span class='line'>                        :     a=ADMIN
+</span><span class='line'>                        :     O=OEM</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now you can hit it via the regular ipmi tools.</p>
+
+<p><strong>Power:</strong></p>
+
+<p>Power cycle a remote node.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>ipmitool -I lan -U root -H 10.10.10.10 -a chassis power cycle</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Power off (hard).  This cuts power like yanking the plug.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>ipmitool -I lan -U root -H 10.10.10.10 -a chassis power off</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Power off (soft).  Sends an ACPI shutdown signal, which is like pressing the power button for an orderly shutdown.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>ipmitool -I lan -U root -H 10.10.10.10 -a chassis power soft</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>System Event Log:</strong></p>
+
+<p>Return a listing of all entries.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>ipmitool -I lan -U root -H 10.10.10.10 -a sel list </span></code></pre></td></tr></table></div></figure>
+
+
+<p>Use the two digit code from the listing to get the entry.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>ipmitool -I lan -U root -H 10.10.10.10 -a sel get 0x&lt;id&gt; </span></code></pre></td></tr></table></div></figure>
+
+
+<p>Power on Hours counter.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>ipmitool -I lan -U root -H 192.168.252.161 -a chassis poh</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Get device info and serial.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>ipmitool -I lan -U root -H 10.10.10.10 -a fru</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>Booting:</strong></p>
+
+<p>Set the BIOS to power on the node automatically when power is restored.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>ipmitool -I lan -U root -H 10.10.10.10 -a chassis policy always-on</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Set the BIOS to boot from PXE on next boot.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>ipmitool -I lan -U root -H 10.10.10.10 -a chassis bootdev pxe</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Set the BIOS to boot from the first hard disk on next boot.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>ipmitool -I lan -U root -H 10.10.10.10 -a chassis bootdev disk</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And finally, a super important one for locating nodes in a rack full of super-dense chassis, you can blink the status LED on the node thus.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>ipmitool -I lan -U root -H 10.10.10.10 -a chassis identify</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This is all fun and good, but you can also hit it as a web interface to hit the MegaRAC.</p>
+
+<p>Note: C6100s (and other Dell C-series) don&#8217;t use the regular dell BIOS, but use an American Megatrends (AMI) BIOS, so thier DRAC is duely named the MegaRAC.</p>
+
+<p>You can browse on over to it via it&#8217;s IP, initially using http://OOB.IP.OF.NODE</p>
+
+<p><img class="center" src="http://nmilford.github.com/images/megarac1.png"></p>
+
+<p>Then you can login as root with the pasword you set with ipmitool</p>
+
+<p><img class="center" src="http://nmilford.github.com/images/megarac2.png"></p>
+
+<p>You can get all sorts of the same data from this that you can get from the cli with ipmitool, but the main thing is going to the &#8216;Remote Control&#8217; tab across the top.</p>
+
+<p><img class="center" src="http://nmilford.github.com/images/megarac3.png"></p>
+
+<p>There you have power control, same as ipmitool gives you, but even better is the &#8216;Console Redirection&#8217; which spawns a little Java KVM instance, much like the DRAC and Dell/Avocent KVMs do.</p>
+
+<p>It&#8217;ll ask you to download a <code>jviewer.jnlp</code> file, which you open up with Java&#8217;s Web Start:</p>
+
+<p><img class="center" src="http://nmilford.github.com/images/rackvm.png"></p>
+
+<p>That&#8217;s it. now you have some sweet remote control options for your Dell C-series.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Keepalived for MySQL High Availability on CentOS]]></title>
+    <link href="http://nmilford.github.com/2012/03/keepalived-for-mysql-high-availability-on-centos/"/>
+    <updated>2012-03-18T10:10:21-04:00</updated>
+    <id>http://nmilford.github.com/2012/03/keepalived-for-mysql-high-availability-on-centos</id>
+    <content type="html"><![CDATA[<p><img class="right" src="http://nmilford.github.com/images/keepalive-jesus.jpg"></p>
+
+<p>We have a pretty normal single master MySQL setup.</p>
+
+<p>Since we have a read heavy application it makes sense. Everyone writes to the master and reads from a large pool of read-only slaves.</p>
+
+<p>But, with more and more slaves it becomes hard to manage what nodes read from what slaves.  It can get unmanageable pretty quick when configuring the app servers.</p>
+
+<p>If we lose a MySQL slave, we have to redirect all of those servers to the new one&#8230; which descends into a bunch of temporary app config or DNS changes that sometimes are not temporary :/</p>
+
+<p>The stuff in this article isn&#8217;t my bit of magic, but it is what we have been using in one of our three datacenters for about a year now and am hoping to migrate the others to the scheme. My boss and an ex co-worker set it up an I think it is pretty nice.</p>
+
+<!-- more -->
+
+
+<p>On your loadbalancer nodes install <a href="http://blog.milford.io/2012/03/keepalived-1-1-20-rpms-for-centos-5/">keepalived</a> and <code>ipvsadm</code> (ipvsadm can be installed via yum from CentOS&#8217;s base repo).</p>
+
+<p>Set up your <code>/etc/keepalived/keepalived.conf</code> to look something like the following:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>global_defs {
+</span><span class='line'>  notification_email {
+</span><span class='line'>    your@email addr
+</span><span class='line'>  }
+</span><span class='line'>  notification_email_from keepalived@lb1
+</span><span class='line'>  smtp_server localhost
+</span><span class='line'>  smtp_connect_timeout 30
+</span><span class='line'>  # This should be unique.
+</span><span class='line'>  router_id lb1
+</span><span class='line'>}
+</span><span class='line'> 
+</span><span class='line'>vrrp_instance mysql_pool {
+</span><span class='line'>   # The interface we listen on.
+</span><span class='line'>   interface eth0
+</span><span class='line'> 
+</span><span class='line'>   # The default state, one should be master, the others should be set to SLAVE.
+</span><span class='line'>   state MASTER
+</span><span class='line'> 
+</span><span class='line'>   # This should be the same on all participating load balancers.
+</span><span class='line'>   virtual_router_id 1
+</span><span class='line'> 
+</span><span class='line'>   priority 101
+</span><span class='line'> 
+</span><span class='line'>   # Set the interface whose status to track to trigger a failover.                   
+</span><span class='line'>   track_interface {           
+</span><span class='line'>     eth0
+</span><span class='line'>   }
+</span><span class='line'> 
+</span><span class='line'>  # Password for the loadbalancers to share.
+</span><span class='line'>  authentication {
+</span><span class='line'>    auth_type PASS
+</span><span class='line'>    auth_pass password
+</span><span class='line'>  }
+</span><span class='line'>
+</span><span class='line'>  # This is the IP address that floats between the loadbalancers.
+</span><span class='line'>  virtual_ipaddress {
+</span><span class='line'>    10.10.10.99 dev eth0
+</span><span class='line'>  }
+</span><span class='line'>}
+</span><span class='line'>    
+</span><span class='line'># Here we add the virtal mysql node
+</span><span class='line'>virtual_server 10.10.10.99 3306 {
+</span><span class='line'>  delay_loop 6
+</span><span class='line'>  # Round robin, but you can use whatever fits your needs.
+</span><span class='line'>  lb_algo rr
+</span><span class='line'>  lb_kind DR
+</span><span class='line'>  protocol TCP
+</span><span class='line'>
+</span><span class='line'>  # The server to default to if all others are down, in our case our master.
+</span><span class='line'>  sorry_server 10.10.10.100 3306
+</span><span class='line'>
+</span><span class='line'>  # For each server add the following. 
+</span><span class='line'>  real_server 10.10.10.1 3306 {
+</span><span class='line'>    weight 10
+</span><span class='line'>    TCP_CHECK {
+</span><span class='line'>      connect_port    3306
+</span><span class='line'>      connect_timeout 2
+</span><span class='line'>    }
+</span><span class='line'>    TCP_CHECK {
+</span><span class='line'>      connect_port    9999
+</span><span class='line'>      connect_timeout 2
+</span><span class='line'>    }
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>Now, on your MySQL slaves:</strong></p>
+
+<p>Install thttpd from <a href="http://fedoraproject.org/wiki/EPEL/">EPEL</a>:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum -y install thttpd</span></code></pre></td></tr></table></div></figure>
+
+
+<p>BTW, if you&#8217;re doing this in RHEL6 you need to enable the epel-testing repo to get thttpd.</p>
+
+<p>Make it listen on port 9999.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cat &lt;&lt;eof_thttpd&gt; /etc/thttpd.conf
+</span><span class='line'>dir=/var/www/thttpd/html
+</span><span class='line'>chroot
+</span><span class='line'>user=thttpd
+</span><span class='line'>logfile=/var/log/thttpd.log
+</span><span class='line'>pidfile=/var/run/thttpd.pid
+</span><span class='line'>port=9999
+</span><span class='line'>EOF_THTTPD</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Fire it up.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/thttpd start</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Add the shared IP so we can listen for it.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cat &lt;&lt;eof_lo0&gt; /etc/sysconfig/network-scripts/ifcfg-lo:1
+</span><span class='line'>DEVICE=lo:1
+</span><span class='line'>IPADDR=10.10.10.99
+</span><span class='line'>NETMASK=255.255.255.255
+</span><span class='line'>ONBOOT=yes
+</span><span class='line'>NAME=loopback
+</span><span class='line'>EOF_LO0</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Bring it up.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>ifup lo:1</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now you can point ALL your app nodes to read from 10.10.10.99:3306 and they will be round-robin balanced.</p>
+
+<p>On the active loadbalancer it should look like this.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[root@lb1:~)# ipvsadm -Ln
+</span><span class='line'>IP Virtual Server version 1.2.1 (size=4096)
+</span><span class='line'>Prot LocalAddress:Port Scheduler Flags
+</span><span class='line'>  -&gt; RemoteAddress:Port           Forward Weight ActiveConn InActConn
+</span><span class='line'>TCP  10.10.10.99:3306 rr
+</span><span class='line'>  -&gt; 10.10.10.1:3306              Route   10     366        2         
+</span><span class='line'>  -&gt; 10.10.10.2:3306              Route   10     375        1   
+</span><span class='line'>  -&gt; 10.10.10.3:3306              Route   10     377        1   </span></code></pre></td></tr></table></div></figure>
+
+
+<p>My favorite part about this scheme is that any time you want to administrative remove a node from the pool you can just take thttpd down thus</p>
+
+<p><code>/etc/init.d/thttpd stop</code></p>
+
+<p>and keepalived chucks it because of the second TCP_CHECK statement in the config above.  This is fantastic because you don&#8217;t have to shut MySQL down on the node if you need to do work with the live instance, but keep traffic off of it.</p>
+
+<p>Also, because of the magic of VRRP if your main load balancer dies, the second one will take right over :)</p>
 ]]></content>
   </entry>
   

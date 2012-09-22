@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Networking | blog.milford.io]]></title>
+  <link href="http://nmilford.github.com/categories/networking/atom.xml" rel="self"/>
+  <link href="http://nmilford.github.com/"/>
+  <updated>2012-09-22T10:49:32-04:00</updated>
+  <id>http://nmilford.github.com/</id>
+  <author>
+    <name><![CDATA[Nathan Milford]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Keepalived for MySQL High Availability on CentOS]]></title>
+    <link href="http://nmilford.github.com/2012/03/keepalived-for-mysql-high-availability-on-centos/"/>
+    <updated>2012-03-18T10:10:21-04:00</updated>
+    <id>http://nmilford.github.com/2012/03/keepalived-for-mysql-high-availability-on-centos</id>
+    <content type="html"><![CDATA[<p><img class="right" src="/images/keepalive-jesus.jpg"></p>
+
+<p>We have a pretty normal single master MySQL setup.</p>
+
+<p>Since we have a read heavy application it makes sense. Everyone writes to the master and reads from a large pool of read-only slaves.</p>
+
+<p>But, with more and more slaves it becomes hard to manage what nodes read from what slaves.  It can get unmanageable pretty quick when configuring the app servers.</p>
+
+<p>If we lose a MySQL slave, we have to redirect all of those servers to the new one... which descends into a bunch of temporary app config or DNS changes that sometimes are not temporary :/</p>
+
+<p>The stuff in this article isn't my bit of magic, but it is what we have been using in one of our three datacenters for about a year now and am hoping to migrate the others to the scheme. My boss and an ex co-worker set it up an I think it is pretty nice.</p>
+
+<!-- more -->
+
+
+<p>On your loadbalancer nodes install <a href="http://blog.milford.io/2012/03/keepalived-1-1-20-rpms-for-centos-5/">keepalived</a> and <code>ipvsadm</code> (ipvsadm can be installed via yum from CentOS's base repo).</p>
+
+<p>Set up your <code>/etc/keepalived/keepalived.conf</code> to look something like the following:</p>
+
+<p>```  <br/>
+global_defs {
+  notification_email {</p>
+
+<pre><code>your@email addr
+</code></pre>
+
+<p>  }
+  notification_email_from keepalived@lb1
+  smtp_server localhost
+  smtp_connect_timeout 30
+  # This should be unique.
+  router_id lb1
+}</p>
+
+<p>vrrp_instance mysql_pool {
+   # The interface we listen on.
+   interface eth0</p>
+
+<p>   # The default state, one should be master, the others should be set to SLAVE.
+   state MASTER</p>
+
+<p>   # This should be the same on all participating load balancers.
+   virtual_router_id 1</p>
+
+<p>   priority 101</p>
+
+<p>   # Set the interface whose status to track to trigger a failover.                 <br/>
+   track_interface {</p>
+
+<pre><code> eth0
+</code></pre>
+
+<p>   }</p>
+
+<p>  # Password for the loadbalancers to share.
+  authentication {</p>
+
+<pre><code>auth_type PASS
+auth_pass password
+</code></pre>
+
+<p>  }</p>
+
+<p>  # This is the IP address that floats between the loadbalancers.
+  virtual_ipaddress {</p>
+
+<pre><code>10.10.10.99 dev eth0
+</code></pre>
+
+<p>  }
+}</p>
+
+<h1>Here we add the virtal mysql node</h1>
+
+<p>virtual_server 10.10.10.99 3306 {
+  delay_loop 6
+  # Round robin, but you can use whatever fits your needs.
+  lb_algo rr
+  lb_kind DR
+  protocol TCP</p>
+
+<p>  # The server to default to if all others are down, in our case our master.
+  sorry_server 10.10.10.100 3306</p>
+
+<p>  # For each server add the following.
+  real_server 10.10.10.1 3306 {</p>
+
+<pre><code>weight 10
+TCP_CHECK {
+  connect_port    3306
+  connect_timeout 2
+}
+TCP_CHECK {
+  connect_port    9999
+  connect_timeout 2
+}
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p><strong>Now, on your MySQL slaves:</strong></p>
+
+<p>Install thttpd from <a href="http://fedoraproject.org/wiki/EPEL/">EPEL</a>:</p>
+
+<p><code>
+yum -y install thttpd
+</code></p>
+
+<p>BTW, if you're doing this in RHEL6 you need to enable the epel-testing repo to get thttpd.</p>
+
+<p>Make it listen on port 9999.
+<code>
+cat &lt;&lt;eof_thttpd&gt; /etc/thttpd.conf
+dir=/var/www/thttpd/html
+chroot
+user=thttpd
+logfile=/var/log/thttpd.log
+pidfile=/var/run/thttpd.pid
+port=9999
+EOF_THTTPD
+</code></p>
+
+<p>Fire it up.
+<code>
+/etc/init.d/thttpd start
+</code></p>
+
+<p>Add the shared IP so we can listen for it.</p>
+
+<p><code>
+cat &lt;&lt;eof_lo0&gt; /etc/sysconfig/network-scripts/ifcfg-lo:1
+DEVICE=lo:1
+IPADDR=10.10.10.99
+NETMASK=255.255.255.255
+ONBOOT=yes
+NAME=loopback
+EOF_LO0
+</code></p>
+
+<p>Bring it up.
+<code>
+ifup lo:1
+</code></p>
+
+<p>Now you can point ALL your app nodes to read from 10.10.10.99:3306 and they will be round-robin balanced.</p>
+
+<p>On the active loadbalancer it should look like this. <br/>
+<code>
+[root@lb1:~)# ipvsadm -Ln
+IP Virtual Server version 1.2.1 (size=4096)
+Prot LocalAddress:Port Scheduler Flags
+  -&gt; RemoteAddress:Port           Forward Weight ActiveConn InActConn
+TCP  10.10.10.99:3306 rr
+  -&gt; 10.10.10.1:3306              Route   10     366        2         
+  -&gt; 10.10.10.2:3306              Route   10     375        1   
+  -&gt; 10.10.10.3:3306              Route   10     377        1   
+</code></p>
+
+<p>My favorite part about this scheme is that any time you want to administrative remove a node from the pool you can just take thttpd down thus</p>
+
+<p><code>/etc/init.d/thttpd stop</code></p>
+
+<p>and keepalived chucks it because of the second TCP_CHECK statement in the config above.  This is fantastic because you don't have to shut MySQL down on the node if you need to do work with the live instance, but keep traffic off of it.</p>
+
+<p>Also, because of the magic of VRRP if your main load balancer dies, the second one will take right over :)</p>
+]]></content>
+  </entry>
+  
+</feed>

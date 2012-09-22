@@ -1,0 +1,569 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Keepalived for MySQL High Availability on CentOS - blog.milford.io</title>
+  <meta name="author" content="Nathan Milford">
+
+  
+  <meta name="description" content="We have a pretty normal single master MySQL setup. Since we have a read heavy application it makes sense. Everyone writes to the master and reads &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://nmilford.github.com/2012/03/keepalived-for-mysql-high-availability-on-centos/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="blog.milford.io" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">blog.milford.io</a></h1>
+  
+    <h2>a personal knowledge dump.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:nmilford.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/cassandra-token-calculator">Cassandra Token Calculator</a></li>
+  <li><a href="/about">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Keepalived for MySQL High Availability on CentOS</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-18T10:10:21-04:00" pubdate data-updated="true">Mar 18<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p><img class="right" src="/images/keepalive-jesus.jpg"></p>
+
+<p>We have a pretty normal single master MySQL setup.</p>
+
+<p>Since we have a read heavy application it makes sense. Everyone writes to the master and reads from a large pool of read-only slaves.</p>
+
+<p>But, with more and more slaves it becomes hard to manage what nodes read from what slaves.  It can get unmanageable pretty quick when configuring the app servers.</p>
+
+<p>If we lose a MySQL slave, we have to redirect all of those servers to the new one&#8230; which descends into a bunch of temporary app config or DNS changes that sometimes are not temporary :/</p>
+
+<p>The stuff in this article isn&#8217;t my bit of magic, but it is what we have been using in one of our three datacenters for about a year now and am hoping to migrate the others to the scheme. My boss and an ex co-worker set it up an I think it is pretty nice.</p>
+
+<!-- more -->
+
+
+<p>On your loadbalancer nodes install <a href="http://blog.milford.io/2012/03/keepalived-1-1-20-rpms-for-centos-5/">keepalived</a> and <code>ipvsadm</code> (ipvsadm can be installed via yum from CentOS&#8217;s base repo).</p>
+
+<p>Set up your <code>/etc/keepalived/keepalived.conf</code> to look something like the following:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>global_defs {
+</span><span class='line'>  notification_email {
+</span><span class='line'>    your@email addr
+</span><span class='line'>  }
+</span><span class='line'>  notification_email_from keepalived@lb1
+</span><span class='line'>  smtp_server localhost
+</span><span class='line'>  smtp_connect_timeout 30
+</span><span class='line'>  # This should be unique.
+</span><span class='line'>  router_id lb1
+</span><span class='line'>}
+</span><span class='line'> 
+</span><span class='line'>vrrp_instance mysql_pool {
+</span><span class='line'>   # The interface we listen on.
+</span><span class='line'>   interface eth0
+</span><span class='line'> 
+</span><span class='line'>   # The default state, one should be master, the others should be set to SLAVE.
+</span><span class='line'>   state MASTER
+</span><span class='line'> 
+</span><span class='line'>   # This should be the same on all participating load balancers.
+</span><span class='line'>   virtual_router_id 1
+</span><span class='line'> 
+</span><span class='line'>   priority 101
+</span><span class='line'> 
+</span><span class='line'>   # Set the interface whose status to track to trigger a failover.                   
+</span><span class='line'>   track_interface {           
+</span><span class='line'>     eth0
+</span><span class='line'>   }
+</span><span class='line'> 
+</span><span class='line'>  # Password for the loadbalancers to share.
+</span><span class='line'>  authentication {
+</span><span class='line'>    auth_type PASS
+</span><span class='line'>    auth_pass password
+</span><span class='line'>  }
+</span><span class='line'>
+</span><span class='line'>  # This is the IP address that floats between the loadbalancers.
+</span><span class='line'>  virtual_ipaddress {
+</span><span class='line'>    10.10.10.99 dev eth0
+</span><span class='line'>  }
+</span><span class='line'>}
+</span><span class='line'>    
+</span><span class='line'># Here we add the virtal mysql node
+</span><span class='line'>virtual_server 10.10.10.99 3306 {
+</span><span class='line'>  delay_loop 6
+</span><span class='line'>  # Round robin, but you can use whatever fits your needs.
+</span><span class='line'>  lb_algo rr
+</span><span class='line'>  lb_kind DR
+</span><span class='line'>  protocol TCP
+</span><span class='line'>
+</span><span class='line'>  # The server to default to if all others are down, in our case our master.
+</span><span class='line'>  sorry_server 10.10.10.100 3306
+</span><span class='line'>
+</span><span class='line'>  # For each server add the following. 
+</span><span class='line'>  real_server 10.10.10.1 3306 {
+</span><span class='line'>    weight 10
+</span><span class='line'>    TCP_CHECK {
+</span><span class='line'>      connect_port    3306
+</span><span class='line'>      connect_timeout 2
+</span><span class='line'>    }
+</span><span class='line'>    TCP_CHECK {
+</span><span class='line'>      connect_port    9999
+</span><span class='line'>      connect_timeout 2
+</span><span class='line'>    }
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>Now, on your MySQL slaves:</strong></p>
+
+<p>Install thttpd from <a href="http://fedoraproject.org/wiki/EPEL/">EPEL</a>:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum -y install thttpd</span></code></pre></td></tr></table></div></figure>
+
+
+<p>BTW, if you&#8217;re doing this in RHEL6 you need to enable the epel-testing repo to get thttpd.</p>
+
+<p>Make it listen on port 9999.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cat &lt;&lt;eof_thttpd&gt; /etc/thttpd.conf
+</span><span class='line'>dir=/var/www/thttpd/html
+</span><span class='line'>chroot
+</span><span class='line'>user=thttpd
+</span><span class='line'>logfile=/var/log/thttpd.log
+</span><span class='line'>pidfile=/var/run/thttpd.pid
+</span><span class='line'>port=9999
+</span><span class='line'>EOF_THTTPD</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Fire it up.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/thttpd start</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Add the shared IP so we can listen for it.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cat &lt;&lt;eof_lo0&gt; /etc/sysconfig/network-scripts/ifcfg-lo:1
+</span><span class='line'>DEVICE=lo:1
+</span><span class='line'>IPADDR=10.10.10.99
+</span><span class='line'>NETMASK=255.255.255.255
+</span><span class='line'>ONBOOT=yes
+</span><span class='line'>NAME=loopback
+</span><span class='line'>EOF_LO0</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Bring it up.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>ifup lo:1</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now you can point ALL your app nodes to read from 10.10.10.99:3306 and they will be round-robin balanced.</p>
+
+<p>On the active loadbalancer it should look like this.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[root@lb1:~)# ipvsadm -Ln
+</span><span class='line'>IP Virtual Server version 1.2.1 (size=4096)
+</span><span class='line'>Prot LocalAddress:Port Scheduler Flags
+</span><span class='line'>  -&gt; RemoteAddress:Port           Forward Weight ActiveConn InActConn
+</span><span class='line'>TCP  10.10.10.99:3306 rr
+</span><span class='line'>  -&gt; 10.10.10.1:3306              Route   10     366        2         
+</span><span class='line'>  -&gt; 10.10.10.2:3306              Route   10     375        1   
+</span><span class='line'>  -&gt; 10.10.10.3:3306              Route   10     377        1   </span></code></pre></td></tr></table></div></figure>
+
+
+<p>My favorite part about this scheme is that any time you want to administrative remove a node from the pool you can just take thttpd down thus</p>
+
+<p><code>/etc/init.d/thttpd stop</code></p>
+
+<p>and keepalived chucks it because of the second TCP_CHECK statement in the config above.  This is fantastic because you don&#8217;t have to shut MySQL down on the node if you need to do work with the live instance, but keep traffic off of it.</p>
+
+<p>Also, because of the magic of VRRP if your main load balancer dies, the second one will take right over :)</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Nathan Milford</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-18T10:10:21-04:00" pubdate data-updated="true">Mar 18<span>th</span>, 2012</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/categories/configurations/'>Configurations</a>, <a class='category' href='/categories/networking/'>Networking</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://nmilford.github.com/2012/03/keepalived-for-mysql-high-availability-on-centos/" data-via="NathanMilford" data-counturl="http://nmilford.github.com/2012/03/keepalived-for-mysql-high-availability-on-centos/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+      
+        <a class="basic-alignment right" href="/2012/03/the-dell-c6100-and-ipmi-drac-megarac/" title="Next Post: The Dell C6100 and IPMI / DRAC / MegaRAC">The Dell C6100 and IPMI / DRAC / MegaRAC &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2012/03/getting-a-basic-cobbler-server-going-on-centos/">Getting a Basic Cobbler server going on CentOS.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/making-a-local-centos-mirror/">Making a local CentOS mirror.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/making-a-simple-yum-repository/">Making a simple Yum repository.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/now-hiring-now-right-now-were-hiring-now/">Now Hiring Now, Right Now We're Hiring Now.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/the-dell-c6220-and-an-ode-to-my-dell-dcs-team/">The Dell C6220 and an Ode to my Dell DCS Team.</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("NathanMilford", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/NathanMilford" class="twitter-follow-button" data-show-count="false">Follow @NathanMilford</a>
+  
+</section>
+
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/nmilford">@nmilford</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'nmilford',
+            count: 6,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Coderwall</h1>
+  <ul id="cw_badges">
+    <li class="loading">Status updating...</li>
+  </ul>
+
+  <script type="text/javascript">
+    var coderwall = (function(){
+      function render(options, badges){
+        var fragment = '',
+            t = $(options.target)[0],
+            height = 65,
+            width = 65,
+            index;
+
+        for (index in badges) {
+          fragment += '<a class="cw_badge"title="' + badges[index].description + '" href="http://coderwall.com/' + options.user + '">';
+          fragment +=   '<img alt="' + badges[index].description + '" height="' + width + '" width="' + height + '" src="' + badges[index].badge + '"/>';
+          fragment += '</a>';
+        }
+
+        t.innerHTML = fragment;
+      }
+      return {
+        showBadges: function(options){
+          $.ajax({
+              url: 'http://coderwall.com/' + options.user + '.json?callback=?'
+            , type: 'jsonp'
+            , error: function (err) { $(options.target + ' li.loading').addClass('error').text("Error loading feed"); }
+            , success: function(res) {
+                render(options, res.data.badges);
+            }
+          });
+        }
+      };
+    })();
+
+    $.domReady(function(){
+      if (!window.jXHR){
+        var jxhr = document.createElement('script');
+        jxhr.type = 'text/javascript';
+        jxhr.src = '/javascripts/libs/jXHR.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(jxhr, s);
+      }
+      if (!window.$){
+        var b = document.createElement('script');
+        b.type = 'text/javascript';
+        b.src = '/javascripts/ender.js';
+        var sc = document.getElementsByTagName('script')[0];
+        sc.parentNode.insertBefore(jxhr, s);
+      }
+      coderwall.showBadges({
+        user: 'nmilford',
+        target: '#cw_badges'
+      });
+    });
+  </script>
+  <style type="text/css">
+    .cw_badge img {
+      padding: 5px;
+      border: 0 none !important;
+      -moz-box-shadow: none !important;
+      -webkit-box-shadow: none !important;
+      -o-box-shadow: none !important;
+      box-shadow: none !important;
+    }
+  </style>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - Nathan Milford -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
