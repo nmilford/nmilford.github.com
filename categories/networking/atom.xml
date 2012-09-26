@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Networking | blog.milford.io]]></title>
-  <link href="http://nmilford.github.com/categories/networking/atom.xml" rel="self"/>
-  <link href="http://nmilford.github.com/"/>
-  <updated>2012-09-22T14:16:51-04:00</updated>
-  <id>http://nmilford.github.com/</id>
+  <link href="http://code.milford.io/categories/networking/atom.xml" rel="self"/>
+  <link href="http://code.milford.io/"/>
+  <updated>2012-09-25T20:00:57-04:00</updated>
+  <id>http://code.milford.io/</id>
   <author>
     <name><![CDATA[Nathan Milford]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Keepalived for MySQL High Availability on CentOS]]></title>
-    <link href="http://nmilford.github.com/2012/03/keepalived-for-mysql-high-availability-on-centos/"/>
+    <link href="http://code.milford.io/2012/03/keepalived-for-mysql-high-availability-on-centos/"/>
     <updated>2012-03-18T10:10:21-04:00</updated>
-    <id>http://nmilford.github.com/2012/03/keepalived-for-mysql-high-availability-on-centos</id>
+    <id>http://code.milford.io/2012/03/keepalived-for-mysql-high-availability-on-centos</id>
     <content type="html"><![CDATA[<p><img class="right" src="/images/keepalive-jesus.jpg"></p>
 
 <p>We have a pretty normal single master MySQL setup.</p>

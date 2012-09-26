@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Configurations | blog.milford.io]]></title>
-  <link href="http://nmilford.github.com/categories/configurations/atom.xml" rel="self"/>
-  <link href="http://nmilford.github.com/"/>
-  <updated>2012-09-22T14:16:51-04:00</updated>
-  <id>http://nmilford.github.com/</id>
+  <link href="http://code.milford.io/categories/configurations/atom.xml" rel="self"/>
+  <link href="http://code.milford.io/"/>
+  <updated>2012-09-25T20:00:57-04:00</updated>
+  <id>http://code.milford.io/</id>
   <author>
     <name><![CDATA[Nathan Milford]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Making a local CentOS mirror.]]></title>
-    <link href="http://nmilford.github.com/2012/03/making-a-local-centos-mirror/"/>
+    <link href="http://code.milford.io/2012/03/making-a-local-centos-mirror/"/>
     <updated>2012-03-25T16:25:39-04:00</updated>
-    <id>http://nmilford.github.com/2012/03/making-a-local-centos-mirror</id>
+    <id>http://code.milford.io/2012/03/making-a-local-centos-mirror</id>
     <content type="html"><![CDATA[<p><img class="center" src="/images/CentOS_amazing1.jpg"></p>
 
 <p>Following up from my <a href="http://link/to/last/post">last post</a> on creating a simple yum repository, here is how to setup a local CentOS mirror.</p>
@@ -139,9 +139,9 @@ EOF
   
   <entry>
     <title type="html"><![CDATA[Making a simple Yum repository.]]></title>
-    <link href="http://nmilford.github.com/2012/03/making-a-simple-yum-repository/"/>
+    <link href="http://code.milford.io/2012/03/making-a-simple-yum-repository/"/>
     <updated>2012-03-24T18:46:25-04:00</updated>
-    <id>http://nmilford.github.com/2012/03/making-a-simple-yum-repository</id>
+    <id>http://code.milford.io/2012/03/making-a-simple-yum-repository</id>
     <content type="html"><![CDATA[<p><img class="center" src="/images/yum.png"></p>
 
 <p>Here is some low hanging fruit to improve your RHEL environment and simplify your work... setup a simple Yum repository.</p>
@@ -226,9 +226,9 @@ yum -y install yum-priorities
   
   <entry>
     <title type="html"><![CDATA[The Dell C6100 and IPMI / DRAC / MegaRAC]]></title>
-    <link href="http://nmilford.github.com/2012/03/the-dell-c6100-and-ipmi-drac-megarac/"/>
+    <link href="http://code.milford.io/2012/03/the-dell-c6100-and-ipmi-drac-megarac/"/>
     <updated>2012-03-18T11:12:54-04:00</updated>
-    <id>http://nmilford.github.com/2012/03/the-dell-c6100-and-ipmi-drac-megarac</id>
+    <id>http://code.milford.io/2012/03/the-dell-c6100-and-ipmi-drac-megarac</id>
     <content type="html"><![CDATA[<p><img class="left" src="/images/ipmi.jpg"></p>
 
 <p>Over the last year Google Analytics says I've been getting a lot of hits from search that indicate there are some folks who want to know how the C-series DRAC works.</p>
@@ -397,9 +397,9 @@ ipmitool -I lan -U root -H 10.10.10.10 -a chassis identify
   
   <entry>
     <title type="html"><![CDATA[Keepalived for MySQL High Availability on CentOS]]></title>
-    <link href="http://nmilford.github.com/2012/03/keepalived-for-mysql-high-availability-on-centos/"/>
+    <link href="http://code.milford.io/2012/03/keepalived-for-mysql-high-availability-on-centos/"/>
     <updated>2012-03-18T10:10:21-04:00</updated>
-    <id>http://nmilford.github.com/2012/03/keepalived-for-mysql-high-availability-on-centos</id>
+    <id>http://code.milford.io/2012/03/keepalived-for-mysql-high-availability-on-centos</id>
     <content type="html"><![CDATA[<p><img class="right" src="/images/keepalive-jesus.jpg"></p>
 
 <p>We have a pretty normal single master MySQL setup.</p>

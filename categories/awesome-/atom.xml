@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Awesome! | blog.milford.io]]></title>
-  <link href="http://nmilford.github.com/categories/awesome-/atom.xml" rel="self"/>
-  <link href="http://nmilford.github.com/"/>
-  <updated>2012-09-22T14:16:51-04:00</updated>
-  <id>http://nmilford.github.com/</id>
+  <link href="http://code.milford.io/categories/awesome-/atom.xml" rel="self"/>
+  <link href="http://code.milford.io/"/>
+  <updated>2012-09-25T20:00:57-04:00</updated>
+  <id>http://code.milford.io/</id>
   <author>
     <name><![CDATA[Nathan Milford]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Now Hiring Now, Right Now We're Hiring Now.]]></title>
-    <link href="http://nmilford.github.com/2012/03/now-hiring-now-right-now-were-hiring-now/"/>
+    <link href="http://code.milford.io/2012/03/now-hiring-now-right-now-were-hiring-now/"/>
     <updated>2012-03-19T22:47:04-04:00</updated>
-    <id>http://nmilford.github.com/2012/03/now-hiring-now-right-now-were-hiring-now</id>
+    <id>http://code.milford.io/2012/03/now-hiring-now-right-now-were-hiring-now</id>
     <content type="html"><![CDATA[<p><img class="center" src="/images/now_hiring_now.jpg"></p>
 
 <p>If you follow this blog, you can see I get to play with all sorts of awesome stuff.</p>

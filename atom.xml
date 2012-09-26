@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[blog.milford.io]]></title>
-  <link href="http://nmilford.github.com/atom.xml" rel="self"/>
-  <link href="http://nmilford.github.com/"/>
-  <updated>2012-09-22T14:16:51-04:00</updated>
-  <id>http://nmilford.github.com/</id>
+  <link href="http://code.milford.io/atom.xml" rel="self"/>
+  <link href="http://code.milford.io/"/>
+  <updated>2012-09-25T20:00:57-04:00</updated>
+  <id>http://code.milford.io/</id>
   <author>
     <name><![CDATA[Nathan Milford]]></name>
     
@@ -15,10 +15,10 @@
   
   <entry>
     <title type="html"><![CDATA[Getting a Basic Cobbler server going on CentOS.]]></title>
-    <link href="http://nmilford.github.com/2012/03/getting-a-basic-cobbler-server-going-on-centos/"/>
+    <link href="http://code.milford.io/2012/03/getting-a-basic-cobbler-server-going-on-centos/"/>
     <updated>2012-03-26T23:05:42-04:00</updated>
-    <id>http://nmilford.github.com/2012/03/getting-a-basic-cobbler-server-going-on-centos</id>
-    <content type="html"><![CDATA[<p><img class="right" src="http://nmilford.github.com/images/automation.jpg"></p>
+    <id>http://code.milford.io/2012/03/getting-a-basic-cobbler-server-going-on-centos</id>
+    <content type="html"><![CDATA[<p><img class="right" src="http://code.milford.io/images/automation.jpg"></p>
 
 <p>I love <a href="https://github.com/cobbler/cobbler">Cobbler</a>.</p>
 
@@ -181,7 +181,7 @@
 
 <p>And we’re good to go, now you can get to the cobbler server at http://cobbler.example.com/cobbler_web/</p>
 
-<p><img class="center" src="http://nmilford.github.com/images/cobblermain.png"></p>
+<p><img class="center" src="http://code.milford.io/images/cobblermain.png"></p>
 
 <p>From here we can work in the web interface as well as through the CLI.</p>
 
@@ -207,7 +207,7 @@
 
 <p>And here is what it looks like in the web interface.</p>
 
-<p><img class="center" src="http://nmilford.github.com/images/distro.png"></p>
+<p><img class="center" src="http://code.milford.io/images/distro.png"></p>
 
 <p>Now add your local repos that we built in the <a href="http://link/to/old/article">previous article</a>.</p>
 
@@ -243,7 +243,7 @@
 
 <p>Once again, the web interface.</p>
 
-<p><img class="center" src="http://nmilford.github.com/images/repo.png"></p>
+<p><img class="center" src="http://code.milford.io/images/repo.png"></p>
 
 <p>Now lets start building our kickstart templates. First, lets make some snippets that will be compiled into the main kickstart file.</p>
 
@@ -733,7 +733,7 @@
 
 <p>And, again with the web interface….</p>
 
-<p><img class="center" src="http://nmilford.github.com/images/profile.png"></p>
+<p><img class="center" src="http://code.milford.io/images/profile.png"></p>
 
 <p>Sync it all with Cobbler.</p>
 
@@ -767,7 +767,7 @@
 
 <p>Here is the node in the web interface.</p>
 
-<p><img class="center" src="http://nmilford.github.com/images/node.png"></p>
+<p><img class="center" src="http://code.milford.io/images/node.png"></p>
 
 <p>There you have it. Enable PXE booting on the node and reboot it.</p>
 
@@ -783,10 +783,10 @@
   
   <entry>
     <title type="html"><![CDATA[Making a local CentOS mirror.]]></title>
-    <link href="http://nmilford.github.com/2012/03/making-a-local-centos-mirror/"/>
+    <link href="http://code.milford.io/2012/03/making-a-local-centos-mirror/"/>
     <updated>2012-03-25T16:25:39-04:00</updated>
-    <id>http://nmilford.github.com/2012/03/making-a-local-centos-mirror</id>
-    <content type="html"><![CDATA[<p><img class="center" src="http://nmilford.github.com/images/CentOS_amazing1.jpg"></p>
+    <id>http://code.milford.io/2012/03/making-a-local-centos-mirror</id>
+    <content type="html"><![CDATA[<p><img class="center" src="http://code.milford.io/images/CentOS_amazing1.jpg"></p>
 
 <p>Following up from my <a href="http://link/to/last/post">last post</a> on creating a simple yum repository, here is how to setup a local CentOS mirror.</p>
 
@@ -983,10 +983,10 @@
   
   <entry>
     <title type="html"><![CDATA[Making a simple Yum repository.]]></title>
-    <link href="http://nmilford.github.com/2012/03/making-a-simple-yum-repository/"/>
+    <link href="http://code.milford.io/2012/03/making-a-simple-yum-repository/"/>
     <updated>2012-03-24T18:46:25-04:00</updated>
-    <id>http://nmilford.github.com/2012/03/making-a-simple-yum-repository</id>
-    <content type="html"><![CDATA[<p><img class="center" src="http://nmilford.github.com/images/yum.png"></p>
+    <id>http://code.milford.io/2012/03/making-a-simple-yum-repository</id>
+    <content type="html"><![CDATA[<p><img class="center" src="http://code.milford.io/images/yum.png"></p>
 
 <p>Here is some low hanging fruit to improve your RHEL environment and simplify your work&#8230; setup a simple Yum repository.</p>
 
@@ -1095,14 +1095,14 @@
   
   <entry>
     <title type="html"><![CDATA[Now Hiring Now, Right Now We're Hiring Now.]]></title>
-    <link href="http://nmilford.github.com/2012/03/now-hiring-now-right-now-were-hiring-now/"/>
+    <link href="http://code.milford.io/2012/03/now-hiring-now-right-now-were-hiring-now/"/>
     <updated>2012-03-19T22:47:04-04:00</updated>
-    <id>http://nmilford.github.com/2012/03/now-hiring-now-right-now-were-hiring-now</id>
-    <content type="html"><![CDATA[<p><img class="center" src="http://nmilford.github.com/images/now_hiring_now.jpg"></p>
+    <id>http://code.milford.io/2012/03/now-hiring-now-right-now-were-hiring-now</id>
+    <content type="html"><![CDATA[<p><img class="center" src="http://code.milford.io/images/now_hiring_now.jpg"></p>
 
 <p>If you follow this blog, you can see I get to play with all sorts of awesome stuff.</p>
 
-<p><img class="center" src="http://nmilford.github.com/images/u_jelly_brah.jpg"></p>
+<p><img class="center" src="http://code.milford.io/images/u_jelly_brah.jpg"></p>
 
 <p>Y U JELLY? No need to be.</p>
 
@@ -1119,7 +1119,7 @@
 </ul>
 
 
-<p><img class="center" src="http://nmilford.github.com/images/awesome.jpg"></p>
+<p><img class="center" src="http://code.milford.io/images/awesome.jpg"></p>
 
 <p>I do not apologize for my gratuitous use of the word awesome.  If you can&#8217;t take this much awesome, you probably couldn&#8217;t handle working at Outbrain.</p>
 ]]></content>
@@ -1127,10 +1127,10 @@
   
   <entry>
     <title type="html"><![CDATA[The Dell C6220 and an Ode to my Dell DCS Team.]]></title>
-    <link href="http://nmilford.github.com/2012/03/the-dell-c6220-and-an-ode-to-my-dell-dcs-team/"/>
+    <link href="http://code.milford.io/2012/03/the-dell-c6220-and-an-ode-to-my-dell-dcs-team/"/>
     <updated>2012-03-19T22:13:23-04:00</updated>
-    <id>http://nmilford.github.com/2012/03/the-dell-c6220-and-an-ode-to-my-dell-dcs-team</id>
-    <content type="html"><![CDATA[<p><img class="right" src="http://nmilford.github.com/images/xanadu.jpg"></p>
+    <id>http://code.milford.io/2012/03/the-dell-c6220-and-an-ode-to-my-dell-dcs-team</id>
+    <content type="html"><![CDATA[<p><img class="right" src="http://code.milford.io/images/xanadu.jpg"></p>
 
 <p>I&#8217;m pretty hard on vendors.</p>
 
@@ -1166,10 +1166,10 @@
   
   <entry>
     <title type="html"><![CDATA[The Dell C6100 and IPMI / DRAC / MegaRAC]]></title>
-    <link href="http://nmilford.github.com/2012/03/the-dell-c6100-and-ipmi-drac-megarac/"/>
+    <link href="http://code.milford.io/2012/03/the-dell-c6100-and-ipmi-drac-megarac/"/>
     <updated>2012-03-18T11:12:54-04:00</updated>
-    <id>http://nmilford.github.com/2012/03/the-dell-c6100-and-ipmi-drac-megarac</id>
-    <content type="html"><![CDATA[<p><img class="left" src="http://nmilford.github.com/images/ipmi.jpg"></p>
+    <id>http://code.milford.io/2012/03/the-dell-c6100-and-ipmi-drac-megarac</id>
+    <content type="html"><![CDATA[<p><img class="left" src="http://code.milford.io/images/ipmi.jpg"></p>
 
 <p>Over the last year Google Analytics says I&#8217;ve been getting a lot of hits from search that indicate there are some folks who want to know how the C-series DRAC works.</p>
 
@@ -1182,7 +1182,7 @@
 
 <p>From the rear, the port can be found here:</p>
 
-<p><img class="center" src="http://nmilford.github.com/images/ipmi-cseries.jpg"></p>
+<p><img class="center" src="http://code.milford.io/images/ipmi-cseries.jpg"></p>
 
 <p>On the node you&#8217;ll need ipmitool.</p>
 
@@ -1360,21 +1360,21 @@
 
 <p>You can browse on over to it via it&#8217;s IP, initially using http://OOB.IP.OF.NODE</p>
 
-<p><img class="center" src="http://nmilford.github.com/images/megarac1.png"></p>
+<p><img class="center" src="http://code.milford.io/images/megarac1.png"></p>
 
 <p>Then you can login as root with the pasword you set with ipmitool</p>
 
-<p><img class="center" src="http://nmilford.github.com/images/megarac2.png"></p>
+<p><img class="center" src="http://code.milford.io/images/megarac2.png"></p>
 
 <p>You can get all sorts of the same data from this that you can get from the cli with ipmitool, but the main thing is going to the &#8216;Remote Control&#8217; tab across the top.</p>
 
-<p><img class="center" src="http://nmilford.github.com/images/megarac3.png"></p>
+<p><img class="center" src="http://code.milford.io/images/megarac3.png"></p>
 
 <p>There you have power control, same as ipmitool gives you, but even better is the &#8216;Console Redirection&#8217; which spawns a little Java KVM instance, much like the DRAC and Dell/Avocent KVMs do.</p>
 
 <p>It&#8217;ll ask you to download a <code>jviewer.jnlp</code> file, which you open up with Java&#8217;s Web Start:</p>
 
-<p><img class="center" src="http://nmilford.github.com/images/rackvm.png"></p>
+<p><img class="center" src="http://code.milford.io/images/rackvm.png"></p>
 
 <p>That&#8217;s it. now you have some sweet remote control options for your Dell C-series.</p>
 ]]></content>
@@ -1382,10 +1382,10 @@
   
   <entry>
     <title type="html"><![CDATA[Keepalived for MySQL High Availability on CentOS]]></title>
-    <link href="http://nmilford.github.com/2012/03/keepalived-for-mysql-high-availability-on-centos/"/>
+    <link href="http://code.milford.io/2012/03/keepalived-for-mysql-high-availability-on-centos/"/>
     <updated>2012-03-18T10:10:21-04:00</updated>
-    <id>http://nmilford.github.com/2012/03/keepalived-for-mysql-high-availability-on-centos</id>
-    <content type="html"><![CDATA[<p><img class="right" src="http://nmilford.github.com/images/keepalive-jesus.jpg"></p>
+    <id>http://code.milford.io/2012/03/keepalived-for-mysql-high-availability-on-centos</id>
+    <content type="html"><![CDATA[<p><img class="right" src="http://code.milford.io/images/keepalive-jesus.jpg"></p>
 
 <p>We have a pretty normal single master MySQL setup.</p>
 
