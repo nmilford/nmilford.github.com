@@ -363,61 +363,12 @@
 
 <p>For me it comes down to having operational responsibility for your infrastructure, rather than a support contract.  But still, I&#8217;m young and work at <a href="http://blog.outbrain.com/">a hot startup</a>; when I&#8217;m CTO of a bank maybe my view will change :P</p>
 
-<p><a href="http://techblog.outbrain.com/">Outbrain</a>&#8217;s Operations Culture is one in which members of Operations ARE the final point of escalation for the infrastructure our product lives on. (Naturally, developers are the final point of escalation beyond that for our custom internal software).  If we can&#8217;t fix it with the help of the community, we didn&#8217;t do our job in understanding things, or we built it wrong.</p>
-
-<p>Ownership, responsibility, and most of all, <strong>enthusiasm</strong> for both the technology and the expansion of our technical knowledge are key DNA for our team.</p>
-
-<p>So, it is not hard to imagine that I should feel like <a href="http://content.dell.com/us/en/enterprise/by-service-type-application-services-business-intelligence-hadoop.aspx">all</a> <a href="http://www.emc.com/about/news/press/2011/20110509-03.htm">of</a> <a href="http://www.pythian.com/news/27353/oracles-big-data-machine-details-and-musings/">these</a> Hadoop hardware appliances (or non-standard hardware heavily marketed as Hadoop solutions like <a href="http://www.marketwire.com/press-release/eharmony-selects-seamicro-to-streamline-hadoop-capabilities-1525698.htm">this</a> <a href="http://blog.milford.io/2011/04/seamicro-is-pretty-sweet-but-i-dont-know-about-it-for-hadoop/">guy</a>) miss the point of an OSS project that comes out of shops with similar operational DNA and are simply CTO bait to exploit an excess of budget and limited depth of understanding about the product&#8217;s capabilities and potential.</p>
-
-<p>Hadoop is one of those things that can be a Swiss Army knife, and can be setup to do quite a lot of different things. Here is a pretty key slide from my perennial <a href="http://blog.milford.io/2011/01/slides-and-notes-from-my-recent-hadoop-talk-in-israel/">Hadoop talk</a>:</p>
-
-<p><img class="center" src="/images/know.png"></p>
-
-<p>I love <a href="http://www.cloudera.com/">Cloudera</a>; I think they&#8217;re absolutly fantastic folks who, without question, know their shit. I also absolutely love my <a href="http://blog.milford.io/2010/07/some-notes-on-dells-c6100-multi-node-server-chassis/">Dell servers</a>. This is not a rant against them, Greenplum, Oracle, EMC or anyone specifically. However, they should all be treated as differently shaped LEGOs rather than a complete kit.</p>
-
-<p><img class="left" src="/images/lego.png">
-There are the type of people who buy a LEGO set, build according to the instructions, buy the next set, and build out the whole Harry Potter LEGO village. Then there are folks who mix and match pieces from the Star Wars set, the Pirates of the Carribean set, and the Harry Potter set to make something new, different and specific.</p>
-
-<p>When I was a kid, I had lots of large plastic tubs of loose LEGOs and would use them to create whatever I wanted.  Vendors and software are much the same in my opinion.</p>
-
-<p>A lot of what you want to do with Hadoop depends on your hardware bottle necks, the type of data, and what you&#8217;re doing with it.  These appliances are usually configured into a sort of generic &#8216;optimum&#8217; that appears to be sub-optimal for any specific workload at any scale. </p>
-
-<p>It is tantamount to all of the car manufacturers in the world saying, &#8216;fuck you bitches, we&#8217;re only making SUVs&#8217;. Sure, they&#8217;re a good trade off for space and performance, but sometimes, you need more performance than space, or you need more fuel efficiency.  I live in Brooklyn and I own a Mini specifically so that I can get into parking spots SUVs cannot. :)</p>
-
-<p>A simple example to wrap your head around is the ratio of CPU cores to disks/storage per datanode/tasktracker.</p>
-
-<ul>
-<li>Tasks run on each node are split out as children of the TaskTracker process.</li>
-<li>The more cores you have, the higher you can bump up the number of concurrent tasks running.</li>
-<li>Usually, Hadoop admins eschew RAID for JBOD so each of those tasks&#8217;s IO can be more or less isolated to the individual disk the HDFS blocks your reading/writing are on.</li>
-</ul>
-
-
-<p>So, with that little bit of knowledge:</p>
-
-<ul>
-<li>A setup with 12 x 2.5&#8221; 300G 15K SAS drives and 24 cores will increase your parellelism and IO speed.</li>
-<li>A setup with 8 x 2TB 3.5&#8221; 7.2K SATA drives and 8 cores will give you way more storage capacity, but less cluster-wide concurrency and node-level IO.</li>
-</ul>
-
-
-<p>Scale that from a cluster of 5 nodes to 50, to 500 and those differences aggegate to quite a meaningful difference in performance and can improve or drag your jobs down. I know several companies that have separate clusters with the same data, but different hardware configs for scheduled production jobs (with SLAs) and for research and ad-hoc jobs.</p>
-
-<p>Ultimately, this is wildly generalistic, since we also need to dial knobs for networking, RAM, architecture; but the point is that nothing, absolutely NOTHING beats knowing your use-case and usage patterns and building accordingly.</p>
-
-<p>Know your usage patterns! If you don&#8217;t know, experiment before buying one of these pre-packaged Hadoop toys! And if you have existing EMC, Greenplum or Oracle infrastructure and need to glue them to Hadoop&#8230; well&#8230;those are just LEGOs&#8230;</p>
-
-<p>Do you want to build your Hadoop cluster using DUPLO blocks to look like this?</p>
-
-<p><img class="center" src="/images/elephant01.jpg"></p>
-
-<p>Or do you want to build your Hadoop cluster to look like this?</p>
-
-<p><img class="center" src="/images/lego-elephant-lrg.png"></p>
-
-<p>Man up, read the docs, join the community, ask questions, then build your cluster.</p>
 </div>
   
+  
+    <footer>
+      <a rel="full-article" href="/2011/10/in-reference-to-hadoop-appliances-or-how-im-an-open-source-snob/">Read on &rarr;</a>
+    </footer>
   
 
 

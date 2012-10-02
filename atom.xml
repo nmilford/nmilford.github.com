@@ -4,7 +4,7 @@
   <title><![CDATA[blog.milford.io]]></title>
   <link href="http://code.milford.io/atom.xml" rel="self"/>
   <link href="http://code.milford.io/"/>
-  <updated>2012-10-01T23:50:25-04:00</updated>
+  <updated>2012-10-02T00:12:45-04:00</updated>
   <id>http://code.milford.io/</id>
   <author>
     <name><![CDATA[Nathan Milford]]></name>
@@ -2647,6 +2647,9 @@ is not very clear to me.</p>
 
 <p>They did.</p>
 
+<!-- more -->
+
+
 <p>I chatted with their parents for a few minutes, gave them my card and the server and sent them on their way.</p>
 
 <p>The next day I got a thank you email:</p>
@@ -3113,6 +3116,9 @@ is not very clear to me.</p>
 <p><em>What fun</em>, I thought. Plugged it into my work desktop (running <a href="http://www.linuxmint.com/download_lmde.php">LinuxMint Debian Edition</a>) only to find there were no linux drivers for this particular device.</p>
 
 <p>This turned into a nice little weekend project :)</p>
+
+<!-- more -->
+
 
 <p>Googling around found <a href="http://code.google.com/p/pyrocket/">pyrocket</a> and <a href="http://code.google.com/p/pymissile/">pymissile</a>.  But, neither of these projects would work with this model.</p>
 
