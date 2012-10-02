@@ -1,0 +1,448 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>In reference to Hadoop Appliances; or, how I'm an Open Source snob. - blog.milford.io</title>
+  <meta name="author" content="Nathan Milford">
+
+  
+  <meta name="description" content="Let me prefix this rant/post by stating that I come from the more scrappy, &#8216;build it out from OSS&#8217; sort of shop, so I am highly biased &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://code.milford.io/2011/10/in-reference-to-hadoop-appliances-or-how-im-an-open-source-snob/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="blog.milford.io" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">blog.milford.io</a></h1>
+  
+    <h2>a personal knowledge dump.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:code.milford.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/cassandra-token-calculator">Cassandra Token Calculator</a></li>
+  <li><a href="/about">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">In Reference to Hadoop Appliances; or, How I'm an Open Source Snob.</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-10-04T17:31:49-04:00" pubdate data-updated="true">Oct 4<span>th</span>, 2011</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p><img class="right" src="/images/chris-rock.jpg"></p>
+
+<p>Let me prefix this rant/post by stating that I come from the more scrappy, &#8216;build it out from OSS&#8217; sort of shop, so I am highly biased toward the approach of:</p>
+
+<ul>
+<li>Thinking first about, and then building, your infrastructure/solution to fit your needs.</li>
+<li>Knowing the software inside and out.</li>
+<li>Relying on the community for the rest.</li>
+</ul>
+
+
+<p>Over the converse &#8216;Enterprise&#8217; approach of:</p>
+
+<ul>
+<li>Building your infrastructure based on someone&#8217;s white paper on how you should build an infrastructure to do X.</li>
+<li>Getting your sysadmins a set of meaningless certifications.</li>
+<li>Ultimately relying on commercial support as your last point of escalation.</li>
+</ul>
+
+
+<p>Yes, yes, yes&#8230; this is very snobby and I am in danger of sounding as irreverent as <a href="http://teddziuba.com/">Ted Dzuiba</a>.  I am also wholly conscious that OSS approach can be taken in the same extreme direction as the enterprise approach. in so much that everyone blindly follows the same design choices that Twitter or Facebook are doing (albeit better than anyone else) or are implementing everything in node.js or Ruby on Rails because that is what the hot-as-shit hipster developers are doing.</p>
+
+<p>For me it comes down to having operational responsibility for your infrastructure, rather than a support contract.  But still, I&#8217;m young and work at <a href="http://blog.outbrain.com/">a hot startup</a>; when I&#8217;m CTO of a bank maybe my view will change :P</p>
+
+<p><a href="http://techblog.outbrain.com/">Outbrain</a>&#8217;s Operations Culture is one in which members of Operations ARE the final point of escalation for the infrastructure our product lives on. (Naturally, developers are the final point of escalation beyond that for our custom internal software).  If we can&#8217;t fix it with the help of the community, we didn&#8217;t do our job in understanding things, or we built it wrong.</p>
+
+<p>Ownership, responsibility, and most of all, <strong>enthusiasm</strong> for both the technology and the expansion of our technical knowledge are key DNA for our team.</p>
+
+<p>So, it is not hard to imagine that I should feel like <a href="http://content.dell.com/us/en/enterprise/by-service-type-application-services-business-intelligence-hadoop.aspx">all</a> <a href="http://www.emc.com/about/news/press/2011/20110509-03.htm">of</a> <a href="http://www.pythian.com/news/27353/oracles-big-data-machine-details-and-musings/">these</a> Hadoop hardware appliances (or non-standard hardware heavily marketed as Hadoop solutions like <a href="http://www.marketwire.com/press-release/eharmony-selects-seamicro-to-streamline-hadoop-capabilities-1525698.htm">this</a> <a href="http://blog.milford.io/2011/04/seamicro-is-pretty-sweet-but-i-dont-know-about-it-for-hadoop/">guy</a>) miss the point of an OSS project that comes out of shops with similar operational DNA and are simply CTO bait to exploit an excess of budget and limited depth of understanding about the product&#8217;s capabilities and potential.</p>
+
+<p>Hadoop is one of those things that can be a Swiss Army knife, and can be setup to do quite a lot of different things. Here is a pretty key slide from my perennial <a href="http://blog.milford.io/2011/01/slides-and-notes-from-my-recent-hadoop-talk-in-israel/">Hadoop talk</a>:</p>
+
+<p><img class="center" src="/images/know.png"></p>
+
+<p>I love <a href="http://www.cloudera.com/">Cloudera</a>; I think they&#8217;re absolutly fantastic folks who, without question, know their shit. I also absolutely love my <a href="http://blog.milford.io/2010/07/some-notes-on-dells-c6100-multi-node-server-chassis/">Dell servers</a>. This is not a rant against them, Greenplum, Oracle, EMC or anyone specifically. However, they should all be treated as differently shaped LEGOs rather than a complete kit.</p>
+
+<p><img class="left" src="/images/lego.png">
+There are the type of people who buy a LEGO set, build according to the instructions, buy the next set, and build out the whole Harry Potter LEGO village. Then there are folks who mix and match pieces from the Star Wars set, the Pirates of the Carribean set, and the Harry Potter set to make something new, different and specific.</p>
+
+<p>When I was a kid, I had lots of large plastic tubs of loose LEGOs and would use them to create whatever I wanted.  Vendors and software are much the same in my opinion.</p>
+
+<p>A lot of what you want to do with Hadoop depends on your hardware bottle necks, the type of data, and what you&#8217;re doing with it.  These appliances are usually configured into a sort of generic &#8216;optimum&#8217; that appears to be sub-optimal for any specific workload at any scale. </p>
+
+<p>It is tantamount to all of the car manufacturers in the world saying, &#8216;fuck you bitches, we&#8217;re only making SUVs&#8217;. Sure, they&#8217;re a good trade off for space and performance, but sometimes, you need more performance than space, or you need more fuel efficiency.  I live in Brooklyn and I own a Mini specifically so that I can get into parking spots SUVs cannot. :)</p>
+
+<p>A simple example to wrap your head around is the ratio of CPU cores to disks/storage per datanode/tasktracker.</p>
+
+<ul>
+<li>Tasks run on each node are split out as children of the TaskTracker process.</li>
+<li>The more cores you have, the higher you can bump up the number of concurrent tasks running.</li>
+<li>Usually, Hadoop admins eschew RAID for JBOD so each of those tasks&#8217;s IO can be more or less isolated to the individual disk the HDFS blocks your reading/writing are on.</li>
+</ul>
+
+
+<p>So, with that little bit of knowledge:</p>
+
+<ul>
+<li>A setup with 12 x 2.5&#8221; 300G 15K SAS drives and 24 cores will increase your parellelism and IO speed.</li>
+<li>A setup with 8 x 2TB 3.5&#8221; 7.2K SATA drives and 8 cores will give you way more storage capacity, but less cluster-wide concurrency and node-level IO.</li>
+</ul>
+
+
+<p>Scale that from a cluster of 5 nodes to 50, to 500 and those differences aggegate to quite a meaningful difference in performance and can improve or drag your jobs down. I know several companies that have separate clusters with the same data, but different hardware configs for scheduled production jobs (with SLAs) and for research and ad-hoc jobs.</p>
+
+<p>Ultimately, this is wildly generalistic, since we also need to dial knobs for networking, RAM, architecture; but the point is that nothing, absolutely NOTHING beats knowing your use-case and usage patterns and building accordingly.</p>
+
+<p>Know your usage patterns! If you don&#8217;t know, experiment before buying one of these pre-packaged Hadoop toys! And if you have existing EMC, Greenplum or Oracle infrastructure and need to glue them to Hadoop&#8230; well&#8230;those are just LEGOs&#8230;</p>
+
+<p>Do you want to build your Hadoop cluster using DUPLO blocks to look like this?</p>
+
+<p><img class="center" src="/images/elephant01.jpg"></p>
+
+<p>Or do you want to build your Hadoop cluster to look like this?</p>
+
+<p><img class="center" src="/images/lego-elephant-lrg.png"></p>
+
+<p>Man up, read the docs, join the community, ask questions, then build your cluster.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Nathan Milford</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-10-04T17:31:49-04:00" pubdate data-updated="true">Oct 4<span>th</span>, 2011</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://code.milford.io/2011/10/in-reference-to-hadoop-appliances-or-how-im-an-open-source-snob/" data-via="NathanMilford" data-counturl="http://code.milford.io/2011/10/in-reference-to-hadoop-appliances-or-how-im-an-open-source-snob/" >Tweet</a>
+  
+  
+  
+</div>
+
+
+
+
+<div class="OUTBRAIN" data-src="http://code.milford.io/2011/10/in-reference-to-hadoop-appliances-or-how-im-an-open-source-snob/"></div>
+<script type="text/javascript" async="async" src="http://widgets.outbrain.com/outbrain.js"></script> 
+
+
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/2011/08/sysdrink-nyc/" title="Previous Post: Sysdrink NYC is Back! Wednesday, September 7th at The Gingerman.">&laquo; Sysdrink NYC is Back! Wednesday, September 7th at The Gingerman.</a>
+      
+      
+        <a class="basic-alignment right" href="/2011/10/building-rpms-for-and-setting-up-statsd-and-graphite-on-centos/" title="Next Post: Building RPMs for and setting up StatsD and Graphite on CentOS.">Building RPMs for and setting up StatsD and Graphite on CentOS. &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2012/03/getting-a-basic-cobbler-server-going-on-centos/">Getting a Basic Cobbler server going on CentOS.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/making-a-local-centos-mirror/">Making a local CentOS mirror.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/making-a-simple-yum-repository/">Making a simple Yum repository.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/now-hiring-now-right-now-were-hiring-now/">Now Hiring Now, Right Now We're Hiring Now.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/the-dell-c6220-and-an-ode-to-my-dell-dcs-team/">The Dell C6220 and an Ode to my Dell DCS Team.</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Tag Cloud</h1>
+    <span id="tag-cloud"></span>
+</section>
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("NathanMilford", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/NathanMilford" class="twitter-follow-button" data-show-count="false">Follow @NathanMilford</a>
+  
+</section>
+
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/nmilford">@nmilford</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'nmilford',
+            count: 6,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Coderwall</h1>
+  <ul id="cw_badges">
+    <li class="loading">Status updating...</li>
+  </ul>
+
+  <script type="text/javascript">
+    var coderwall = (function(){
+      function render(options, badges){
+        var fragment = '',
+            t = $(options.target)[0],
+            height = 65,
+            width = 65,
+            index;
+
+        for (index in badges) {
+          fragment += '<a class="cw_badge"title="' + badges[index].description + '" href="http://coderwall.com/' + options.user + '">';
+          fragment +=   '<img alt="' + badges[index].description + '" height="' + width + '" width="' + height + '" src="' + badges[index].badge + '"/>';
+          fragment += '</a>';
+        }
+
+        t.innerHTML = fragment;
+      }
+      return {
+        showBadges: function(options){
+          $.ajax({
+              url: 'http://coderwall.com/' + options.user + '.json?callback=?'
+            , type: 'jsonp'
+            , error: function (err) { $(options.target + ' li.loading').addClass('error').text("Error loading feed"); }
+            , success: function(res) {
+                render(options, res.data.badges);
+            }
+          });
+        }
+      };
+    })();
+
+    $.domReady(function(){
+      if (!window.jXHR){
+        var jxhr = document.createElement('script');
+        jxhr.type = 'text/javascript';
+        jxhr.src = '/javascripts/libs/jXHR.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(jxhr, s);
+      }
+      if (!window.$){
+        var b = document.createElement('script');
+        b.type = 'text/javascript';
+        b.src = '/javascripts/ender.js';
+        var sc = document.getElementsByTagName('script')[0];
+        sc.parentNode.insertBefore(jxhr, s);
+      }
+      coderwall.showBadges({
+        user: 'nmilford',
+        target: '#cw_badges'
+      });
+    });
+  </script>
+  <style type="text/css">
+    .cw_badge img {
+      padding: 5px;
+      border: 0 none !important;
+      -moz-box-shadow: none !important;
+      -webkit-box-shadow: none !important;
+      -o-box-shadow: none !important;
+      box-shadow: none !important;
+    }
+  </style>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - Nathan Milford -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+
+<input type="hidden" name="OBKey" value=''/> 
+<script LANGUAGE="JavaScript">
+var OBCTm='';
+</script>
+<script LANGUAGE="JavaScript" src="http://widgets.outbrain.com/claim.js"></script>
+
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'code-milford-io';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://code.milford.io/2011/10/in-reference-to-hadoop-appliances-or-how-im-an-open-source-snob/';
+        var disqus_url = 'http://code.milford.io/2011/10/in-reference-to-hadoop-appliances-or-how-im-an-open-source-snob/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

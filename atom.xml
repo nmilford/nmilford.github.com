@@ -4,7 +4,7 @@
   <title><![CDATA[blog.milford.io]]></title>
   <link href="http://code.milford.io/atom.xml" rel="self"/>
   <link href="http://code.milford.io/"/>
-  <updated>2012-09-27T20:25:24-04:00</updated>
+  <updated>2012-10-01T23:50:25-04:00</updated>
   <id>http://code.milford.io/</id>
   <author>
     <name><![CDATA[Nathan Milford]]></name>
@@ -1623,6 +1623,1692 @@
 <p>and keepalived chucks it because of the second TCP_CHECK statement in the config above.  This is fantastic because you don&#8217;t have to shut MySQL down on the node if you need to do work with the live instance, but keep traffic off of it.</p>
 
 <p>Also, because of the magic of VRRP if your main load balancer dies, the second one will take right over :)</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Installing Graylog2 0.9.6, ElasticSearch 0.18.7, & MongoDB 2.0.3 on CentOS 5 (With RVM)]]></title>
+    <link href="http://code.milford.io/2012/03/installing-graylog2-0-9-6-elasticsearch-0-18-7-mongodb-2-0-3-on-centos-5-with-rvm/"/>
+    <updated>2012-03-17T17:03:45-04:00</updated>
+    <id>http://code.milford.io/2012/03/installing-graylog2-0-9-6-elasticsearch-0-18-7-mongodb-2-0-3-on-centos-5-with-rvm</id>
+    <content type="html"><![CDATA[<p><img class="right" src="http://code.milford.io/images/partygorillasquare.png"></p>
+
+<p>Gorilla Party Rocking your logs like an open-source mogul.  </p>
+
+<p><a href="http://www.graylog2.org/">Graylog2</a>&#8217;s moto should be LMFAO (logging my freaking apps off).</p>
+
+<p>Graylog2 is lovely little <a href="http://www.splunk.com/">Splunk</a>-like server that collects your logs and provides a nice interface for searching and analyzing them.</p>
+
+<p>From the site</p>
+
+<blockquote><p>Graylog2 is an open source log management solution that stores your logs in ElasticSearch. It consists of a server written in Java that accepts your syslog messages via TCP, UDP or AMQP and stores it in the database. The second part is a web interface that allows you to manage the log messages from your web browser.</p></blockquote>
+
+<p>They have lovely screen shots <a href="http://www.graylog2.org/about">here</a>.</p>
+
+<p>The only problem with it is it has quite a few moving parts that need to be installed that are not traditionally easy to get going on CentOS.</p>
+
+<p>So, here is my guide.</p>
+
+<!-- more -->
+
+
+<p>These steps were borrowed liberally from <a href="https://twitter.com/miller_joe">Joe Miller</a>&#8217;s blog <a href="http://joemiller.me/2011/04/13/howto-install-graylog2-on-centos-5-with-rvm-passenger/">here</a> where he setup a previous version, as well as from each product&#8217;s documentation.</p>
+
+<h2>Installing <a href="http://www.elasticsearch.org/">ElasticSearch</a>:</h2>
+
+<h3>Grab and place ElasticSearch.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd /opt
+</span><span class='line'>curl http://cloud.github.com/downloads/elasticsearch/elasticsearch/elasticsearch-0.18.7.tar.gz | tar zxv 
+</span><span class='line'>ln -s elasticsearch-0.18.7/ elasticsearch</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Install the ES service wrapper.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -k -L http://github.com/elasticsearch/elasticsearch-servicewrapper/tarball/master | tar -xz
+</span><span class='line'>mv *servicewrapper*/service elasticsearch/bin/
+</span><span class='line'>rm -Rf *servicewrapper*
+</span><span class='line'>/opt/elasticsearch/bin/service/elasticsearch install</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Give yourself a control script.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>ln -s `readlink -f elasticsearch/bin/service/elasticsearch` /usr/bin/elasticsearch_ctl</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Give the ES cluster a unique name.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sed -i -e 's|# cluster.name: elasticsearch|cluster.name: graylog2|' /opt/elasticsearch/config/elasticsearch.yml</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Fire it up.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/elasticsearch start</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Test it out.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -XGET 'http://localhost:9200/_cluster/health?pretty=true'</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Installing <a href="http://www.mongodb.org/">MongoDB</a>:</h2>
+
+<h3>Grab MongoDB from <a href="http://www.10gen.com/">10Gen</a>.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://downloads-distro.mongodb.org/repo/redhat/os/x86_64/RPMS/mongo-10gen-2.0.3-mongodb_1.x86_64.rpm
+</span><span class='line'>wget http://downloads-distro.mongodb.org/repo/redhat/os/x86_64/RPMS/mongo-10gen-server-2.0.3-mongodb_1.x86_64.rpm
+</span><span class='line'>rpm -Uvh *mongo*.rpm</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Fire it up.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/mongod start</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Setup MongoDB and auth.</h3>
+
+<p><code>mongo</code></p>
+
+<p>Dump this into the shell (after updating the credentials as you see fit.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>use admin
+</span><span class='line'>  db.addUser('admin', 'adminpass')
+</span><span class='line'>  db.auth('admin', 'adminpass')
+</span><span class='line'>use graylog2
+</span><span class='line'>  db.addUser('grayloguser', 'graylogpass')
+</span><span class='line'>  db.auth('grayloguser', 'graylogpass')
+</span><span class='line'>exit</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Install the Graylog2 server:</h2>
+
+<h3>Grab and place it.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd /opt 
+</span><span class='line'>curl  http://cloud.github.com/downloads/Graylog2/graylog2-server/graylog2-server-0.9.6.tar.gz | tar zxv 
+</span><span class='line'>ln -s graylog2-server-0.9.6/ graylog2-server</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Setup the config file and remove mongo authentication (couldn&#8217;t get it to work with auth enabled).</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cp /opt/graylog2-server/graylog2.conf{.example,}
+</span><span class='line'>cd /etc
+</span><span class='line'>ln -s /opt/graylog2-server/graylog2.conf graylog2.conf
+</span><span class='line'>cd -
+</span><span class='line'>sed -i -e 's|mongodb_useauth = true|mongodb_useauth = false|' /opt/graylog2-server/graylog2.conf</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Drop an init script.</h3>
+
+<p><code>vim /etc/init.d/graylog2-server</code></p>
+
+<p>In it put this:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#!/bin/sh
+</span><span class='line'>#
+</span><span class='line'># graylog2-server:   graylog2 message collector
+</span><span class='line'>#
+</span><span class='line'># chkconfig: - 98 02
+</span><span class='line'># description:  This daemon listens for syslog and GELF messages and stores them in mongodb
+</span><span class='line'>#
+</span><span class='line'>CMD=$1
+</span><span class='line'>NOHUP=`which nohup`
+</span><span class='line'>JAVA_HOME=/usr/java/latest
+</span><span class='line'>JAVA_CMD=$JAVA_HOME/bin/java
+</span><span class='line'>GRAYLOG2_SERVER_HOME=/opt/graylog2-server
+</span><span class='line'>
+</span><span class='line'>start() {
+</span><span class='line'>  echo "Starting graylog2-server ..."
+</span><span class='line'>  $NOHUP $JAVA_CMD -jar $GRAYLOG2_SERVER_HOME/graylog2-server.jar &gt; /var/log/graylog2.log 2&gt;&1 &
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>stop() {
+</span><span class='line'>  PID=`cat /tmp/graylog2.pid`
+</span><span class='line'>  echo "Stopping graylog2-server ($PID) ..."
+</span><span class='line'>  kill $PID
+</span><span class='line'>}
+</span><span class='line'>     
+</span><span class='line'>restart() {
+</span><span class='line'>  echo "Restarting graylog2-server ..."
+</span><span class='line'>  stop
+</span><span class='line'>  start
+</span><span class='line'>}
+</span><span class='line'>     
+</span><span class='line'>case "$CMD" in
+</span><span class='line'>  start)
+</span><span class='line'>    start;;
+</span><span class='line'>  stop)
+</span><span class='line'>    stop;;
+</span><span class='line'>  restart)
+</span><span class='line'>    restart;;
+</span><span class='line'>  *)
+</span><span class='line'>    echo "Usage $0 {start|stop|restart}"
+</span><span class='line'>    RETVAL=1;;
+</span><span class='line'>esac</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<h3>Prime and load.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>chmod +x /etc/init.d/graylog2-server
+</span><span class='line'>chkconfig --add graylog2-server
+</span><span class='line'>chkconfig graylog2-server on</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Fire it up.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/graylog2-server start</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Grab the Web Interface.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd /opt
+</span><span class='line'>curl  http://cloud.github.com/downloads/Graylog2/graylog2-web-interface/graylog2-web-interface-0.9.6.tar.gz | tar zxv 
+</span><span class='line'>ln -s graylog2-web-interface-0.9.6 graylog2-web-interface</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Install RVM with Ruby 1.9.2.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo yum install -y gcc-c++ patch readline readline-devel zlib zlib-devel libyaml-devel libffi-devel openssl-devel curl-devel
+</span><span class='line'>echo insecure &gt;&gt; ~/.curlrc
+</span><span class='line'>bash -s stable &lt; &lt;(curl -s -k https://raw.github.com/wayneeseguin/rvm/master/binscripts/rvm-installer)
+</span><span class='line'>rvm install 1.9.2</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Setup a Graylog2 user.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>useradd graylog2 -d /opt/graylog2-web-interface -G rvm
+</span><span class='line'>chown -R graylog2:graylog2 /opt/graylog2-web-interface*</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Give root RVM access.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>usermod -G rvm root</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Bundle.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>rvm use 1.9.2
+</span><span class='line'>cd /opt/graylog2-web-interface
+</span><span class='line'>gem install bundler
+</span><span class='line'>bundle install</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Setup the web interface&#8217;s MongoDB config.</h3>
+
+<p><code>vim /opt/graylog2-web-interface/config/mongoid.yml</code></p>
+
+<p>Make sure the production setting looks like this:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>production:
+</span><span class='line'>  host: localhost
+</span><span class='line'>  port: 27017
+</span><span class='line'>  username:
+</span><span class='line'>  password:
+</span><span class='line'>  database: graylog2</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Fire it up and set a password.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>su - graylog2
+</span><span class='line'>rvm use 1.9.2
+</span><span class='line'>RAILS_ENV=production script/rails server</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Browse to <code>http://$HOSTNAME:3000</code> and setup your first user.</p>
+
+<p>Once done, CTRL-C to stop the server, then CTRL-D to go back to root.</p>
+
+<h3>Install and configure Passenger.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum -y install curl-devel
+</span><span class='line'>rvm use 1.9.2
+</span><span class='line'>gem install passenger
+</span><span class='line'>gem install file-tail</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Drop an init script.</h3>
+
+<p><code>vim /etc/init.d/graylog2-web</code></p>
+
+<p>In it put this:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#!/bin/bash
+</span><span class='line'>#
+</span><span class='line'># graylog2-web:   graylog2 web interface
+</span><span class='line'>#
+</span><span class='line'># chkconfig: - 98 02
+</span><span class='line'># description:  Starts graylog2-web-interface using passenger-standalone. \
+</span><span class='line'>#       Uses RVM to use switch to a specific ruby version.
+</span><span class='line'>#
+</span><span class='line'># config
+</span><span class='line'>USER=graylog2
+</span><span class='line'>APP_DIR=/opt/graylog2-web-interface
+</span><span class='line'>RVM_RUBY=1.9.2
+</span><span class='line'>ADDR=0.0.0.0
+</span><span class='line'>PORT=3000
+</span><span class='line'>ENVIRONMENT=production
+</span><span class='line'>LOG_FILE=/var/log/graylog2-web-interface.log
+</span><span class='line'>
+</span><span class='line'># --
+</span><span class='line'> 
+</span><span class='line'>if [ ! -d $APP_DIR/tmp ]; then
+</span><span class='line'>  mkdir $APP_DIR/tmp
+</span><span class='line'>fi
+</span><span class='line'>    
+</span><span class='line'>if [ ! -d $APP_DIR/log ]; then
+</span><span class='line'>  mkdir $APP_DIR/log
+</span><span class='line'>fi
+</span><span class='line'>    
+</span><span class='line'>chown -R $USER:$USER $APP_DIR/{log,tmp}
+</span><span class='line'>chmod -R 777 $APP_DIR/{log,tmp}
+</span><span class='line'>    
+</span><span class='line'>CMD_START="cd $APP_DIR; rvm use $RVM_RUBY; passenger start -d \
+</span><span class='line'>                        -a $ADDR \
+</span><span class='line'>                        -p $PORT \
+</span><span class='line'>                        -e $ENVIRONMENT \
+</span><span class='line'>                        --user $USER"
+</span><span class='line'>CMD_STOP="cd $APP_DIR; rvm use $RVM_RUBY; passenger stop -p $PORT"
+</span><span class='line'>     
+</span><span class='line'>CMD_STATUS="cd $APP_DIR; rvm use $RVM_RUBY; passenger status -p $PORT"
+</span><span class='line'>     
+</span><span class='line'>. /lib/lsb/init-functions
+</span><span class='line'>
+</span><span class='line'>case "$1" in
+</span><span class='line'>  start)
+</span><span class='line'>    echo "Starting graylog2-web-interface"
+</span><span class='line'>    su - $USER -c "$CMD_START";;
+</span><span class='line'>  stop)
+</span><span class='line'>    echo "Stopping graylog2-web-interface"
+</span><span class='line'>    su - $USER -c "$CMD_STOP";;
+</span><span class='line'>  status)
+</span><span class='line'>    su - $USER -c "$CMD_STATUS";;
+</span><span class='line'>  *)
+</span><span class='line'>    echo "Usage: $0 start|stop|status"
+</span><span class='line'>    exit 3;;
+</span><span class='line'>esac</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Prime and load.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>chmod +x /etc/init.d/graylog2-web
+</span><span class='line'>chkconfig --add graylog2-web
+</span><span class='line'>chkconfig graylog2-web on</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Fire it up.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/graylog2-web start</span></code></pre></td></tr></table></div></figure>
+
+
+<p>First time it runs it&#8217;ll grab some stuff for passenger, but will be fine every time after.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Keepalived 1.1.20 RPMs for CentOS 5]]></title>
+    <link href="http://code.milford.io/2012/03/keepalived-1-1-20-rpms-for-centos-5/"/>
+    <updated>2012-03-17T14:20:06-04:00</updated>
+    <id>http://code.milford.io/2012/03/keepalived-1-1-20-rpms-for-centos-5</id>
+    <content type="html"><![CDATA[<p><img class="left" src="http://code.milford.io/images/keepalived.png"></p>
+
+<p><a href="http://www.keepalived.org/">Keepalived</a> is a very handy piece of ops-sauce.  Dash some on your operations project and it adds a bit of tangy high availability and an aroma of robust fail-over.</p>
+
+<p>It implements a VRRPv2 stack to handle LVS director failover and acts as a userspace daemon for LVS cluster nodes healthchecks and LVS directors failover.</p>
+
+<p>While trying to reverse engineer how a previous co-worker setup a MySQL load balancing scheme using keepalived I discovered how difficult it was to find rpms for it (I found 1.1.10 out there).  I&#8217;ll be posting later on the MySQL HA scheme later.</p>
+
+<p>I tried building the latest version (1.2.2) which continually broke in RHEL5 (despite there being a RHEL6 rpm)&#8230; so I gave in and built the latest version of the previous release (1.1.20).</p>
+
+<p>Here we go&#8230;</p>
+
+<!-- more -->
+
+
+<p>Setup your rpm build environment.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo yum -y install rpmdevtools kernel-devel openssl-devel 
+</span><span class='line'>rpmdev-setuptree</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Get it.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://www.keepalived.org/software/keepalived-1.1.20.tar.gz \
+</span><span class='line'>  -O ~/rpmbuild/SOURCES/keepalived-1.1.20.tar.gz
+</span><span class='line'>wget https://raw.github.com/nmilford/specfiles/master/keepalived-1.1/keepalived-1.1.spec \
+</span><span class='line'>  -O ~/rpmbuild/SPECS/keepalived-1.1.spec</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Build it.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>rpmbuild -bb ~/rpmbuild/SPECS/keepalived-1.1.spec</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Install it.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo rpm -Uvh ~/rpmbuild/RPMS/x86_64/keepalived-1.1-1.1.20-1.x86_64.rpm</span></code></pre></td></tr></table></div></figure>
+
+
+<p>From here you can follow the keepalived <a href="http://www.keepalived.org/LVS-NAT-Keepalived-HOWTO.html">tutorial</a>.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[A new Cassandra Chef Cookbook for handling multiple clusters.]]></title>
+    <link href="http://code.milford.io/2012/03/a-new-cassandra-chef-cookbook-for-handling-multiple-clusters/"/>
+    <updated>2012-03-15T10:21:46-04:00</updated>
+    <id>http://code.milford.io/2012/03/a-new-cassandra-chef-cookbook-for-handling-multiple-clusters</id>
+    <content type="html"><![CDATA[<p><img class="center" src="http://code.milford.io/images/chef.gif"></p>
+
+<p>I find myself running more and more Cassandra clusters and when we were on Chef 0.9.8 I was being lazy and just cloning my Cassandra cookbook per cluster.  Not exactly a way to scale the manageability of your config :P</p>
+
+<p>Now I&#8217;ve refactored the cookbook to allow me to manage multiple clusters by extracting the <code>cluster_name</code> and <code>initial_token</code> from a databag. Once we start implementing the new Environments feature in Chef 0.10 I&#8217;ll be able to simplify this further. :)</p>
+
+<p>I&#8217;m debating having the cookbook auto-generate tokens and assign them as well as re-generate/nodetool move/re-balance when I&#8217;ve added another node with that cluster specified in the databag. That&#8217;s a big project and for now I&#8217;m too much of a control freak to automate that, but I&#8217;m thinking on it.</p>
+
+<p>I&#8217;ve also made it so the cookbook auto-generates the <code>cassandra-topology.properties</code> for the <code>PropertyFileSnitch</code> based off of location info stored in the databag.</p>
+
+<!-- more -->
+
+
+<p>The cookbook is on github <a href="https://github.com/nmilford/cookbooks/tree/master/cassandra">here</a>.</p>
+
+<p>To build the databags, first set your <code>EDITOR</code> environment variable.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>export EDITOR=vim</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Rock some knife action.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>knife data bag create Cassandra cass01</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then paste the JSON into the editor knife opens and repeat for each node.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{
+</span><span class='line'>  "id": "hostname",
+</span><span class='line'>  "location": "DC:RACK",
+</span><span class='line'>  "initial_token": "",
+</span><span class='line'>  "cluster_name": ""
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>On each chef-client run it&#8217;ll sift through the databags and generate (of if the config templates have already rendered, enforce) the config on each node.</p>
+
+<p>You can add another cluster by defining nodes with a &#8221;<code>cluster_name</code>&#8221; value in thier databag then adding the cluster to the case statement at the top of <code>./recipes/default.rb</code>.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">case</span> <span class="no">Cassandra</span><span class="o">[</span><span class="s1">&#39;cluster_name&#39;</span><span class="o">]</span>
+</span><span class='line'><span class="k">when</span> <span class="s2">&quot;Prod Cluster&quot;</span>
+</span><span class='line'>  <span class="n">node</span><span class="o">.</span><span class="n">set</span><span class="o">[</span><span class="ss">:Cassandra</span><span class="o">][</span><span class="ss">:Version</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;1.0.7-1&quot;</span>
+</span><span class='line'>  <span class="n">node</span><span class="o">.</span><span class="n">set</span><span class="o">[</span><span class="ss">:Cassandra</span><span class="o">][</span><span class="ss">:seeds</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;192.168.1.1, 192.168.1.2&quot;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># The nodes on this cluster all have 12 cores, so (8*12 = 96)</span>
+</span><span class='line'>  <span class="n">node</span><span class="o">.</span><span class="n">set</span><span class="o">[</span><span class="ss">:Cassandra</span><span class="o">][</span><span class="ss">:concurrent_writes</span><span class="o">]</span> <span class="o">=</span> <span class="mi">96</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>While I&#8217;m not a rubyist, my Ruby-fu is getting slightly stronger each day when it comes to working with Chef.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[The joy of the Opscode Chef Omnibus installer.]]></title>
+    <link href="http://code.milford.io/2012/03/the-joy-of-the-opscode-chef-omnibus-installer/"/>
+    <updated>2012-03-14T21:03:18-04:00</updated>
+    <id>http://code.milford.io/2012/03/the-joy-of-the-opscode-chef-omnibus-installer</id>
+    <content type="html"><![CDATA[<p><img class="right" src="http://code.milford.io/images/angry_chef.jpg"></p>
+
+<p>Finally upgraded to <a href="http://www.opscode.com/chef/">Chef</a> 0.10.6 from 0.9.8.</p>
+
+<p>Hot, sweet, <a href="http://wiki.opscode.com/display/chef/Environments">environments</a> and <a href="http://wiki.opscode.com/display/chef/Encrypted+Data+Bags">encrypted data bag</a> action.</p>
+
+<p>Except&#8230; well&#8230; the chef-client would ocassionally die&#8230; quetly.</p>
+
+<p>No log, no debug output, no exit codes, just poof&#8230; no more chef-client daemon.</p>
+
+<p>(This is not the point there you guys tell me I should use cron or runit or daemontools or something to run chef, I&#8217;ve heard it)</p>
+
+<p>The lovely folks at <a href="http://www.opscode.com/">Opscode</a> said that running on ruby 1.8.7 rather than ruby 1.9.2 was the culprit and then drew my attention to the super-happy-awesome Opscode Chef <a href="http://lists.opscode.com/sympa/arc/chef-dev/2011-08/msg00055.html">Omnibus</a> installer <a href="http://www.opscode.com/chef/install/">here</a> (avaliable as rpms, debs, tgz, etc..)</p>
+
+<p>It installs (almost) everything you need into /opt and lets Chef run in it&#8217;s own &#8216;embedded&#8217; ruby 1.9.2 environment keeping my system ruby clean.</p>
+
+<!-- more -->
+
+
+<p>I grabbed the rpm for the RHEL version by poking around their S3 bucket and dumped it into my local yum repo.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://s3.amazonaws.com/opscode-full-stack/el-5.7-x86_64/chef-full-0.10.6-1.x86_64.rpm</span></code></pre></td></tr></table></div></figure>
+
+
+<p>From there I can remove the <a href="http://rbel.frameos.org/">rbel</a> Chef and install the Omnibus package.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum -y erase rubygem-chef
+</span><span class='line'>yum -y install chef-full</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Everything is in <code>/opt/opscode</code> :)</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[root@sandbox:~]# /opt/opscode/embedded/bin/ruby -v
+</span><span class='line'>ruby 1.9.2p180 (2011-02-18) [x86_64-linux]</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>chef-solo</code>, <code>chef-client</code>, <code>knife</code>, and <code>shef</code> are live in <code>/opt/opscode/bin</code> and a link is put in <code>/usr/bin</code></p>
+
+<p>There were two issues with it I&#8217;ve found.</p>
+
+<p>First, it doesn&#8217;t drop an init script. I just stole the one from the rbel rubygems-chef RPM and had Chef drop it in <code>/etc/init.d/chef-client</code> as a cookbook_file. Worked fine.</p>
+
+<p>Second, I have a cookbook that sets a user password which requires the ruby-shadow gem.</p>
+
+<p>Ordinarily you could have a cookbook install it in the embedded ruby path thus:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem_package</span> <span class="s2">&quot;ruby-shadow&quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">gem_binary</span>  <span class="s2">&quot;/opt/opscode/embedded/bin/gem&quot;</span>
+</span><span class='line'>  <span class="n">action</span> <span class="ss">:install</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>But, there is some bug with mongrel and ruby 1.9.2 that causes some problems (seen <a href="http://tickets.opscode.com/browse/CHEF-2848">here</a> specifically in Omnibus, documented <a href="http://stackoverflow.com/questions/1073841/gem-install-mongrel-fails-with-ruby-1-9-1">here</a> on stack overflow, I chose the top voted solution, not the &#8216;accepted&#8217; one).</p>
+
+<p>The little hack below got me around it for now. Since I am still &#8216;a/b testing&#8217; it I don&#8217;t have the Omnibus installer setup everywhere so I wrapped it in a hackish check.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">if</span> <span class="no">File</span><span class="o">.</span><span class="n">exist?</span><span class="p">(</span><span class="s2">&quot;/opt/opscode/&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">package</span> <span class="s2">&quot;gcc&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">action</span> <span class="ss">:install</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">execute</span> <span class="s2">&quot;installMongrelPre&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">command</span> <span class="s2">&quot;/opt/opscode/embedded/bin/gem install mongrel --pre&quot;</span>
+</span><span class='line'>    <span class="n">creates</span> <span class="s2">&quot;/opt/opscode/embedded/lib/ruby/gems/1.9.1/gems/mongrel-1.2.0.pre2/setup.rb&quot;</span>
+</span><span class='line'>    <span class="n">action</span> <span class="ss">:run</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">gem_package</span> <span class="s2">&quot;ruby-shadow&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">gem_binary</span>  <span class="s2">&quot;/opt/opscode/embedded/bin/gem&quot;</span>
+</span><span class='line'>    <span class="n">action</span> <span class="ss">:install</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And from there, my chef-client run completes with no issues and the chef-client daemon does not mysteriously die.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Stop! mysqlHammerOfThor.py time!]]></title>
+    <link href="http://code.milford.io/2012/02/stop-mysqlhammerofthor-py-time/"/>
+    <updated>2012-02-01T21:39:49-05:00</updated>
+    <id>http://code.milford.io/2012/02/stop-mysqlhammerofthor-py-time</id>
+    <content type="html"><![CDATA[<p><img class="center" src="http://code.milford.io/images/hammertime.jpg"></p>
+
+<p>So, expanding upon my <a href="http://blog.milford.io/2012/01/i-wield-the-mysql-hammer-of-zeus-mass-killing-queries-by-host/">previous post</a>, I wrote a simple python script that would kill all queries running on a MySQL instance based on a host wildcard or runtime of a query.</p>
+
+<p>Yes, yes, I know about <a href="http://www.maatkit.org/doc/mk-kill.html">mk-kill</a>, but I enjoy writing little scripts.  Writing trivial scripts is always a great way to get better. :)</p>
+
+<!-- more -->
+
+
+<p>Nothing crazy, here is how to run it:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Usage: mysqlHammerOfThor.py [options]
+</span><span class='line'>
+</span><span class='line'>Options:
+</span><span class='line'>  -h, --help            show this help message and exit
+</span><span class='line'>  -s SERVER, --server=SERVER
+</span><span class='line'>                        Server to kill queries on.
+</span><span class='line'>  -p PORT, --port=PORT  Port of above server (default: 3306).
+</span><span class='line'>  -u USER, --user=USER  User that can kill queries (default: root).
+</span><span class='line'>  -w HOST, --wildcard=HOST
+</span><span class='line'>                        Kills all queries from any host matching a wildcard
+</span><span class='line'>                        string.
+</span><span class='line'>  -t THRESH, --threshold=THRESH
+</span><span class='line'>                        Kills all queries that have been running longer than
+</span><span class='line'>                        this value in seconds.</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You can grab it from my Github repo here:  <a href="https://github.com/nmilford/scripts/blob/master/MySQL/mysqlHammerOfThor.py">mysqlHammerOfThor.py</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[I wield the MySQL hammer of Thor! Mass killing queries by host.]]></title>
+    <link href="http://code.milford.io/2012/01/i-wield-the-mysql-hammer-of-zeus-mass-killing-queries-by-host/"/>
+    <updated>2012-01-30T17:57:56-05:00</updated>
+    <id>http://code.milford.io/2012/01/i-wield-the-mysql-hammer-of-zeus-mass-killing-queries-by-host</id>
+    <content type="html"><![CDATA[<p><img class="center" src="http://code.milford.io/images/thor.jpg"></p>
+
+<p>Just a quick protip.  I&#8217;m not a DBA, but I&#8217;m about to whack you with the clue hammer.</p>
+
+<p>I had an errant application node hammering a MySQL slave with metric butt loads (engineering term) of junk queries that were locking the slave up.</p>
+
+<p>If you find yourself in a similar position without your own surly DBA around, I&#8217;ll save 20 minutes of googling:</p>
+
+<!-- more -->
+
+
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>SELECT concat('KILL ',id,';') FROM information_schema.processlist WHERE host LIKE '%hostname%';"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Just put in drop in the node&#8217;s hostname in the wildcards.</p>
+
+<p>That will give you an output like:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mysql&gt; select concat('KILL ',id,';') from information_schema.processlist where host like '%server123%';
+</span><span class='line'>+------------------------+
+</span><span class='line'>| concat('KILL ',id,';') |
+</span><span class='line'>+------------------------+
+</span><span class='line'>| KILL 75284687;         |
+</span><span class='line'>| KILL 75284684;         |
+</span><span class='line'>| KILL 75284450;         |
+</span><span class='line'>| KILL 75284418;         |
+</span><span class='line'>| KILL 75284348;         |
+</span><span class='line'>| KILL 75232685;         |
+</span><span class='line'>+------------------------+
+</span><span class='line'>6 rows in set (0.00 sec)</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Grab all the KILL statements and run them and you can save yourself a lecture from from an angry DBA.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Automating Some Cassandra Maintenance]]></title>
+    <link href="http://code.milford.io/2012/01/automating-some-cassandra-maintenance/"/>
+    <updated>2012-01-29T22:55:39-05:00</updated>
+    <id>http://code.milford.io/2012/01/automating-some-cassandra-maintenance</id>
+    <content type="html"><![CDATA[<p><img class="center" src="http://code.milford.io/images//MaintenanceMania.gif"></p>
+
+<p>Lets talk about Cassandra maintenance.</p>
+
+<p>Nothing crazy here&#8230; these are just some notes I jotted down for folks I work with explaining a cronjob I put into production as well as providing the simple script.  Thought some other people might benefit.</p>
+
+<!-- more -->
+
+
+<p><strong>Why do regular repairs?</strong></p>
+
+<p>From the Cassandra Operations Wiki:</p>
+
+<blockquote><p>Unless your application performs no deletes, it is vital that production clusters run nodetool repair periodically on all nodes in the cluster. The hard requirement for repair frequency is the value used for GCGraceSeconds (see <a href="http://wiki.apache.org/cassandra/DistributedDeletes">DistributedDeletes</a>). Running nodetool repair often enough to guarantee that all nodes have performed a repair in a given period GCGraceSeconds long, ensures that deletes are not &#8220;forgotten&#8221; in the cluster.</p></blockquote>
+
+<p>This is best expressed from this excerpt by Konstantin Naryshkin from the Cassandra mailing list (source is <a href="http://mail-archives.apache.org/mod_mbox/cassandra-user/201106.mbox/%3Cb4905f9f-7aa0-458c-9736-c9f8f61c3f2c@mail-1.01.com%3E">here</a>)</p>
+
+<p>The query:</p>
+
+<blockquote><p>I am little confused of the reason why nodetool repair has to run within GCGraceSeconds.</p>
+
+<p>The documentation at: <a href="http://wiki.apache.org/cassandra/Operations#Frequency_of_nodetool_repair">http://wiki.apache.org/cassandra/Operations#Frequency_of_nodetool_repair</a>
+is not very clear to me.</p>
+
+<p>How can a delete be &#8216;unforgotten&#8217; if I don&#8217;t run nodetool repair? (I understand that if a node is down for more than GCGraceSeconds, I should not get it up without resynching is completely. Otherwise deletes may reappear. But not sure how exactly nodetool repair ties into this mechanism ofdistributed deletes.</p></blockquote>
+
+<p>The Answer:</p>
+
+<blockquote><p>As I understand, it has to do with a node being up but missing the delete message (remember, if you apply the delete at CL.QUORUM, you can have almost half the replicas miss it and still succeed). Imagine that you have 3 nodes A, B, and C, each of which has a column &#8216;foo&#8217; witha value &#8216;bar&#8217;. Their state would be:</p>
+
+<p>A: &#8216;foo&#8217;:&#8217;bar&#8217; B: &#8216;foo&#8217;:&#8217;bar&#8217; C: &#8216;foo&#8217;:&#8217;bar&#8217;</p>
+
+<p>We attempt to delete column &#8216;foo&#8217;, and it succeeds on nodes A and B (meaning that we succeeded on CL.QUORUM). Unfortunately the packet going to node C runs afoul of the network gods and gets zapped in transit. The state is now:</p>
+
+<p>A: &#8216;foo&#8217;:deleted B: &#8216;foo&#8217;:deleted C: &#8216;foo&#8217;:&#8217;bar&#8217;</p>
+
+<p>If we try a read at this point, at CL.QUORUM, we are guaranteed to get at least one record that &#8216;foo&#8217; was deleted and because of timestamps we know to tell the client as much.</p>
+
+<p>After GCGraceSeconds and a compaction, the state of the nodes will be:</p>
+
+<p>A: None B: None C: &#8216;foo&#8217;:&#8217;bar&#8217;</p>
+
+<p>Some time later, we attempt a read and just happen to get C&#8217;s response first. The response will be that &#8216;foo&#8217; is storing &#8216;bar&#8217;. Not only that, but read repair happens as well, so the state will become:</p>
+
+<p>A: &#8216;foo&#8217;:&#8217;bar&#8217; B: &#8216;foo&#8217;:&#8217;bar&#8217; C: &#8216;foo&#8217;:&#8217;bar&#8217;</p>
+
+<p>We have the infamous undelete.</p></blockquote>
+
+<p><strong>The Script.</strong></p>
+
+<p>I have all of my Cassandra nodes run a simple script weekly.  Each node runs at a different time on a different day of the week.</p>
+
+<p>The script is <a href="https://github.com/nmilford/scripts/blob/master/Cassandra/cassandraMaintenance.sh">here</a>.</p>
+
+<p>The script is run thus:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>usage: ./cassandraMaintenance.sh -k keyspace -c [ columnfamily or 'all']</span></code></pre></td></tr></table></div></figure>
+
+
+<p>It also drops a log at: <code>/var/log/cassandra/mainenance.log</code></p>
+
+<p><strong>What does the script do exactly?</strong></p>
+
+<p>The script does three things for each ColumnFamily it is run against:</p>
+
+<ul>
+<li>Runs repair against the column family to force all nodes&#8217; data is in sync.
+
+<ul>
+<li>Node will exchange it&#8217;s inventory with other nodes with replicas of same data.</li>
+<li>Other replicas will &#8216;stream&#8217; sstables to this node with Keys this node may have missed or may have an older value so it can have a complete consistent set.</li>
+<li>Additionally, just as active data is made consistent, it makes sure keys marked as tombstoned are made consistent, so they don&#8217;t magically pop back into existence as described above.</li>
+<li>One downside is that, because sstable files are immutable, if you need only one Key out of a 20G file, you still have to get the whole 20G file. This causes two drawbacks.
+
+<ul>
+<li>How long it takes to move files across datacenters,</li>
+<li>Having multiple copies of the same Key in multiple sstable files on your one node. This is helped in the next step.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Runs a major compaction against the ColumnFamily to strip away excess.
+
+<ul>
+<li>It takes all of the sstables on the node, even the redundant ones and merge/sorts them into a single large sstable file. This benefits thus:
+
+<ul>
+<li>Improves performance through limiting seeks on disk through multiple files.</li>
+<li>The act of merge/sorting and creating a new sstable strips out all of the old tombstoned files.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Runs a cleanup on the column family.
+
+<ul>
+<li>Deletes all of the redundant/old sstable files leaving only the new relevant ones.</li>
+<li>All of these processes run in the background on node and are throttled. Depending on the size of the data set and the quality of the link between datacenters the whole cycle can last 5 minutes or 5 hours.</li>
+</ul>
+</li>
+</ul>
+
+
+<p><strong>Monitoring the process.</strong></p>
+
+<p>Firstly you can follow the script itself via its&#8217; log.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tail -f /var/log/cassandra/mainenance.log</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Secondly, you can see what files are streaming where using nodetool:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># nodetool -h $HOSTNAME -p 8080 netstats
+</span><span class='line'>Mode: Normal
+</span><span class='line'>Streaming to: /192.168.x.x
+</span><span class='line'>/var/lib/cassandra/data/outbrain_kvdb/KvImpressions-g-2045-Data.db sections=4227 progress=0/10811259 - 0%
+</span><span class='line'>Streaming to: /192.168.x.x
+</span><span class='line'>/var/lib/cassandra/data/outbrain_kvdb/KvImpressions-g-2003-Data.db sections=2175 progress=0/5533079 - 0%
+</span><span class='line'>/var/lib/cassandra/data/outbrain_kvdb/KvImpressions-g-1989-Data.db sections=2179 progress=0/16699525 - 0%
+</span><span class='line'>/var/lib/cassandra/data/outbrain_kvdb/KvImpressions-g-1618-Data.db sections=2179 progress=0/31682653 - 0%
+</span><span class='line'>/var/lib/cassandra/data/outbrain_kvdb/KvImpressions-g-2045-Data.db sections=2157 progress=0/5267750 - 0%
+</span><span class='line'>/var/lib/cassandra/data/outbrain_kvdb/KvImpressions-g-1618-Data.db sections=4328 progress=22770607/65975034 - 34%
+</span><span class='line'>/var/lib/cassandra/data/outbrain_kvdb/KvImpressions-g-2045-Data.db sections=4288 progress=0/11004297 - 0%
+</span><span class='line'>Streaming to: /192.168.x.x
+</span><span class='line'>/var/lib/cassandra/data/outbrain_kvdb/KvImpressions-g-2003-Data.db sections=2340 progress=0/5969050 - 0%
+</span><span class='line'>/var/lib/cassandra/data/outbrain_kvdb/KvImpressions-g-1989-Data.db sections=2344 progress=0/18059904 - 0%
+</span><span class='line'>/var/lib/cassandra/data/outbrain_kvdb/KvImpressions-g-1618-Data.db sections=2344 progress=0/34242610 - 0%
+</span><span class='line'>/var/lib/cassandra/data/outbrain_kvdb/KvImpressions-g-2045-Data.db sections=2321 progress=0/5689294 - 0%
+</span><span class='line'>Not receiving any streams.
+</span><span class='line'>Pool Name Active Pending Completed
+</span><span class='line'>Commands n/a 0 1713477766
+</span><span class='line'>Responses n/a 0 746604055</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Additionally, you can follow progress of the command with watch:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>watch -n5 nodetool -h $HOSTNAME -p 8080 netstats</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Lastly you can get a birds eye view from <a href="http://www.datastax.com/products/opscenter">DataStax&#8217;s OpsCenter</a>, an epic free tool for watching your cluster purr:</p>
+
+<p><img class="center" src="http://code.milford.io/images/opsctr.png"></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[In which I give a server to some kids.]]></title>
+    <link href="http://code.milford.io/2012/01/in-which-i-give-a-server-to-some-kids/"/>
+    <updated>2012-01-29T21:08:44-05:00</updated>
+    <id>http://code.milford.io/2012/01/in-which-i-give-a-server-to-some-kids</id>
+    <content type="html"><![CDATA[<p><img class="right" src="http://code.milford.io/images/funny-celebrity-pictures-i-believe-the-children-are-our-future-not-these-better-ones.jpg"></p>
+
+<p>So, I am at one of my data centers late last Friday night bringing up some new Hadoop nodes when I look up to see <a href="atlanticmetro.ne">Atlantic Metro</a>&#8217;s eminent &#8216;head cheese of facilities&#8217; <a href="https://twitter.com/ckvibes">Christian</a> walk by at the lead of a crew of 3 kids and their parents carrying a little 1U server.</p>
+
+<p>Odd, I thought, so I asked Christian what they were doing.  These kids were racking thier first server. They are starting a game company!</p>
+
+<p>How cool is that!?! How cool are these kids!?!  How fantastic are these kid&#8217;s parents?!</p>
+
+<p>Here I am, impressed as hell by these short entrepreneurs, sitting next to a stack of 4 year old servers that we&#8217;ve recently decommissioned and I&#8217;ve freshly wiped.  We still haven&#8217;t figured out what to do with them, where to donate them, since their resell value is ~3-5% of their original purchase price and I&#8217;m too lazy to put them up on eBay for the company only to have the company make ~$100 bucks for my time.</p>
+
+<p>So, I asked them if they wanted a server.</p>
+
+<p>They did.</p>
+
+<p>I chatted with their parents for a few minutes, gave them my card and the server and sent them on their way.</p>
+
+<p>The next day I got a thank you email:</p>
+
+<blockquote><p>Hey Nathan this is <redacted>, We met in the Atlantic Metro Communications Data Center a few days ago with my family and I, we were setting up our server with Christian. I really appreciate that you gave us the opportunity to succeed in our careers by giving us one of your servers. I would never expect someone to do that, honestly I thought that I would drive to the data center and drop off a server at a desk, instead we walk in, install the server on the racks and meet awesome people like you :D</p>
+
+<p>I would really like to learn more about how you got started in the Job. Because a person giving servers away like that isn&#8217;t the average &#8216;Joe&#8217; ;) So for you to do something like that is just showing that you care and I really appreciate it.</p>
+
+<p>So tell me, how did you get started? :D</p>
+
+<p>Thanks,
+-<redacted></p></blockquote>
+
+<p>Below is my reply.  I am conscious that it seems a bit arrogant and self indulgent, but it is how I feel:</p>
+
+<blockquote><p>Ahoy,</p>
+
+<p>I was just impressed that you and your cohorts were taking the step to co-lo a server, and that your interest in technology and computers extends beyond just playing games or tinkering with iPhones to doing something practical with it and taking the next logical step. Racking your first server is a pretty awesome thing to be doing at 15. That experience and a few other bits of basic know-how and you’ll be qualified for a $20-25/hr job as a NOC Technician.</p>
+
+<p>For a lot of people, their interest ends with what technology can do for them. Your actions suggest that you&#8217;re more interested in what you can do with technology. That&#8217;s pretty flipping awesome!</p>
+
+<p>To answer your question about how I got started and what I do: I&#8217;m an Operations Engineer for a startup here in NYC. An Operations Engineer is akin to a sysadmin, but Ops Engineers usually work in web companies and do much more interesting work (IMHO). But I don&#8217;t have any formal training in technology. I have a Film Production degree and before that I studied linguistics and theater. I learned all of this myself. I know how to do diverse things from scripting in Python to how to crimp Cat5 cables. I know high-level networking, routing, switching and low level hardware stuff. I am great at a lot of diverse technology disciplines but a master at none.</p>
+
+<p>90% of my job and why I’m good at it is not what I know, or the depth to which I know it. It is my potential to know something. How quickly can I google an idea or software, and how rapidly can I make that knowledge useful. This is why companies want to hire me for <em>me</em> and not my skillset or certifications.</p>
+
+<p>I&#8217;m not particularly smart. I know way smarter people than me. I&#8217;m just engaged and interested in what I do and my liberal arts education (rather than purely CS) gives me powerful intellectual tools to model and create metaphors for new ideas and technologies that are not merely framed in math or engineering technobabble. Whether or not you get an engineering degree, dipping your intellectual toes in the humanities makes you a better technologist. It gives you a framework to connect diverse ideas together and make them work for you and equips you to relate to others who are not technologists.</p>
+
+<p>When I was 12 I broke my family computer, so I had to fix it before anyone noticed. The computer itself ceased to be an unknowable black box. I became interested in it and how it worked, I joined dial-up BBS systems, played games, met other kids like me from around the world. Installed Linux and NetBSD and Windows NT. Spent a lot of time on Internet Relay Chat with others like me to the wee hours in the morning on school nights. Did some unethical stuff I regret, but got out of it before I got into real trouble. Worked various IT jobs while putting myself through college. In college, while studying theater, I took a bunch of old 486 desktops out of a dumpster and turned them into a small beowolf cluster. After ~15 years I am where I am now. And. It. Is. Awesome.</p>
+
+<p>My day-to-day work consists of working with bleeding edge distributed systems. This is not the normal boring Microsoft/Cisco Certified stuff a regular sysadmin works with. There are thousands of regular enterprise sysadmins making sure people&#8217;s Windows laptops work, but there are maybe 100-150 Ops guys like us in NYC building awesome scaling infrastructures for high volume web sites to run on. The infrastructure my team and I work on handles 1 billion requests a day.</p>
+
+<p>The things I work with are incredibly powerful but they don&#8217;t necessarily have documentation or support numbers. They are not things you can take a class on or get a college degree in. They are things you need to actually be personally interested in, engage in a community for and go dumpster diving through code to know. To be able to do what I do you need 1) to have an overall sense of how things work, preferably which you’ve acquired by doing them, failing, breaking stuff and doing it again (you also need to have a healthy attitude toward failure); and 2) enough interest to read blogs, whitepapers, journals, go to tech meetups and involve yourself in opensource communities.</p>
+
+<p>To keep up with it all, you need to have a genuine interest in it. It’s also best if you take advantage of the operations community to contribute and learn. I run two technology meetups in NYC, am an internationally acknowledged expert in distributed systems such as Hadoop (http://hadoop.apache.org/) and Cassandra (http://cassandra.apache.org/); I commit small bits of code to Open Source Projects (thought I am not a developer), I engage and foster relationships with other people doing what I&#8217;m doing and my Google Reader queue consists of hundreds of technology blogs. I myself write a technology blog (http://blog.milford.io/) whose aim is to share what I learn with others, and it gets a significant amount of traffic.</p>
+
+<p>Here’s another good reason to consider operations: the technology community is desperate for people like me, and there aren’t a lot of us out there. I get recruiters contacting me every other day from places like Google, Facebook, Yahoo etc. When I moved to New York City twelve years ago I had a basic IT support job that paid $32000. Now, having switched my focus to operations, I make six figures a year with benefits and stock options and get to work at an incredible company. My wife is a young adult novelist (http://www.amazon.com/Boneshaker-Kate-Milford/dp/0547241879) and my salary allows her to write full-time without having to hold down a second job. We’ve also been able to save enough to adopt a child from China :)</p>
+
+<p>I&#8217;m doing pretty good. :)</p>
+
+<p>If I were a suit-n-tie IT guy only interested in getting this or that certification, or point-n-click administering a vanilla Microsoft world I&#8217;m sure I would be doing ok&#8230;and I don’t remotely want to diminish the incredibly difficult and often thankless jobs IT guys do, but for me, at least, it would just be a job. Instead I have a career doing something I truly love and where I get to travel the world, be a sought-after expert, play with the latest stuff and do all sorts of cool shit with the hottest gear.</p>
+
+<p>Many people go into technology because they have a passing interest with gadgets. For many, a technology career choice stems from the fact that they&#8217;re not smart enough to be a doctor, or have enough money for law school, so IT looks like an stable, reasonably respectable career. They like what technology does for them and they learn this or that technology stack (usually Microsoft), maybe get some certifications and then they&#8217;re done. Then they get stuck in an enterprise cul-de-sac. They keep re-implementing the same setup at this company or that company. They&#8217;re solving the same problems over and over and they stagnate, feeling like they know it all in their field.</p>
+
+<p>I have been sitting through dozens of interviews for positions I am trying to fill and am confronted with hordes of uninspired people with no curiosity, who tell me to implement a white paper or technology without even knowing my problem set. People who say I should &#8216;Virtualize&#8217; or move to the &#8216;Cloud&#8217; and throw lots of technobabble at me. Please don&#8217;t be that guy. Be the guy I want to hire because of your curiosity and intuitiveness.</p>
+
+<p>Operations Engineers (and developers at companies like mine) need to implement large changes fast and continuously make paradigm shifts in our thinking. We have to be flexible. We&#8217;re making the Internet. There is no blueprint. When we run into a problem, we have to pivot and find a new tack that may take us 180 degrees away from where we were. The stakes are always high. We are always learning and ravenous for what our peers are doing to solve these same problems.</p>
+
+<p>We are cowboys of the Internet&#8217;s Wild West. We’re doing what others cannot. :)</p>
+
+<p>You don&#8217;t become one of us without a genuine interest in technology and its power, and a drive to be constantly learning more so you can make the technologies bend to your will and serve the ultimate ends of society—whether that end is a mechanism for parsing large amounts of data to cure cancer, or making a more efficient way of sharing cat pictures. :P</p>
+
+<p>I know there’s a fine line between sounding inspiring and just sounding arrogant. I’m shooting for inspiring, because there are just not enough of us, and because when Christian told me what you guys were doing I thought that it was pretty cool and I’m hoping that by giving you guys a bit of support and a server one or more of you might consider a future in operations someday. No matter what, keep up your enthusiasm and your curiosity and your self-motivation, and you’ve got a career :)</p>
+
+<p>Even if you don&#8217;t become world-class developers or ops guys, your entrepreneurial instincts are just as important. Guys like you will be giants in the coming decades and more likely than not, guys like you will be my bosses. You will be coming up with the solutions to our problems and creating jobs. Also, your parents are awesome rarities and you are incredibly lucky that they&#8217;re encouraging you.</p>
+
+<p>So, enjoy the server. Learn on it (I&#8217;m partial to Linux&#8230;:P) and do something mind-blowing/world-changing with it. You have my email and my phone number, so don’t be a stranger. I am available to answer any technology questions you want. And when you guys are next in NYC I&#8217;ll buy you lunch/dinner and we can talk tech.</p></blockquote>
+
+<p>As I was composing this blog entry I got an email from another one of the kids:</p>
+
+<blockquote><p>This is <redacted> the person you met at the data center Friday along with <redacted>, just wanted to say thanks again for the server, its funny how me and <redacted> both had thought it would be years until we got another server. Looks like Christmas has come early haha. You really made that whole trip one of the best I have ever taken, I expected to just walk in there drop it off and wave goodbye but it turned into something I am going to remember forever. I cant wait to find out how we are going to utilize the server and really make great use of it. My one question was what exactly was this server used for before it was taken off the rack? We were really thinking about starting up a web server on it and running our website and all of our MySQL databases and everything on it as the stuff we do requires ALOT of database usage.</p></blockquote>
+
+<p>How cool is that?  These kids are going to learn how to measure IOPs and spec out a MySQL instance.  If his data needs are so high, maybe he should try Cassandra or Mongo so he can scale out?  I&#8217;m waiting to hear back from him with his description of his data and usage patterns.</p>
+
+<p><img class="center" src="http://code.milford.io/images/n170496_watch-out-we-got-a-badass-over-here-meme_large.png"></p>
+
+<p>I&#8217;ve had a lot of really exciting moments in this job and I&#8217;ve met a lot of really incredible people as well as had a chance to talk to some of the world most brilliant engineers. But, this was really special.</p>
+
+<p>The world, to say nothing of our industry, needs more kids and parents like these.</p>
+
+<p><img class="center" src="http://code.milford.io/images/Feels_good_man_2.jpg"></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Adjust your slab! Memcached 1.4.12 RPMs on CentOS 5.7.]]></title>
+    <link href="http://code.milford.io/2012/01/adjust-your-slab-memcached-1-4-11-rpms-on-centos-5-7/"/>
+    <updated>2012-01-28T15:29:25-05:00</updated>
+    <id>http://code.milford.io/2012/01/adjust-your-slab-memcached-1-4-11-rpms-on-centos-5-7</id>
+    <content type="html"><![CDATA[<p><img class="right" src="http://code.milford.io/images/memcached-logo-500x380-300x228.png"></p>
+
+<p>So, memcached 1.4.11 lets you rebalance and reassign slab memory!</p>
+
+<p>This is epic!</p>
+
+<p>Info why this is epic <a href="http://freetofeel.com/2010/12/29/memcached-slabs.html">here</a>.</p>
+
+<p>Info on the implementation is in the <a href="http://code.google.com/p/memcached/wiki/ReleaseNotes1411">release notes</a></p>
+
+<p>From the release notes, please remember that the slab reassignment feature is in beta and is subject to some changes.</p>
+
+<p>I just took the regular spec file I found for the project elsewhere and modified it a little. I disabled the SASL stuff in my spec file since we don&#8217;t use it and I didn&#8217;t want to mess with building it.</p>
+
+<!-- more -->
+
+
+<p>EDIT: Actually, this article has revised for less yak shaving. With the help of <a href="https://twitter.com/dormando">Dormando</a> and <a href="https://twitter.com/lintzston">Justin Lintz</a>. I was able to shed some unneeded dependencies.</p>
+
+<p>So here you go:</p>
+
+<p>Setup your RPM Build environment and some dependencies:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo yum -y install rpmdevtools libevent-devel 
+</span><span class='line'>rpmdev-setuptree</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Grab and place the source and spec file:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://memcached.googlecode.com/files/memcached-1.4.12.tar.gz \
+</span><span class='line'>   -O ~/rpmbuild/SOURCES/memcached-1.4.12.tar.gz 
+</span><span class='line'>wget https://raw.github.com/nmilford/specfiles/master/memcached-1.4/memcached-1.4.spec \ 
+</span><span class='line'>   -O ~/rpmbuild/SPECS/memcached-1.4.spec</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Build the RPM:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>rpmbuild -bb ~/rpmbuild/SPECS/memcached-1.4.spec</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And here on you can install it:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo rpm -Uvh ~/rpmbuild/RPMS/x86_64/memcached-1.4.12-1.x86_64.rpm</span></code></pre></td></tr></table></div></figure>
+
+
+<p>On nodes you didn&#8217;t just install <code>libevent-devel_</code> on to build it, you&#8217;ll want to install <code>libevent</code>.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo yum -y install libevent</span></code></pre></td></tr></table></div></figure>
+
+
+<p>From here on, set your cache size and other stuff in <code>/etc/sysconfig/memcached</code>, but mainly you&#8217;ll want to enable the slab manipulation option.</p>
+
+<p>Under the OPTIONS environment variable add <code>-o slab_reassign</code> for manual adjustment and <code>-o slab_reassign,slab_automove</code> if you want to try out the automatic memory reassignment algorithm.</p>
+
+<p>Now you can fire it up!</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo /etc/init.d/memcached start</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You can verify it is up and responsive thus:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>echo stats | nc localhost 11211</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You can see info on the slab stuff here:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>echo stats | nc localhost 11211 | grep slab</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And you can turn the automatic algorithm on or off on a live instance:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>echo "slabs automove 0" | nc localhost 11211</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Ha ha! Glorious Victory!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Kicking the tires on Hadoop 0.23: Pseudo-Distributed mode.]]></title>
+    <link href="http://code.milford.io/2012/01/kicking-the-tires-on-hadoop-0-23-pseudo-distributed-mode/"/>
+    <updated>2012-01-10T01:04:22-05:00</updated>
+    <id>http://code.milford.io/2012/01/kicking-the-tires-on-hadoop-0-23-pseudo-distributed-mode</id>
+    <content type="html"><![CDATA[<p><img class="right" src="http://code.milford.io/images/Depressed-Elephant.jpg"></p>
+
+<p>Thought I’d play a little with Hadoop 0.23 (a.k.a YARN, MR2, NextGen Hadoop) and dump my notes here.</p>
+
+<p>Gotta keep my skillz sharp y’all so I don’t become irrelephant. (Yes, that just happened.)</p>
+
+<p>Below I just setup a pseudo-distributed mode setup and run some examples on it, nothing crazy.</p>
+
+<p>I’m hoping to test and write more on how <a href="http://hadoop.apache.org/common/docs/r0.23.0/hadoop-project-dist/hadoop-common/releasenotes.html">0.23</a> differs from the main line <a href="http://hadoop.apache.org/common/docs/r0.20.205.0/releasenotes.html">0.20.x</a>, <a href="http://hadoop.apache.org/common/docs/r1.0.0/releasenotes.html">1.0</a> and <a href="https://ccp.cloudera.com/display/CDHDOC/CDH3+Release+Notes">CDH3</a> releases as well as playing with the <a href="http://hadoop.apache.org/common/docs/r0.23.0/hadoop-yarn/hadoop-yarn-site/Federation.html">NameNode federation</a> and using some other paradigms like <a href="http://www.open-mpi.org/">MPI</a>, <a href="http://incubator.apache.org/hama/">Hama</a> and <a href="https://github.com/mesos/spark-yarn/">Spark</a>.</p>
+
+<!-- more -->
+
+
+<p>Grab the tarball. I’ll put it in /opt for now:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd /opt
+</span><span class='line'>curl http://mirror.atlanticmetro.net/apache//hadoop/common/hadoop-0.23.0/hadoop-0.23.0.tar.gz  | tar zxv
+</span><span class='line'>ln -s hadoop-0.23.0 hadoop</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Create the working directories.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mkdir -p /opt/hadoop/dfs/{name,data}
+</span><span class='line'>mkdir -p /opt/hadoop/mapred/{temp,local}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Drop some basic configurations.</p>
+
+<p><code>core-site.xml</code></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cat &gt;/opt/hadoop/conf/core-site.xml &lt;&lt;CORE_EOF
+</span><span class='line'>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+</span><span class='line'>&lt;?xml-stylesheet type="text/xsl" href="configuration.xsl"?&gt;
+</span><span class='line'>&lt;configuration&gt;
+</span><span class='line'>  &lt;property&gt;
+</span><span class='line'>    &lt;name&gt;fs.default.name&lt;/name&gt;
+</span><span class='line'>    &lt;value&gt;hdfs://localhost:8020&lt;/value&gt;
+</span><span class='line'>  &lt;/property&gt;
+</span><span class='line'>&lt;/configuration&gt;
+</span><span class='line'>CORE_EOF</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>hdfs-site.xml</code></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cat &gt;/opt/hadoop/conf/hdfs-site.xml &lt;&lt;HDFS_EOF
+</span><span class='line'>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+</span><span class='line'>&lt;?xml-stylesheet type="text/xsl" href="configuration.xsl"?&gt;
+</span><span class='line'>&lt;configuration&gt;
+</span><span class='line'>  &lt;property&gt;
+</span><span class='line'>    &lt;name&gt;dfs.replication&lt;/name&gt;
+</span><span class='line'>    &lt;value&gt;1&lt;/value&gt;
+</span><span class='line'>  &lt;/property&gt;
+</span><span class='line'>  &lt;property&gt;
+</span><span class='line'>    &lt;name&gt;dfs.namenode.name.dir&lt;/name&gt;
+</span><span class='line'>    &lt;value&gt;/opt/hadoop/dfs/name&lt;/value&gt;
+</span><span class='line'>  &lt;/property&gt;
+</span><span class='line'>  &lt;property&gt;
+</span><span class='line'>    &lt;name&gt;dfs.datanode.data.dir&lt;/name&gt;
+</span><span class='line'>    &lt;value&gt;/opt/hadoop/dfs/data&lt;/value&gt;
+</span><span class='line'>  &lt;/property&gt;
+</span><span class='line'>&lt;/configuration&gt;
+</span><span class='line'>HDFS_EOF</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>mapred-site.xml</code></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cat &gt;/opt/hadoop/conf/mapred-site.xml &lt;&lt;MAPRED_EOF
+</span><span class='line'>&lt;?xml version="1.0"?&gt;
+</span><span class='line'>&lt;?xml-stylesheet href="configuration.xsl"?&gt;
+</span><span class='line'>&lt;configuration&gt;
+</span><span class='line'>  &lt;property&gt;
+</span><span class='line'>    &lt;name&gt;mapreduce.framework.name&lt;/name&gt;
+</span><span class='line'>    &lt;value&gt;yarn&lt;/value&gt;
+</span><span class='line'>  &lt;/property&gt;
+</span><span class='line'>  &lt;property&gt;
+</span><span class='line'>    &lt;name&gt;mapreduce.cluster.temp.dir&lt;/name&gt;
+</span><span class='line'>    &lt;value&gt;/opt/hadoop/mapred/temp&lt;/value&gt;
+</span><span class='line'>  &lt;/property&gt;
+</span><span class='line'>  &lt;property&gt;
+</span><span class='line'>    &lt;name&gt;mapreduce.cluster.local.dir&lt;/name&gt;
+</span><span class='line'>    &lt;value&gt;/opt/hadoop/mapred/local&lt;/value&gt;
+</span><span class='line'>  &lt;/property&gt;
+</span><span class='line'>&lt;/configuration&gt;
+</span><span class='line'>MAPRED_EOF</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>yarn-site.xml</code></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cat &gt;/opt/hadoop/conf/yarn-site.xml &lt;&lt;YARN_EOF
+</span><span class='line'>&lt;?xml version="1.0"?&gt;
+</span><span class='line'>&lt;configuration&gt;
+</span><span class='line'>  &lt;property&gt;
+</span><span class='line'>    &lt;name&gt;yarn.nodemanager.aux-services&lt;/name&gt;
+</span><span class='line'>    &lt;value&gt;mapreduce.shuffle&lt;/value&gt;
+</span><span class='line'>  &lt;/property&gt;
+</span><span class='line'>  &lt;property&gt;
+</span><span class='line'>    &lt;name&gt;yarn.nodemanager.aux-services.mapreduce.shuffle.class&lt;/name&gt;
+</span><span class='line'>    &lt;value&gt;org.apache.hadoop.mapred.ShuffleHandler&lt;/value&gt;
+</span><span class='line'>  &lt;/property&gt;
+</span><span class='line'>&lt;/configuration&gt;
+</span><span class='line'>YARN_EOF</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Copy the metrics config over.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cp etc/hadoop/hadoop-metrics* conf/</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Setup the environment (your <code>JAVA_HOME</code> may be different, I’m testing on debian).</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>export JAVA_HOME=/usr/lib/jvm/java-6-sun/
+</span><span class='line'>export HADOOP_HOME=/opt/hadoop/
+</span><span class='line'>export HADOOP_MAPRED_HOME=${HADOOP_HOME}
+</span><span class='line'>export HADOOP_COMMON_HOME=${HADOOP_HOME}
+</span><span class='line'>export HADOOP_HDFS_HOME=${HADOOP_HOME}
+</span><span class='line'>export YARN_HOME=${HADOOP_HOME}
+</span><span class='line'>export HADOOP_CONF_DIR=${HADOOP_HOME}/conf/
+</span><span class='line'>export YARN_CONF_DIR=~${HADOOP_HOME}/conf/</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Format your namenode.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>./bin/hdfs namenode -format</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Start up the HDFS daemons.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>./sbin/hadoop-daemon.sh namenode start
+</span><span class='line'>./sbin/hadoop-daemon.sh datanode start</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Fire up the YARN daemons.</p>
+
+<ul>
+<li>ResourceManager is analagous to the JobTracker.</li>
+<li>NodeManager is analagous to the TaskTracker.</li>
+<li>JobHistoryServer gives you a better interface to job histories than the JobTracker did.</li>
+</ul>
+
+
+<p>More on the YARN architecture <a href="http://hadoop.apache.org/common/docs/r0.23.0/hadoop-yarn/hadoop-yarn-site/YARN.html">here</a>.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>./bin/yarn-daemon.sh start resourcemanager
+</span><span class='line'>./bin/yarn-daemon.sh start nodemanager
+</span><span class='line'>./bin/yarn-daemon.sh start historyserver</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Make sure everything is up and running.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># jps
+</span><span class='line'>12370 Jps
+</span><span class='line'>11057 NameNode
+</span><span class='line'>11231 DataNode
+</span><span class='line'>12053 JobHistoryServer
+</span><span class='line'>11875 ResourceManager
+</span><span class='line'>12284 NodeManager</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Web interfaces:</p>
+
+<ul>
+<li>NammeNode: <a href="http://localhost:50070/dfshealth.jsp">http://localhost:50070/dfshealth.jsp</a></li>
+<li>ResourceManager: <a href="http://localhost:8088/cluster">http://localhost:8088/cluster</a></li>
+<li>JobHistory: <a href="http://localhost:19888/jobhistory">http://localhost:19888/jobhistory</a></li>
+<li>NodeManager: <a href="http://localhost:9999/node">http://localhost:9999/node</a></li>
+</ul>
+
+
+<p>Now to do some light work.</p>
+
+<p>Calculate yourself some Pi:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>./bin/hadoop jar ./hadoop-mapreduce-examples-0.23.0.jar pi 10 10000</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And while you’re at it, pimp yourself a wordcount.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://www.gutenberg.org/cache/epub/779/pg779.txt -O /tmp/faustus.txt
+</span><span class='line'>./bin/hadoop fs -mkdir /tmp
+</span><span class='line'>./bin/hadoop fs -copyFromLocal /tmp/faustus.txt /tmp/faustus.txt
+</span><span class='line'>./bin/hadoop jar ./hadoop-mapreduce-examples-0.23.0.jar  wordcount /tmp/faustus.txt /tmp/faustus.out
+</span><span class='line'>./bin/hadoop fs -cat /tmp/faustus.out/part-r-00000</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Next time I’ll make a proper cluster and play with some of the more whizzbang features and maybe run some terasorts for fun.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Code Example: Linux + PyUSB & the Dream Cheeky Thunder/Storm USB Missile Launcher]]></title>
+    <link href="http://code.milford.io/2012/01/code-example-linux-pyusb-the-dream-cheeky-thunderstorm-usb-missile-launcher/"/>
+    <updated>2012-01-07T12:06:57-05:00</updated>
+    <id>http://code.milford.io/2012/01/code-example-linux-pyusb-the-dream-cheeky-thunderstorm-usb-missile-launcher</id>
+    <content type="html"><![CDATA[<p><img class="left" src="http://code.milford.io/images/cheeky.jpg"></p>
+
+<p>Went to Staples the other day to grab some assorted accessories for work and I saw they had some <a href="http://www.brookstone.com/usb-desktop-missile-launcher">Brookstone USB Desktop Missile Launchers</a> in the clearence section, so I grabbed one.</p>
+
+<p><em>What fun</em>, I thought. Plugged it into my work desktop (running <a href="http://www.linuxmint.com/download_lmde.php">LinuxMint Debian Edition</a>) only to find there were no linux drivers for this particular device.</p>
+
+<p>This turned into a nice little weekend project :)</p>
+
+<p>Googling around found <a href="http://code.google.com/p/pyrocket/">pyrocket</a> and <a href="http://code.google.com/p/pymissile/">pymissile</a>.  But, neither of these projects would work with this model.</p>
+
+<p>Digging under the hood I ran <code>lsusb</code> which gave me this:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Bus 002 Device 008: ID 2123:1010</span></code></pre></td></tr></table></div></figure>
+
+
+<p>A little searching showed that it was a rebrand of the Dream Cheeky <a href="http://www.dreamcheeky.com/thunder-missile-launcher">Thunder</a>/<a href="http://www.dreamcheeky.com/storm-oic-missile-launcher">O.I.C Storm</a> models.</p>
+
+<p>There is a goofy project called <a href="https://github.com/codedance/Retaliation">Retaliation</a> that uses this model in conjunction with the <a href="http://jenkins-ci.org/">Jenkins</a> continuous integration server to punish the person who broke a build.  It was very useful in seeing how to manipulate the device with <a href="http://sourceforge.net/apps/trac/pyusb/">PyUSB</a>, as it was really the only thing I could find that interfaces wih the device in Linux.</p>
+
+<p>Additionally <a href="http://www.wingmanteam.com/usbsnoopy/">USB Snoopy</a> was useful for reverse engineering USB messages the device was using that I couldn&#8217;t grok from Retaliation.</p>
+
+<p>A few days later and lots of PyUSB and <a href="http://wiki.python.org/moin/TkInter">Tkinter</a> trial and error, I give you my <a href="https://github.com/nmilford/stormLauncher">Storm Launcher</a>.</p>
+
+<p>It is not so very complex, but there are a few points to note:</p>
+
+<ul>
+<li><p>Debian/Ubuntu&#8217;s <code>python-usb</code> package installs PyUSB 0.4 and this project uses <a href="http://pypi.python.org/pypi/pyusb/1.0.0a2">1.0</a>, so you&#8217;ll need to install it manually.</p></li>
+<li><p>You&#8217;ll need to run it as root (or via sudo) unless you want to dick around with <a href="http://reactivated.net/writing_udev_rules.html">udev</a> rules.</p></li>
+</ul>
+
+
+<p>One final note for others attempting to do something similar with a USB device in Linux that caused me to waste a few hours and receede my hairline a bit:  You need to detach the kernel driver or you cannot claim the device.</p>
+
+<p>Setup the device as normal using the ID numbers from <code>lsusb</code>:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>dev = usb.core.find(idVendor=0x2123, idProduct=0x1010)</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Detach the kernel driver if it is active:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">if</span> <span class="n">dev</span><span class="o">.</span><span class="n">is_kernel_driver_active</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+</span><span class='line'>   <span class="n">dev</span><span class="o">.</span><span class="n">detach_kernel_driver</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This will free you up so you can get to work.</p>
+
+<p>So there you have it.  I fear for the sanity of my co-workers who walk up behind me to ask questions: <em>pew</em> <em>pew</em> <em>pew</em> :P</p>
+
+<p>Download the code <a href="https://github.com/nmilford/stormLauncher">here</a>.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Building and Installing Python 2.7 RPMs on CentOS 5.7]]></title>
+    <link href="http://code.milford.io/2012/01/building-and-installing-python-2-7-rpms-on-centos-5-7/"/>
+    <updated>2012-01-04T21:48:03-05:00</updated>
+    <id>http://code.milford.io/2012/01/building-and-installing-python-2-7-rpms-on-centos-5-7</id>
+    <content type="html"><![CDATA[<p><img class="right" src="http://code.milford.io/images/macbook.png"></p>
+
+<p>I was asked today to install Python 2.7 on a CentOS based node and I thought I&#8217;d take this oportunity to add a companion article to my <a href="http://blog.milford.io/2010/08/new-method-for-installing-python-2-6-4-with-mysql-python-on-centos-5-5/">Python 2.6 article</a>.</p>
+
+<p>We&#8217;re all well aware that CentOS is pretty backwards when it comes to having the latest and greatest sotware packages and is particularly finicky when it comes to Python since so much of RHEL depends on it.</p>
+
+<p>As a rule, I refuse to rush in and install anything in production that isn&#8217;t in a manageable package format such as RPM. I need to be able to predictably reproduce software installs across a large number of nodes.</p>
+
+<p>The following steps will not clobber your default Python 2.4 install and will keep both CentOS and your developers happy.</p>
+
+<p>So, here we go.</p>
+
+<!-- more -->
+
+
+<p>Install the dependancies.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo yum -y install rpmdevtools tk-devel tcl-devel expat-devel db4-devel \
+</span><span class='line'>                    gdbm-devel sqlite-devel bzip2-devel openssl-devel \
+</span><span class='line'>                    ncurses-devel readline-devel</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Setup you RPM build envirnoment.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>rpmdev-setuptree</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Grab my spec file.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget https://raw.github.com/nmilford/specfiles/master/python-2.7/python27-2.7.2.spec \
+</span><span class='line'>     -O ~/rpmbuild/SPECS/python27-2.7.2.spec </span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://www.python.org/ftp/python/2.7.2/Python-2.7.2.tar.bz2 \
+</span><span class='line'>     -O ~/rpmbuild/SOURCES/Python-2.7.2.tar.bz2</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Build RPM. (FYI, the QA_RPATHS variable tells the rpmbuild to skip some file path errors).</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>QA_RPATHS=$[ 0x0001|0x0010 ] rpmbuild -bb ~/rpmbuild/SPECS/python-2.7.2.spec</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Install the RPMs.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo rpm -Uvh ~/rpmbuild/RPMS/x86_64/python27*.rpm</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now on to the the setuptools.</p>
+
+<p>Grab my spec file.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget https://raw.github.com/nmilford/specfiles/master/python-2.7/python27-setuptools-0.6c11.spec \
+</span><span class='line'>     -O ~/rpmbuild/SPECS/python27-setuptools-0.6c11.spec </span></code></pre></td></tr></table></div></figure>
+
+
+<p>Grab the source.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://pypi.python.org/packages/source/s/setuptools/setuptools-0.6c11.tar.gz \
+</span><span class='line'>     -O ~/rpmbuild/SOURCES/setuptools-0.6c11.tar.gz</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Build the RPMs.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>rpmbuild -bb ~/rpmbuild/SPECS/python27-setuptools-0.6c11.spec</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Install the RPMs.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo rpm -Uvh ~/rpmbuild/RPMS/noarch/python27-setuptools-0.6c11-milford.noarch.rpm</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, we&#8217;ll install MySQL-python as an example.</p>
+
+<p>Grab the mysql-dev package</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum -y install mysql-devel</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Grab, build and install the MySQL-python package.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl http://superb-sea2.dl.sourceforge.net/project/mysql-python/mysql-python/1.2.3/MySQL-python-1.2.3.tar.gz | tar zxv
+</span><span class='line'>cd MySQL-python-1.2.3
+</span><span class='line'>python2.7 setup.py build
+</span><span class='line'>python2.7 setup.py install</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Like with the previous Python 2.6 article, note how I called the script explicitly using the following python binary: <code>/usr/bin/python2.7</code></p>
+
+<p>Now we’re good to give it the old test thus:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>python2.7 -c "import MySQLdb"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If it doesn&#8217;t puke out some error message, you&#8217;re all set.</p>
+
+<p>Happy pythoning.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Cassandra NYC 2011 Talk on YouTube]]></title>
+    <link href="http://code.milford.io/2012/01/cassandra-nyc-2011-talk-on-youtube/"/>
+    <updated>2012-01-04T00:53:35-05:00</updated>
+    <id>http://code.milford.io/2012/01/cassandra-nyc-2011-talk-on-youtube</id>
+    <content type="html"><![CDATA[<p><img class="center" src="http://code.milford.io/images/CassNYC.png"></p>
+
+<p><a href="http://www.datastax.com">Datastax</a> posted my talk (see below)!</p>
+
+<!-- more -->
+
+
+<p>I.. uhh.. am.. err.. almost.. uhm.. coherent :)</p>
+
+<iframe width="560" height="315" src="http://www.youtube.com/embed/wPs4yyQr-Q8?rel=0" frameborder="0" allowfullscreen></iframe>
+
+
+<p>All of the talks are available <a href="http://www.datastax.com/events/cassandranyc2011/presentations">here</a>.</p>
 ]]></content>
   </entry>
   

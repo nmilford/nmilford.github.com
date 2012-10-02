@@ -1,0 +1,520 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Why I am very excited about DataStax's Brisk. - blog.milford.io</title>
+  <meta name="author" content="Nathan Milford">
+
+  
+  <meta name="description" content="DataStax (née Riptano) is to Cassandra as Cloudera is to Hadoop (or Redhat is to Linux). Brisk is DataStax&#8217;s upcoming Cassandra/Hadoop hybrid &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://code.milford.io/2011/04/why-i-am-very-excited-about-datastaxs-brisk/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="blog.milford.io" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">blog.milford.io</a></h1>
+  
+    <h2>a personal knowledge dump.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:code.milford.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/cassandra-token-calculator">Cassandra Token Calculator</a></li>
+  <li><a href="/about">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Why I Am Very Excited About DataStax's Brisk.</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-04-16T10:19:19-04:00" pubdate data-updated="true">Apr 16<span>th</span>, 2011</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p><img class="right" src="/images/brisk.jpg"></p>
+
+<p><a href="http://www.datastax.com/">DataStax</a> (née Riptano) is to <a href="http://cassandra.apache.org/">Cassandra</a> as <a href="http://www.cloudera.com/">Cloudera</a> is to <a href="http://hadoop.apache.org/">Hadoop</a> (or <a href="http://www.redhat.com/">Redhat</a> is to <a href="http://www.kernel.org/">Linux</a>).</p>
+
+<p><a href="http://www.datastax.com/products/brisk">Brisk</a> is DataStax&#8217;s upcoming Cassandra/Hadoop hybrid distribution.  From thier site:</p>
+
+<blockquote><p>DataStax’ Brisk is an enhanced open-source Apache Hadoop and Hive distribution that utilizes Apache Cassandra for many of its core services. Brisk provides integrated Hadoop MapReduce, Hive and job and task tracking capabilities, while providing an HDFS-compatible storage layer powered by the Cassandra DB.</p></blockquote>
+
+<p>They added Cassandra as an option for the Hadoop storage layer, allowing you to bypass HDFS; however, the implications of that go a whole lot further.  You get the strengths of both systems here and lose some of the problems.</p>
+
+<p>I&#8217;m pretty jazzed about this and I hope to convince my co-workers to give it a go. I&#8217;d like to tell you why.</p>
+
+<!-- more -->
+
+
+<p><strong>Reason the First:  Removal of the Namenode.</strong></p>
+
+<p><img class="right" src="/images/nn.png"></p>
+
+<p>The Hadoop Namenode is a scary, brittle thing.</p>
+
+<p>Don&#8217;t get me wrong.  It is a trumph and the culmination of years of engineering. However, it is a glaring single point of failure and has hard limits as to how far it can scale. If Hadoop is in your critical path, the idea of a corrupt <code>fsimage</code> file gives you cold chills.</p>
+
+<p>When it is down&#8230; so are you.</p>
+
+<ul>
+<li><p>It is not highly available out of the box.</p></li>
+<li><p>There is no hot stand-by Namenode.</p></li>
+<li><p>It has a small file/block size problem.</p></li>
+<li><p>It has other general scaling problems.</p></li>
+</ul>
+
+
+<p>My <a href="http://blog.milford.io/blog/2011/04/15/hadoop-downfall-parody/">previous post</a> is a funny example of a worst case scenario.</p>
+
+<p>Cassandra has no single point of failure, no coordinator node.  All nodes are equal.</p>
+
+<p><strong>Reason the Second: Speeding up analytics.</strong></p>
+
+<p>We&#8217;ve got scads of algorithims and a few classes of logs we collect from our API servers. Currently we generate 4 logs (different types) per API server per hour that are of interest to us.</p>
+
+<p>Some logs are ~400KB and some are ~100MB, but our average &#8216;in HDFS&#8217; file size is 5MB. This is NOT awesome in terms of scaling in light of the <a href="http://www.cloudera.com/blog/2009/02/the-small-files-problem/">small files problem</a>. Depending on our retention needs and how many new API servers we add, we&#8217;re going to zap our Namenode one day.</p>
+
+<p>Use <a href="http://hadoop.apache.org/mapreduce/docs/r0.21.0/hadoop_archives.html">Hadoop Archives</a>, you say?</p>
+
+<p>Well yeah, that might help the Namenode, but we also have issues in terms of query efficiency.  We still need to traverse all those files within the HAR.</p>
+
+<p>Querying one type of data means one type of log we collect, and we&#8217;re doing one of these logs per API server per hour.</p>
+
+<p><img class="left" src="/images/angry_nerd.jpg"></p>
+
+<p>If R&amp;D runs a Hive job on the last 30 days of a particular table, over data on 100 servers, we&#8217;re looking at 72000 maps (720 hours * 100 servers) at minimum and much more depending on the query&#8217;s complexity.</p>
+
+<p>This is a <a href="http://wiki.apache.org/hadoop/HowManyMapsAndReduces">gross oversimplification</a>, but you get the idea.</p>
+
+<p>More small files means more DFS blocks; means more maps; more maps means longer jobs; longer jobs means delay.</p>
+
+<p>Right now, we&#8217;re hoping to improve this by using Cloudera&#8217;s <a href="https://github.com/cloudera/flume">Flume</a> to stream all logs from all servers into a single aggregated hourly file. (That&#8217;s my next big project; in fact, stay tuned for Flume blog posts in the coming months).</p>
+
+<p>We&#8217;re also kicking around the idea of migrating to <a href="http://hbase.apache.org/">Hbase</a> to increase query speed.</p>
+
+<p>Our logs are, for all intents and purposes, structured data (TSV&#8217;s) that could realistically be made to fit into a more structured, lower latency system like Hbase.</p>
+
+<p>Facebook does <a href="http://highscalability.com/blog/2011/3/22/facebooks-new-realtime-analytics-system-hbase-to-process-20.html">something like this</a>, but uses <a href="https://github.com/facebook/scribe">Scribe</a> instead of Flume.</p>
+
+<p>Hbase and Cassandra share a lot of similarities in terms of data modeling&#8230;.so if you&#8217;re thinking Hbase, you could just as easily think Brisk.</p>
+
+<p><strong>Reason the Third: Potential removal of the memcached layer.</strong></p>
+
+<p>This one is iffy (and Cassandra-generic rather than Brisk-specific), and requires more research in terms of implementation on my part, but deserves serious consideration.</p>
+
+<p><a href="http://twitter.com/edwardcapriolo">Edward Capriolo</a> gave a talk the other night at the <a href="http://www.meetup.com/NYC-Cassandra-User-Group">NYC Cassandra Meetup</a> group (which I missed!) entitled <em>Cassandra as Memcache</em> where he gives a compelling case for obviating the use of <a href="http://memcached.org/">memcached</a> in front of Cassandra.</p>
+
+<p>The slides are availaible <a href="http://www.edwardcapriolo.com/roller/edwardcapriolo/entry/first_nyc_cassandra_meetup">here</a> and I&#8217;m hoping a video of the talk surfaces soon.</p>
+
+<p>He gives four configurations utilizing different replication factors, consistency levels, row and key caches with different tradeoffs, like:</p>
+
+<p><img class="center" src="/images/ed_slide.png"></p>
+
+<p>You really should grab the slides.  Lots to think about there, and you&#8217;ve also got to respect a guy who posts his slides in an Open/LibreOffice format :)</p>
+
+<p><strong>Reason the Fourth: Less shipping of data from the primary serving data store to the data warehouse.</strong></p>
+
+<p>Here is a VERY rough idea what one of our processes looks like (in sweet psuedo-BASIC):</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>10 API servers serve up recomendations from Cassandra.
+</span><span class='line'>20 API server generates logs of those transactions.
+</span><span class='line'>30 Logs are shipped to Hadoop.
+</span><span class='line'>40 Algo run across that data via Hive.
+</span><span class='line'>50 Algo results decide on good recs and are shipped to Cassandra.
+</span><span class='line'>60 go to 10</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This also speaks to analytics speed.  The feedback cycles for many of our algorithms traverse several layers of machines and some data needs to be transformed or processed before it can be fed to our API servers.</p>
+
+<p>Some data can take a few hours to migrate up to the business folks because of this.</p>
+
+<p>One VERY cool thing you can do is with Brisk is partition your cluster (Cassandra is built to do this very simply and seamlessly for spanning multiple datacenters), causing replica placement of cluster data to be evenly distributed between the two cluster halves.</p>
+
+<p>THEN you can use one side for serving and one side for analytics, allowing data to move back and forth IN REAL TIME.  DataStax puts a nice illustration of this in their whitepaper:</p>
+
+<p><img class="center" src="/images/brisky.png"></p>
+
+<p>So here is my dream of simplicity:</p>
+
+<p><code>Serving Layer &lt;-&gt; Bunch of Cassandra servers running Brisk.</code></p>
+
+<p>and that is it.</p>
+
+<p>From an Operations perspective, this is fantastic since it reduces the classes of hardware I need for this part of our infrastructure to two.  It also makes us more elastic:  add a Cassandra node and a few Tomcat nodes, et voilà.</p>
+
+<p>Workflow might be something like this:</p>
+
+<ul>
+<li><p>Recommendation Keyspace has a very high replication factor across the cluster and a large row cache to act like memcached.</p></li>
+<li><p>Data in the Recommendations Keyspace can also be given <a href="http://www.datastax.com/dev/blog/whats-new-cassandra-07-expiring-columns">TTLs</a> so stale recs can expire.</p></li>
+<li><p>Log Keyspace has a replication factor of two (maybe more to increase map/reduce concurrency) so it is split evenly into the analytics side of the cluster.</p></li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>10 API server serves up recs from Recommendation Keyspace.
+</span><span class='line'>20 API server pipes log data right into a Logs Keyspace in Cassandra
+</span><span class='line'>30 Hive Job run across Logs Keyspace and algorithm updates the Recommendations Keyspace accordingly.
+</span><span class='line'>40 Go to 10.</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You can see the efficiency. Cassandra is FANTASTIC at writes, and using the same TCP session from steps 10 &amp; 20 might cause less network overhead too.</p>
+
+<p>And perhaps we could use Flume to siphon log data off of nodes or off the cluster itself to an offline archive.</p>
+
+<p>Less shuffling of data around.  No clumsy scripts that rely on NFS or SCP and shared keys.</p>
+
+<p>Also, business data can be queried as it comes in.</p>
+
+<p>Will this work?</p>
+
+<p>Heck if I know. Brisk isn&#8217;t out yet so it is untested (publicly). It could grind to a halt, but I&#8217;d love to give it a shot.</p>
+
+<p>Soo&#8230; it&#8217;s definelty a union of technologies I am looking forward to.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Nathan Milford</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-04-16T10:19:19-04:00" pubdate data-updated="true">Apr 16<span>th</span>, 2011</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://code.milford.io/2011/04/why-i-am-very-excited-about-datastaxs-brisk/" data-via="NathanMilford" data-counturl="http://code.milford.io/2011/04/why-i-am-very-excited-about-datastaxs-brisk/" >Tweet</a>
+  
+  
+  
+</div>
+
+
+
+
+<div class="OUTBRAIN" data-src="http://code.milford.io/2011/04/why-i-am-very-excited-about-datastaxs-brisk/"></div>
+<script type="text/javascript" async="async" src="http://widgets.outbrain.com/outbrain.js"></script> 
+
+
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/2011/04/hadoop-downfall-parody/" title="Previous Post: Hadoop Downfall Parody!">&laquo; Hadoop Downfall Parody!</a>
+      
+      
+        <a class="basic-alignment right" href="/2011/04/seamicro-is-pretty-sweet-but-i-dont-know-about-it-for-hadoop/" title="Next Post: SeaMicro is pretty sweet, but I don't know about it for Hadoop.">SeaMicro is pretty sweet, but I don't know about it for Hadoop. &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2012/03/getting-a-basic-cobbler-server-going-on-centos/">Getting a Basic Cobbler server going on CentOS.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/making-a-local-centos-mirror/">Making a local CentOS mirror.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/making-a-simple-yum-repository/">Making a simple Yum repository.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/now-hiring-now-right-now-were-hiring-now/">Now Hiring Now, Right Now We're Hiring Now.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/the-dell-c6220-and-an-ode-to-my-dell-dcs-team/">The Dell C6220 and an Ode to my Dell DCS Team.</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Tag Cloud</h1>
+    <span id="tag-cloud"></span>
+</section>
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("NathanMilford", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/NathanMilford" class="twitter-follow-button" data-show-count="false">Follow @NathanMilford</a>
+  
+</section>
+
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/nmilford">@nmilford</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'nmilford',
+            count: 6,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Coderwall</h1>
+  <ul id="cw_badges">
+    <li class="loading">Status updating...</li>
+  </ul>
+
+  <script type="text/javascript">
+    var coderwall = (function(){
+      function render(options, badges){
+        var fragment = '',
+            t = $(options.target)[0],
+            height = 65,
+            width = 65,
+            index;
+
+        for (index in badges) {
+          fragment += '<a class="cw_badge"title="' + badges[index].description + '" href="http://coderwall.com/' + options.user + '">';
+          fragment +=   '<img alt="' + badges[index].description + '" height="' + width + '" width="' + height + '" src="' + badges[index].badge + '"/>';
+          fragment += '</a>';
+        }
+
+        t.innerHTML = fragment;
+      }
+      return {
+        showBadges: function(options){
+          $.ajax({
+              url: 'http://coderwall.com/' + options.user + '.json?callback=?'
+            , type: 'jsonp'
+            , error: function (err) { $(options.target + ' li.loading').addClass('error').text("Error loading feed"); }
+            , success: function(res) {
+                render(options, res.data.badges);
+            }
+          });
+        }
+      };
+    })();
+
+    $.domReady(function(){
+      if (!window.jXHR){
+        var jxhr = document.createElement('script');
+        jxhr.type = 'text/javascript';
+        jxhr.src = '/javascripts/libs/jXHR.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(jxhr, s);
+      }
+      if (!window.$){
+        var b = document.createElement('script');
+        b.type = 'text/javascript';
+        b.src = '/javascripts/ender.js';
+        var sc = document.getElementsByTagName('script')[0];
+        sc.parentNode.insertBefore(jxhr, s);
+      }
+      coderwall.showBadges({
+        user: 'nmilford',
+        target: '#cw_badges'
+      });
+    });
+  </script>
+  <style type="text/css">
+    .cw_badge img {
+      padding: 5px;
+      border: 0 none !important;
+      -moz-box-shadow: none !important;
+      -webkit-box-shadow: none !important;
+      -o-box-shadow: none !important;
+      box-shadow: none !important;
+    }
+  </style>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - Nathan Milford -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+
+<input type="hidden" name="OBKey" value=''/> 
+<script LANGUAGE="JavaScript">
+var OBCTm='';
+</script>
+<script LANGUAGE="JavaScript" src="http://widgets.outbrain.com/claim.js"></script>
+
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'code-milford-io';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://code.milford.io/2011/04/why-i-am-very-excited-about-datastaxs-brisk/';
+        var disqus_url = 'http://code.milford.io/2011/04/why-i-am-very-excited-about-datastaxs-brisk/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

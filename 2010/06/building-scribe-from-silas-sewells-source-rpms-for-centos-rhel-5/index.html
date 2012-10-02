@@ -1,0 +1,493 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Building Scribe from Silas Sewell's source RPMs for CentOS - blog.milford.io</title>
+  <meta name="author" content="Nathan Milford">
+
+  
+  <meta name="description" content="Before, I wrote about how to build Scribe 2.1 and its&#8217; dependencies on CentOS from source by hand. I&#8217;m not a life long Linux admin, only &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://code.milford.io/2010/06/building-scribe-from-silas-sewells-source-rpms-for-centos-rhel-5/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="blog.milford.io" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">blog.milford.io</a></h1>
+  
+    <h2>a personal knowledge dump.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:code.milford.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/cassandra-token-calculator">Cassandra Token Calculator</a></li>
+  <li><a href="/about">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Building Scribe From Silas Sewell's Source RPMs for CentOS</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2010-06-19T10:15:03-04:00" pubdate data-updated="true">Jun 19<span>th</span>, 2010</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Before, I wrote about <a href="http://blog.milford.io/blog/2010/06/19/building-scribe-from-silas-sewells-source-rpms-for-centos-rhel-5/">how to build Scribe 2.1</a> and its&#8217; dependencies on CentOS from source by hand.</p>
+
+<p>I&#8217;m not a life long Linux admin, only been at it for a few years, so the process of discovery involved in getting it built made my hairline recede a bit&#8230;</p>
+
+<p><img class="center" src="/images/monkey.jpg"></p>
+
+<p>The author just after running  <code>make install</code></p>
+
+<p>However, you&#8217;re in luck if you want to avoid all that and keep your hair, if you&#8217;re willing to make a few compromises.</p>
+
+<p><a href="http://www.silassewell.com/">Silas Sewell</a> was awesome enough to share his own <a href="http://www.silassewell.com/blog/2009/05/07/scribe-scalable-real-time-log-aggregation-for-centos-5-rhel-5/">source RPMS</a> with the world!</p>
+
+<!-- more -->
+
+
+<p>Here are the limitations, though:  It is uses slightly older versions of Scribe, Thrift and fb303 and thrift is build without support for java and some other languages.  This is due to the unavaliability of some important packages in <a href="https://fedoraproject.org/wiki/EPEL/FAQ#howtouse">EPEL</a>.</p>
+
+<p><a href="http://www.outbrain.com">Outbrain</a> is a java shop so normally it would be very important to builld thrift with java support, but we&#8217;ll be using <a href="http://about.digg.com/opensource">Digg&#8217;s</a> <a href="http://github.com/lenn0x/Scribe-log4j-Appender">scribe-log4j-appender</a> (which comes with its&#8217; own thrift jar) that will write to a local scirbe instance&#8217;s buffer store on each application server then ultimately to a central scribe instance which works just fine with Silas&#8217; RPMS.</p>
+
+<p>The instructions below will build the redistributable binary RPMS you can use to deploy Scribe out to your CentOS boxen.</p>
+
+<p>In theory you should be able to install all the dependencies (well not even all of them since we don&#8217;t need to the build or devel stuff) and then install the binary RPMs built from this process on any similar machine.</p>
+
+<p>Install all the dependencies.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum -y install rpm-build gcc-c++ boost boost-devel libevent \
+</span><span class='line'>               libevent-devel automake autoconf m4 bison zlib \
+</span><span class='line'>               zlib-devel bzip2 bzip2-devel flex pkgconfig \
+</span><span class='line'>               python-devel ruby-devel libtool mono-devel byacc ruby</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Get al the Source RPMS.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://silassewell.googlecode.com/files/thrift-0.0-0.el5.20090505svn770888.src.rpm
+</span><span class='line'>wget http://silassewell.googlecode.com/files/fb303-0.0-0.el5.20090505svn770888.src.rpm
+</span><span class='line'>wget http://silassewell.googlecode.com/files/scribe-2.01-2.el5.src.rpm</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Unpack/install all of the source RPMs.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>rpm -i thrift-0.0-0.el5.20090505svn770888.src.rpm
+</span><span class='line'>rpm -i fb303-0.0-0.el5.20090505svn770888.src.rpm
+</span><span class='line'>rpm -i scribe-2.01-2.el5.src.rpm</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Build and install thrift RPMs spec.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>rpmbuild -bb /usr/src/redhat/SPECS/thrift.spec
+</span><span class='line'>rpm -Uvh /usr/src/redhat/RPMS/x86_64/thrift-0.0-0.20090505svn770888.x86_64.rpm
+</span><span class='line'>rpm -Uvh /usr/src/redhat/RPMS/x86_64/thrift-python-0.0-0.20090505svn770888.x86_64.rpm
+</span><span class='line'>rpm -Uvh /usr/src/redhat/RPMS/x86_64/thrift-cpp-0.0-0.20090505svn770888.x86_64.rpm
+</span><span class='line'>rpm -Uvh /usr/src/redhat/RPMS/x86_64/thrift-cpp-devel-0.0-0.20090505svn770888.x86_64.rpm</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Build and Install fb303 RPMs from spec.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>rpmbuild -bb /usr/src/redhat/SPECS/fb303.spec
+</span><span class='line'>rpm -Uvh /usr/src/redhat/RPMS/x86_64/fb303-0.0-0.20090505svn770888.x86_64.rpm
+</span><span class='line'>rpm -Uvh /usr/src/redhat/RPMS/x86_64/fb303-devel-0.0-0.20090505svn770888.x86_64.rpm
+</span><span class='line'>rpm -Uvh /usr/src/redhat/RPMS/x86_64/fb303-python-0.0-0.20090505svn770888.x86_64.rpm</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Build and Install scribe RPMs from spec.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>rpmbuild -bb /usr/src/redhat/SPECS/scribe.spec
+</span><span class='line'>rpm -Uvh /usr/src/redhat/RPMS/x86_64/scribe-2.01-2.x86_64.rpm
+</span><span class='line'>rpm -Uvh /usr/src/redhat/RPMS/x86_64/scribe-python-2.01-2.x86_64.rpm</span></code></pre></td></tr></table></div></figure>
+
+
+<p>In the end you&#8217;ll have all of these files in <code>/usr/src/redhat/RPMS/x86_64</code>.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>fb303-0.0-0.20090505svn770888.x86_64.rpm
+</span><span class='line'>fb303-devel-0.0-0.20090505svn770888.x86_64.rpm
+</span><span class='line'>fb303-python-0.0-0.20090505svn770888.x86_64.rpm
+</span><span class='line'>scribe-2.01-2.x86_64.rpm
+</span><span class='line'>scribe-python-2.01-2.x86_64.rpm
+</span><span class='line'>thrift-0.0-0.20090505svn770888.x86_64.rpm
+</span><span class='line'>thrift-cpp-0.0-0.20090505svn770888.x86_64.rpm
+</span><span class='line'>thrift-cpp-devel-0.0-0.20090505svn770888.x86_64.rpm
+</span><span class='line'>thrift-perl-0.0-0.20090505svn770888.x86_64.rpm
+</span><span class='line'>thrift-python-0.0-0.20090505svn770888.x86_64.rpm
+</span><span class='line'>thrift-ruby-0.0-0.20090505svn770888.x86_64.rpm</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I didn&#8217;t install them all because I didn&#8217;t need them all, but they&#8217;re there if you need them.</p>
+
+<p>From there you just need to put them somewhere central (presumably an internal yum repository) and deploy them out.</p>
+
+<p>NOTE: Siles&#8217; RPMs put scribe into <code>/usr/sbin/</code> where my previous article put everything in <code>/usr/local/bin/</code>.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Nathan Milford</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2010-06-19T10:15:03-04:00" pubdate data-updated="true">Jun 19<span>th</span>, 2010</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://code.milford.io/2010/06/building-scribe-from-silas-sewells-source-rpms-for-centos-rhel-5/" data-via="NathanMilford" data-counturl="http://code.milford.io/2010/06/building-scribe-from-silas-sewells-source-rpms-for-centos-rhel-5/" >Tweet</a>
+  
+  
+  
+</div>
+
+
+
+
+<div class="OUTBRAIN" data-src="http://code.milford.io/2010/06/building-scribe-from-silas-sewells-source-rpms-for-centos-rhel-5/"></div>
+<script type="text/javascript" async="async" src="http://widgets.outbrain.com/outbrain.js"></script> 
+
+
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/2010/06/building-facebook-scribe-2-1-on-centos-5-5/" title="Previous Post: Building Facebook Scribe 2.1 on CentOS 5.5">&laquo; Building Facebook Scribe 2.1 on CentOS 5.5</a>
+      
+      
+        <a class="basic-alignment right" href="/2010/06/installing-diggs-log4j-appender-for-scribe/" title="Next Post: Installing Digg's log4j appender for Scribe">Installing Digg's log4j appender for Scribe &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2012/03/getting-a-basic-cobbler-server-going-on-centos/">Getting a Basic Cobbler server going on CentOS.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/making-a-local-centos-mirror/">Making a local CentOS mirror.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/making-a-simple-yum-repository/">Making a simple Yum repository.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/now-hiring-now-right-now-were-hiring-now/">Now Hiring Now, Right Now We're Hiring Now.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/the-dell-c6220-and-an-ode-to-my-dell-dcs-team/">The Dell C6220 and an Ode to my Dell DCS Team.</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Tag Cloud</h1>
+    <span id="tag-cloud"></span>
+</section>
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("NathanMilford", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/NathanMilford" class="twitter-follow-button" data-show-count="false">Follow @NathanMilford</a>
+  
+</section>
+
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/nmilford">@nmilford</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'nmilford',
+            count: 6,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Coderwall</h1>
+  <ul id="cw_badges">
+    <li class="loading">Status updating...</li>
+  </ul>
+
+  <script type="text/javascript">
+    var coderwall = (function(){
+      function render(options, badges){
+        var fragment = '',
+            t = $(options.target)[0],
+            height = 65,
+            width = 65,
+            index;
+
+        for (index in badges) {
+          fragment += '<a class="cw_badge"title="' + badges[index].description + '" href="http://coderwall.com/' + options.user + '">';
+          fragment +=   '<img alt="' + badges[index].description + '" height="' + width + '" width="' + height + '" src="' + badges[index].badge + '"/>';
+          fragment += '</a>';
+        }
+
+        t.innerHTML = fragment;
+      }
+      return {
+        showBadges: function(options){
+          $.ajax({
+              url: 'http://coderwall.com/' + options.user + '.json?callback=?'
+            , type: 'jsonp'
+            , error: function (err) { $(options.target + ' li.loading').addClass('error').text("Error loading feed"); }
+            , success: function(res) {
+                render(options, res.data.badges);
+            }
+          });
+        }
+      };
+    })();
+
+    $.domReady(function(){
+      if (!window.jXHR){
+        var jxhr = document.createElement('script');
+        jxhr.type = 'text/javascript';
+        jxhr.src = '/javascripts/libs/jXHR.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(jxhr, s);
+      }
+      if (!window.$){
+        var b = document.createElement('script');
+        b.type = 'text/javascript';
+        b.src = '/javascripts/ender.js';
+        var sc = document.getElementsByTagName('script')[0];
+        sc.parentNode.insertBefore(jxhr, s);
+      }
+      coderwall.showBadges({
+        user: 'nmilford',
+        target: '#cw_badges'
+      });
+    });
+  </script>
+  <style type="text/css">
+    .cw_badge img {
+      padding: 5px;
+      border: 0 none !important;
+      -moz-box-shadow: none !important;
+      -webkit-box-shadow: none !important;
+      -o-box-shadow: none !important;
+      box-shadow: none !important;
+    }
+  </style>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - Nathan Milford -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+
+<input type="hidden" name="OBKey" value=''/> 
+<script LANGUAGE="JavaScript">
+var OBCTm='';
+</script>
+<script LANGUAGE="JavaScript" src="http://widgets.outbrain.com/claim.js"></script>
+
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'code-milford-io';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://code.milford.io/2010/06/building-scribe-from-silas-sewells-source-rpms-for-centos-rhel-5/';
+        var disqus_url = 'http://code.milford.io/2010/06/building-scribe-from-silas-sewells-source-rpms-for-centos-rhel-5/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

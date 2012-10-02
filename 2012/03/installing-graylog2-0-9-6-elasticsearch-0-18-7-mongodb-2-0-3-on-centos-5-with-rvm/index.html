@@ -1,0 +1,843 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Installing Graylog2 0.9.6, ElasticSearch 0.18.7, & MongoDB 2.0.3 on CentOS 5 (With RVM) - blog.milford.io</title>
+  <meta name="author" content="Nathan Milford">
+
+  
+  <meta name="description" content="Gorilla Party Rocking your logs like an open-source mogul.   Graylog2&#8217;s moto should be LMFAO (logging my freaking apps off). Graylog2 is &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://code.milford.io/2012/03/installing-graylog2-0-9-6-elasticsearch-0-18-7-mongodb-2-0-3-on-centos-5-with-rvm/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="blog.milford.io" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">blog.milford.io</a></h1>
+  
+    <h2>a personal knowledge dump.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:code.milford.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/cassandra-token-calculator">Cassandra Token Calculator</a></li>
+  <li><a href="/about">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Installing Graylog2 0.9.6, ElasticSearch 0.18.7, & MongoDB 2.0.3 on CentOS 5 (With RVM)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-17T17:03:45-04:00" pubdate data-updated="true">Mar 17<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p><img class="right" src="/images/partygorillasquare.png"></p>
+
+<p>Gorilla Party Rocking your logs like an open-source mogul.  </p>
+
+<p><a href="http://www.graylog2.org/">Graylog2</a>&#8217;s moto should be LMFAO (logging my freaking apps off).</p>
+
+<p>Graylog2 is lovely little <a href="http://www.splunk.com/">Splunk</a>-like server that collects your logs and provides a nice interface for searching and analyzing them.</p>
+
+<p>From the site</p>
+
+<blockquote><p>Graylog2 is an open source log management solution that stores your logs in ElasticSearch. It consists of a server written in Java that accepts your syslog messages via TCP, UDP or AMQP and stores it in the database. The second part is a web interface that allows you to manage the log messages from your web browser.</p></blockquote>
+
+<p>They have lovely screen shots <a href="http://www.graylog2.org/about">here</a>.</p>
+
+<p>The only problem with it is it has quite a few moving parts that need to be installed that are not traditionally easy to get going on CentOS.</p>
+
+<p>So, here is my guide.</p>
+
+<!-- more -->
+
+
+<p>These steps were borrowed liberally from <a href="https://twitter.com/miller_joe">Joe Miller</a>&#8217;s blog <a href="http://joemiller.me/2011/04/13/howto-install-graylog2-on-centos-5-with-rvm-passenger/">here</a> where he setup a previous version, as well as from each product&#8217;s documentation.</p>
+
+<h2>Installing <a href="http://www.elasticsearch.org/">ElasticSearch</a>:</h2>
+
+<h3>Grab and place ElasticSearch.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd /opt
+</span><span class='line'>curl http://cloud.github.com/downloads/elasticsearch/elasticsearch/elasticsearch-0.18.7.tar.gz | tar zxv 
+</span><span class='line'>ln -s elasticsearch-0.18.7/ elasticsearch</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Install the ES service wrapper.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -k -L http://github.com/elasticsearch/elasticsearch-servicewrapper/tarball/master | tar -xz
+</span><span class='line'>mv *servicewrapper*/service elasticsearch/bin/
+</span><span class='line'>rm -Rf *servicewrapper*
+</span><span class='line'>/opt/elasticsearch/bin/service/elasticsearch install</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Give yourself a control script.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>ln -s `readlink -f elasticsearch/bin/service/elasticsearch` /usr/bin/elasticsearch_ctl</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Give the ES cluster a unique name.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sed -i -e 's|# cluster.name: elasticsearch|cluster.name: graylog2|' /opt/elasticsearch/config/elasticsearch.yml</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Fire it up.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/elasticsearch start</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Test it out.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -XGET 'http://localhost:9200/_cluster/health?pretty=true'</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Installing <a href="http://www.mongodb.org/">MongoDB</a>:</h2>
+
+<h3>Grab MongoDB from <a href="http://www.10gen.com/">10Gen</a>.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://downloads-distro.mongodb.org/repo/redhat/os/x86_64/RPMS/mongo-10gen-2.0.3-mongodb_1.x86_64.rpm
+</span><span class='line'>wget http://downloads-distro.mongodb.org/repo/redhat/os/x86_64/RPMS/mongo-10gen-server-2.0.3-mongodb_1.x86_64.rpm
+</span><span class='line'>rpm -Uvh *mongo*.rpm</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Fire it up.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/mongod start</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Setup MongoDB and auth.</h3>
+
+<p><code>mongo</code></p>
+
+<p>Dump this into the shell (after updating the credentials as you see fit.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>use admin
+</span><span class='line'>  db.addUser('admin', 'adminpass')
+</span><span class='line'>  db.auth('admin', 'adminpass')
+</span><span class='line'>use graylog2
+</span><span class='line'>  db.addUser('grayloguser', 'graylogpass')
+</span><span class='line'>  db.auth('grayloguser', 'graylogpass')
+</span><span class='line'>exit</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Install the Graylog2 server:</h2>
+
+<h3>Grab and place it.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd /opt 
+</span><span class='line'>curl  http://cloud.github.com/downloads/Graylog2/graylog2-server/graylog2-server-0.9.6.tar.gz | tar zxv 
+</span><span class='line'>ln -s graylog2-server-0.9.6/ graylog2-server</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Setup the config file and remove mongo authentication (couldn&#8217;t get it to work with auth enabled).</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cp /opt/graylog2-server/graylog2.conf{.example,}
+</span><span class='line'>cd /etc
+</span><span class='line'>ln -s /opt/graylog2-server/graylog2.conf graylog2.conf
+</span><span class='line'>cd -
+</span><span class='line'>sed -i -e 's|mongodb_useauth = true|mongodb_useauth = false|' /opt/graylog2-server/graylog2.conf</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Drop an init script.</h3>
+
+<p><code>vim /etc/init.d/graylog2-server</code></p>
+
+<p>In it put this:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#!/bin/sh
+</span><span class='line'>#
+</span><span class='line'># graylog2-server:   graylog2 message collector
+</span><span class='line'>#
+</span><span class='line'># chkconfig: - 98 02
+</span><span class='line'># description:  This daemon listens for syslog and GELF messages and stores them in mongodb
+</span><span class='line'>#
+</span><span class='line'>CMD=$1
+</span><span class='line'>NOHUP=`which nohup`
+</span><span class='line'>JAVA_HOME=/usr/java/latest
+</span><span class='line'>JAVA_CMD=$JAVA_HOME/bin/java
+</span><span class='line'>GRAYLOG2_SERVER_HOME=/opt/graylog2-server
+</span><span class='line'>
+</span><span class='line'>start() {
+</span><span class='line'>  echo "Starting graylog2-server ..."
+</span><span class='line'>  $NOHUP $JAVA_CMD -jar $GRAYLOG2_SERVER_HOME/graylog2-server.jar &gt; /var/log/graylog2.log 2&gt;&1 &
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>stop() {
+</span><span class='line'>  PID=`cat /tmp/graylog2.pid`
+</span><span class='line'>  echo "Stopping graylog2-server ($PID) ..."
+</span><span class='line'>  kill $PID
+</span><span class='line'>}
+</span><span class='line'>     
+</span><span class='line'>restart() {
+</span><span class='line'>  echo "Restarting graylog2-server ..."
+</span><span class='line'>  stop
+</span><span class='line'>  start
+</span><span class='line'>}
+</span><span class='line'>     
+</span><span class='line'>case "$CMD" in
+</span><span class='line'>  start)
+</span><span class='line'>    start;;
+</span><span class='line'>  stop)
+</span><span class='line'>    stop;;
+</span><span class='line'>  restart)
+</span><span class='line'>    restart;;
+</span><span class='line'>  *)
+</span><span class='line'>    echo "Usage $0 {start|stop|restart}"
+</span><span class='line'>    RETVAL=1;;
+</span><span class='line'>esac</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<h3>Prime and load.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>chmod +x /etc/init.d/graylog2-server
+</span><span class='line'>chkconfig --add graylog2-server
+</span><span class='line'>chkconfig graylog2-server on</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Fire it up.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/graylog2-server start</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Grab the Web Interface.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd /opt
+</span><span class='line'>curl  http://cloud.github.com/downloads/Graylog2/graylog2-web-interface/graylog2-web-interface-0.9.6.tar.gz | tar zxv 
+</span><span class='line'>ln -s graylog2-web-interface-0.9.6 graylog2-web-interface</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Install RVM with Ruby 1.9.2.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo yum install -y gcc-c++ patch readline readline-devel zlib zlib-devel libyaml-devel libffi-devel openssl-devel curl-devel
+</span><span class='line'>echo insecure &gt;&gt; ~/.curlrc
+</span><span class='line'>bash -s stable &lt; &lt;(curl -s -k https://raw.github.com/wayneeseguin/rvm/master/binscripts/rvm-installer)
+</span><span class='line'>rvm install 1.9.2</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Setup a Graylog2 user.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>useradd graylog2 -d /opt/graylog2-web-interface -G rvm
+</span><span class='line'>chown -R graylog2:graylog2 /opt/graylog2-web-interface*</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Give root RVM access.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>usermod -G rvm root</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Bundle.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>rvm use 1.9.2
+</span><span class='line'>cd /opt/graylog2-web-interface
+</span><span class='line'>gem install bundler
+</span><span class='line'>bundle install</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Setup the web interface&#8217;s MongoDB config.</h3>
+
+<p><code>vim /opt/graylog2-web-interface/config/mongoid.yml</code></p>
+
+<p>Make sure the production setting looks like this:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>production:
+</span><span class='line'>  host: localhost
+</span><span class='line'>  port: 27017
+</span><span class='line'>  username:
+</span><span class='line'>  password:
+</span><span class='line'>  database: graylog2</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Fire it up and set a password.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>su - graylog2
+</span><span class='line'>rvm use 1.9.2
+</span><span class='line'>RAILS_ENV=production script/rails server</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Browse to <code>http://$HOSTNAME:3000</code> and setup your first user.</p>
+
+<p>Once done, CTRL-C to stop the server, then CTRL-D to go back to root.</p>
+
+<h3>Install and configure Passenger.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum -y install curl-devel
+</span><span class='line'>rvm use 1.9.2
+</span><span class='line'>gem install passenger
+</span><span class='line'>gem install file-tail</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Drop an init script.</h3>
+
+<p><code>vim /etc/init.d/graylog2-web</code></p>
+
+<p>In it put this:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#!/bin/bash
+</span><span class='line'>#
+</span><span class='line'># graylog2-web:   graylog2 web interface
+</span><span class='line'>#
+</span><span class='line'># chkconfig: - 98 02
+</span><span class='line'># description:  Starts graylog2-web-interface using passenger-standalone. \
+</span><span class='line'>#       Uses RVM to use switch to a specific ruby version.
+</span><span class='line'>#
+</span><span class='line'># config
+</span><span class='line'>USER=graylog2
+</span><span class='line'>APP_DIR=/opt/graylog2-web-interface
+</span><span class='line'>RVM_RUBY=1.9.2
+</span><span class='line'>ADDR=0.0.0.0
+</span><span class='line'>PORT=3000
+</span><span class='line'>ENVIRONMENT=production
+</span><span class='line'>LOG_FILE=/var/log/graylog2-web-interface.log
+</span><span class='line'>
+</span><span class='line'># --
+</span><span class='line'> 
+</span><span class='line'>if [ ! -d $APP_DIR/tmp ]; then
+</span><span class='line'>  mkdir $APP_DIR/tmp
+</span><span class='line'>fi
+</span><span class='line'>    
+</span><span class='line'>if [ ! -d $APP_DIR/log ]; then
+</span><span class='line'>  mkdir $APP_DIR/log
+</span><span class='line'>fi
+</span><span class='line'>    
+</span><span class='line'>chown -R $USER:$USER $APP_DIR/{log,tmp}
+</span><span class='line'>chmod -R 777 $APP_DIR/{log,tmp}
+</span><span class='line'>    
+</span><span class='line'>CMD_START="cd $APP_DIR; rvm use $RVM_RUBY; passenger start -d \
+</span><span class='line'>                        -a $ADDR \
+</span><span class='line'>                        -p $PORT \
+</span><span class='line'>                        -e $ENVIRONMENT \
+</span><span class='line'>                        --user $USER"
+</span><span class='line'>CMD_STOP="cd $APP_DIR; rvm use $RVM_RUBY; passenger stop -p $PORT"
+</span><span class='line'>     
+</span><span class='line'>CMD_STATUS="cd $APP_DIR; rvm use $RVM_RUBY; passenger status -p $PORT"
+</span><span class='line'>     
+</span><span class='line'>. /lib/lsb/init-functions
+</span><span class='line'>
+</span><span class='line'>case "$1" in
+</span><span class='line'>  start)
+</span><span class='line'>    echo "Starting graylog2-web-interface"
+</span><span class='line'>    su - $USER -c "$CMD_START";;
+</span><span class='line'>  stop)
+</span><span class='line'>    echo "Stopping graylog2-web-interface"
+</span><span class='line'>    su - $USER -c "$CMD_STOP";;
+</span><span class='line'>  status)
+</span><span class='line'>    su - $USER -c "$CMD_STATUS";;
+</span><span class='line'>  *)
+</span><span class='line'>    echo "Usage: $0 start|stop|status"
+</span><span class='line'>    exit 3;;
+</span><span class='line'>esac</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Prime and load.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>chmod +x /etc/init.d/graylog2-web
+</span><span class='line'>chkconfig --add graylog2-web
+</span><span class='line'>chkconfig graylog2-web on</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Fire it up.</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/etc/init.d/graylog2-web start</span></code></pre></td></tr></table></div></figure>
+
+
+<p>First time it runs it&#8217;ll grab some stuff for passenger, but will be fine every time after.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Nathan Milford</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-17T17:03:45-04:00" pubdate data-updated="true">Mar 17<span>th</span>, 2012</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://code.milford.io/2012/03/installing-graylog2-0-9-6-elasticsearch-0-18-7-mongodb-2-0-3-on-centos-5-with-rvm/" data-via="NathanMilford" data-counturl="http://code.milford.io/2012/03/installing-graylog2-0-9-6-elasticsearch-0-18-7-mongodb-2-0-3-on-centos-5-with-rvm/" >Tweet</a>
+  
+  
+  
+</div>
+
+
+
+
+<div class="OUTBRAIN" data-src="http://code.milford.io/2012/03/installing-graylog2-0-9-6-elasticsearch-0-18-7-mongodb-2-0-3-on-centos-5-with-rvm/"></div>
+<script type="text/javascript" async="async" src="http://widgets.outbrain.com/outbrain.js"></script> 
+
+
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/2012/03/keepalived-1-1-20-rpms-for-centos-5/" title="Previous Post: Keepalived 1.1.20 RPMs for CentOS 5">&laquo; Keepalived 1.1.20 RPMs for CentOS 5</a>
+      
+      
+        <a class="basic-alignment right" href="/2012/03/keepalived-for-mysql-high-availability-on-centos/" title="Next Post: Keepalived for MySQL High Availability on CentOS">Keepalived for MySQL High Availability on CentOS &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2012/03/getting-a-basic-cobbler-server-going-on-centos/">Getting a Basic Cobbler server going on CentOS.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/making-a-local-centos-mirror/">Making a local CentOS mirror.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/making-a-simple-yum-repository/">Making a simple Yum repository.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/now-hiring-now-right-now-were-hiring-now/">Now Hiring Now, Right Now We're Hiring Now.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/the-dell-c6220-and-an-ode-to-my-dell-dcs-team/">The Dell C6220 and an Ode to my Dell DCS Team.</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Tag Cloud</h1>
+    <span id="tag-cloud"></span>
+</section>
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("NathanMilford", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/NathanMilford" class="twitter-follow-button" data-show-count="false">Follow @NathanMilford</a>
+  
+</section>
+
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/nmilford">@nmilford</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'nmilford',
+            count: 6,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Coderwall</h1>
+  <ul id="cw_badges">
+    <li class="loading">Status updating...</li>
+  </ul>
+
+  <script type="text/javascript">
+    var coderwall = (function(){
+      function render(options, badges){
+        var fragment = '',
+            t = $(options.target)[0],
+            height = 65,
+            width = 65,
+            index;
+
+        for (index in badges) {
+          fragment += '<a class="cw_badge"title="' + badges[index].description + '" href="http://coderwall.com/' + options.user + '">';
+          fragment +=   '<img alt="' + badges[index].description + '" height="' + width + '" width="' + height + '" src="' + badges[index].badge + '"/>';
+          fragment += '</a>';
+        }
+
+        t.innerHTML = fragment;
+      }
+      return {
+        showBadges: function(options){
+          $.ajax({
+              url: 'http://coderwall.com/' + options.user + '.json?callback=?'
+            , type: 'jsonp'
+            , error: function (err) { $(options.target + ' li.loading').addClass('error').text("Error loading feed"); }
+            , success: function(res) {
+                render(options, res.data.badges);
+            }
+          });
+        }
+      };
+    })();
+
+    $.domReady(function(){
+      if (!window.jXHR){
+        var jxhr = document.createElement('script');
+        jxhr.type = 'text/javascript';
+        jxhr.src = '/javascripts/libs/jXHR.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(jxhr, s);
+      }
+      if (!window.$){
+        var b = document.createElement('script');
+        b.type = 'text/javascript';
+        b.src = '/javascripts/ender.js';
+        var sc = document.getElementsByTagName('script')[0];
+        sc.parentNode.insertBefore(jxhr, s);
+      }
+      coderwall.showBadges({
+        user: 'nmilford',
+        target: '#cw_badges'
+      });
+    });
+  </script>
+  <style type="text/css">
+    .cw_badge img {
+      padding: 5px;
+      border: 0 none !important;
+      -moz-box-shadow: none !important;
+      -webkit-box-shadow: none !important;
+      -o-box-shadow: none !important;
+      box-shadow: none !important;
+    }
+  </style>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - Nathan Milford -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+
+<input type="hidden" name="OBKey" value=''/> 
+<script LANGUAGE="JavaScript">
+var OBCTm='';
+</script>
+<script LANGUAGE="JavaScript" src="http://widgets.outbrain.com/claim.js"></script>
+
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'code-milford-io';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://code.milford.io/2012/03/installing-graylog2-0-9-6-elasticsearch-0-18-7-mongodb-2-0-3-on-centos-5-with-rvm/';
+        var disqus_url = 'http://code.milford.io/2012/03/installing-graylog2-0-9-6-elasticsearch-0-18-7-mongodb-2-0-3-on-centos-5-with-rvm/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

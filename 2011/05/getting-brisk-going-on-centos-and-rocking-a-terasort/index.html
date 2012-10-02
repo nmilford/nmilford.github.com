@@ -1,0 +1,568 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Getting Brisk going on CentOS and rocking a Terasort. - blog.milford.io</title>
+  <meta name="author" content="Nathan Milford">
+
+  
+  <meta name="description" content="So, I started playing with a beta of Brisk this weekend. The Datastax guys are industrious, energentic and are very open to hearing from both the &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://code.milford.io/2011/05/getting-brisk-going-on-centos-and-rocking-a-terasort/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="blog.milford.io" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">blog.milford.io</a></h1>
+  
+    <h2>a personal knowledge dump.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:code.milford.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/cassandra-token-calculator">Cassandra Token Calculator</a></li>
+  <li><a href="/about">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Getting Brisk Going on CentOS and Rocking a Terasort.</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-05-15T20:45:44-04:00" pubdate data-updated="true">May 15<span>th</span>, 2011</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p><img class="right" src="/images/Terasort-Brisk.jpg"></p>
+
+<p>So, I started playing with a beta of <a href="http://www.datastax.com/products/brisk">Brisk</a> this weekend.</p>
+
+<p>The Datastax guys are industrious, energentic and are very open to hearing from both the Cassandra and Hadoop communities.  You should hit them in #Datastax-Brisk on <a href="http://freenode.net/">Freenode</a> IRC.</p>
+
+<p>I&#8217;ll post more on my benchmarks and tests later, I&#8217;m still getting comfortable with it, but it is still very familiar, already being a Hadoop and Cassandra user.</p>
+
+<p>I need to setup the <a href="http://www.datastax.com/products/opscenter">OpsCenter</a> stuff which looks pretty cool and put some real data in it.</p>
+
+<p>So far, my favorite thing/</p>
+
+<p><code>INFO 23:36:22,093 Chose seed 192.168.x.x as jobtracker</code></p>
+
+<p>Magic!</p>
+
+<p>My current concern is how to deal with deletes in CFS (CassandraFS) as Hive (and Terasort for that matter) kicks up a lot of ephemeral data.  <a href="http://thelastpickle.com/2011/05/15/Deletes-and-Tombstones/">Cassandra doesn&#8217;t delete stuff instantly</a>, so I imagine I&#8217;ll need to do some tweaking with <code>GCGraceSeconds</code> to find an optimal setting.</p>
+
+<p>So, this is my quick 5 minute setup to get going and running benchmarks.</p>
+
+<!-- more -->
+
+
+<p>You&#8217;ll need EPEL.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>rpm -Uvh http://download.fedora.redhat.com/pub/epel/5/i386/epel-release-5-4.noarch.rpm</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Setup the Datastax Repository.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>echo "[datastax]
+</span><span class='line'>name=DataStax Repo for Apache Cassandra
+</span><span class='line'>baseurl=http://rpm.datastax.com/EL/5/
+</span><span class='line'>enabled=1
+</span><span class='line'>gpgcheck=0" &gt; /etc/yum.repos.d/datastax.repo</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Install Brisk from yum (it gets most everything you might need, even JNA!)</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum -y install brisk-full</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I like to use MX4J in production.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget http://sourceforge.net/projects/mx4j/files/MX4J%20Binary/3.0.2/mx4j-3.0.2.tar.gz/download
+</span><span class='line'>tar zxvf mx4j-3.0.2.tar.gz mx4j-3.0.2/lib/mx4j-tools.jar
+</span><span class='line'>cp mx4j-3.0.2/lib/mx4j-tools.jar /usr/share/brisk/cassandra/lib/
+</span><span class='line'>chown cassandra:cassandra /usr/share/brisk/cassandra/lib/mx4j-tools.jar
+</span><span class='line'>chmod 755 /usr/share/brisk/cassandra/lib/mx4j-tools.jar</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Actually setup the Cassandra component of the cluster.</p>
+
+<p>Set your <a href="http://blog.milford.io/cassandra-token-calculator/">initial tokens:</a></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sed -i "s,initial_token:,initial_token: 0," /etc/brisk/cassandra/cassandra.yaml</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Change the cluster name.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sed -i "s,cluster_name: 'Test Cluster',cluster_name: 'Brisk Test'," /etc/brisk/cassandra/cassandra.yaml</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Set your seeds.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sed -i 's/- seeds: "127.0.0.1"/- seeds: "192.168.1.1,192.168.1.2"/' /etc/brisk/cassandra/cassandra.yaml </span></code></pre></td></tr></table></div></figure>
+
+
+<p>Set the addresses you want to bind to.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sed -i "s,listen_address: localhost,listen_address:," /etc/brisk/cassandra/cassandra.yaml
+</span><span class='line'>sed -i "s,rpc_address: localhost,rpc_address: 0.0.0.0," /etc/brisk/cassandra/cassandra.yaml</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now for the Hadoop component setup.</p>
+
+<p>For the sake of this setup I&#8217;m not spliting the cluster into two halves, only need a Hadoop half.</p>
+
+<p>Enable the Nodes as Brisk nodes.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sed -i "s,HADOOP_ENABLED=0,HADOOP_ENABLED=1," /etc/default/brisk</span></code></pre></td></tr></table></div></figure>
+
+
+<p>My config is very simple with the data living on a 5 drive stripe.  For the terasort you&#8217;re going to want to setup a <code>mapred.local.dir</code> that has some room in it, as the default in /tmp will fill up pretty quick.  I&#8217;m just dumping it on the same place my CFS data is, not perfect for performance, but good enough for my testing.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mkdir -p /var/lib/cassandra/mapred/local
+</span><span class='line'>chown cassandra:cassandra /var/lib/cassandra/mapred/local</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Also, we&#8217;ll want to set more map and reduce slots. Setting these is a balance of the ammount of RAM, drives and cores the node has. More info can be found <a href="http://developer.yahoo.com/hadoop/tutorial/module7.html#config-large">here</a>.</p>
+
+<p><code>vim /etc/brisk/hadoop/mapred-site.xml</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;code&gt;</span>
+</span><span class='line'><span class="nt">&lt;property&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;name&gt;</span>mapred.local.dir<span class="nt">&lt;/name&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;value&gt;</span>/var/lib/cassandra/mapred/local<span class="nt">&lt;/value&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;final&gt;</span>true<span class="nt">&lt;/final&gt;</span>
+</span><span class='line'><span class="nt">&lt;/property&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nt">&lt;property&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;name&gt;</span>mapred.tasktracker.map.tasks.maximum<span class="nt">&lt;/name&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;value&gt;</span>8<span class="nt">&lt;/value&gt;</span>
+</span><span class='line'><span class="nt">&lt;/property&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nt">&lt;property&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;name&gt;</span>mapred.tasktracker.reduce.tasks.maximum<span class="nt">&lt;/name&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;value&gt;</span>8<span class="nt">&lt;/value&gt;</span>
+</span><span class='line'><span class="nt">&lt;/property&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And that should be enough to get you going, fire it up thus.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'>/etc/init.d/brisk start
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Michael Noll has a fantastic blog article on running some of these benchmarks <a href="http://www.michael-noll.com/blog/2011/04/09/benchmarking-and-stress-testing-an-hadoop-cluster-with-terasort-testdfsio-nnbench-mrbench/">here</a>.</p>
+
+<p>One of the tests usually I run across my regular Hadoop cluster after a restart or upgrade to make sure it is operating is the pi calc.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'>brisk hadoop jar /usr/share/brisk/hadoop/lib/hadoop-examples*.jar pi 10 10000
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And here is how you can run your TeraSort.</p>
+
+<p>TeraGen.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'>brisk hadoop jar /usr/share/brisk/hadoop/lib/hadoop-examples*.jar teragen 1000000000 /tmp/terasort-input
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>TeraSort.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'>brisk hadoop jar /usr/share/brisk/hadoop/lib/hadoop-examples*.jar terasort /tmp/terasort-input /tmp/terasort-output
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>TeraValidate.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'>brisk hadoop jar /usr/share/brisk/hadoop/lib/hadoop-examples*.jar teravalidate /tmp/terasort-output /tmp/terasort-validate
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Cleanup.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'>brisk hadoop fs -rmr cfs:///tmp/tera*
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And thats it.  I&#8217;ve done a small 100G terasort and it came off well.  Will do the real 1TB terasort in the next few days and maybe mrbench, then setup CDH3 on the same hardware and do the same.</p>
+
+<p>So far, I&#8217;m pleased with it.  For beta software there are only a few rough edges.  Everything works out of the box and is much easier to get going than a regular Hadoop cluster.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Nathan Milford</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-05-15T20:45:44-04:00" pubdate data-updated="true">May 15<span>th</span>, 2011</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://code.milford.io/2011/05/getting-brisk-going-on-centos-and-rocking-a-terasort/" data-via="NathanMilford" data-counturl="http://code.milford.io/2011/05/getting-brisk-going-on-centos-and-rocking-a-terasort/" >Tweet</a>
+  
+  
+  
+</div>
+
+
+
+
+<div class="OUTBRAIN" data-src="http://code.milford.io/2011/05/getting-brisk-going-on-centos-and-rocking-a-terasort/"></div>
+<script type="text/javascript" async="async" src="http://widgets.outbrain.com/outbrain.js"></script> 
+
+
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/2011/05/in-which-i-discourse-on-java-bloat-and-cassandra-node-balancing/" title="Previous Post: In which I discourse on Java bloat and Cassandra Node Balancing.">&laquo; In which I discourse on Java bloat and Cassandra Node Balancing.</a>
+      
+      
+        <a class="basic-alignment right" href="/2011/05/filemaker-pro-at-web-scale/" title="Next Post: FileMaker Pro at 'Web Scale' :)">FileMaker Pro at 'Web Scale' :) &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2012/03/getting-a-basic-cobbler-server-going-on-centos/">Getting a Basic Cobbler server going on CentOS.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/making-a-local-centos-mirror/">Making a local CentOS mirror.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/making-a-simple-yum-repository/">Making a simple Yum repository.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/now-hiring-now-right-now-were-hiring-now/">Now Hiring Now, Right Now We're Hiring Now.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/the-dell-c6220-and-an-ode-to-my-dell-dcs-team/">The Dell C6220 and an Ode to my Dell DCS Team.</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Tag Cloud</h1>
+    <span id="tag-cloud"></span>
+</section>
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("NathanMilford", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/NathanMilford" class="twitter-follow-button" data-show-count="false">Follow @NathanMilford</a>
+  
+</section>
+
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/nmilford">@nmilford</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'nmilford',
+            count: 6,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Coderwall</h1>
+  <ul id="cw_badges">
+    <li class="loading">Status updating...</li>
+  </ul>
+
+  <script type="text/javascript">
+    var coderwall = (function(){
+      function render(options, badges){
+        var fragment = '',
+            t = $(options.target)[0],
+            height = 65,
+            width = 65,
+            index;
+
+        for (index in badges) {
+          fragment += '<a class="cw_badge"title="' + badges[index].description + '" href="http://coderwall.com/' + options.user + '">';
+          fragment +=   '<img alt="' + badges[index].description + '" height="' + width + '" width="' + height + '" src="' + badges[index].badge + '"/>';
+          fragment += '</a>';
+        }
+
+        t.innerHTML = fragment;
+      }
+      return {
+        showBadges: function(options){
+          $.ajax({
+              url: 'http://coderwall.com/' + options.user + '.json?callback=?'
+            , type: 'jsonp'
+            , error: function (err) { $(options.target + ' li.loading').addClass('error').text("Error loading feed"); }
+            , success: function(res) {
+                render(options, res.data.badges);
+            }
+          });
+        }
+      };
+    })();
+
+    $.domReady(function(){
+      if (!window.jXHR){
+        var jxhr = document.createElement('script');
+        jxhr.type = 'text/javascript';
+        jxhr.src = '/javascripts/libs/jXHR.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(jxhr, s);
+      }
+      if (!window.$){
+        var b = document.createElement('script');
+        b.type = 'text/javascript';
+        b.src = '/javascripts/ender.js';
+        var sc = document.getElementsByTagName('script')[0];
+        sc.parentNode.insertBefore(jxhr, s);
+      }
+      coderwall.showBadges({
+        user: 'nmilford',
+        target: '#cw_badges'
+      });
+    });
+  </script>
+  <style type="text/css">
+    .cw_badge img {
+      padding: 5px;
+      border: 0 none !important;
+      -moz-box-shadow: none !important;
+      -webkit-box-shadow: none !important;
+      -o-box-shadow: none !important;
+      box-shadow: none !important;
+    }
+  </style>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - Nathan Milford -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+
+<input type="hidden" name="OBKey" value=''/> 
+<script LANGUAGE="JavaScript">
+var OBCTm='';
+</script>
+<script LANGUAGE="JavaScript" src="http://widgets.outbrain.com/claim.js"></script>
+
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'code-milford-io';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://code.milford.io/2011/05/getting-brisk-going-on-centos-and-rocking-a-terasort/';
+        var disqus_url = 'http://code.milford.io/2011/05/getting-brisk-going-on-centos-and-rocking-a-terasort/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,468 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Slides and notes from my recent Hadoop talk in Israel. - blog.milford.io</title>
+  <meta name="author" content="Nathan Milford">
+
+  
+  <meta name="description" content="So, I&#8217;m in Israel working with the team here to plan a large infrastructure project and while here I was asked to do a talk on Hadoop for the &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://code.milford.io/2011/01/slides-and-notes-from-my-recent-hadoop-talk-in-israel/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="blog.milford.io" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">blog.milford.io</a></h1>
+  
+    <h2>a personal knowledge dump.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:code.milford.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/cassandra-token-calculator">Cassandra Token Calculator</a></li>
+  <li><a href="/about">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Slides and Notes From My Recent Hadoop Talk in Israel.</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-01-09T12:39:43-05:00" pubdate data-updated="true">Jan 9<span>th</span>, 2011</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>So, I&#8217;m in Israel working with the team here to plan a large infrastructure project and while here I was asked to do a talk on Hadoop for the team as well as the <a href="http://www.iltechtalks.org.il/">Israel Tech Talks</a> group.</p>
+
+<p><img class="center" src="/images/hadoop_slides.png"></p>
+
+<p>It was a reasonably large turn out. I&#8217;m not sure how long I talked and really what I talked about&#8230; hopefully I was coherent if not articulate :P</p>
+
+<!-- more -->
+
+
+
+
+<center>
+<div style="width:425px" align="center" id="__ss_6494816"> <strong style="display:block;margin:12px 0 4px"><a href="http://www.slideshare.net/nmilford/hadoop-splitting-big-problems-into-manageable-pieces" title="Hadoop - Splitting big problems into manageable pieces." target="_blank">Hadoop - Splitting big problems into manageable pieces.</a></strong> <iframe src="http://www.slideshare.net/slideshow/embed_code/6494816" width="425" height="355" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe> <div style="padding:5px 0 12px"> View more <a href="http://www.slideshare.net/" target="_blank">presentations</a> from <a href="http://www.slideshare.net/nmilford" target="_blank">Nathan Milford</a> </div> </div>
+</center>
+
+
+<p><strong>Know and test your use case before you build:</strong></p>
+
+<ul>
+<li><p>Defaults meant for standalone and pseudo-distributed mode.</p></li>
+<li><p>Default settings are not optimal for any setup really. (FIFO Scheduler?!?)</p></li>
+<li><p>Build a test cluster.</p></li>
+</ul>
+
+
+<p><strong>Hadoop Distributed File System:</strong></p>
+
+<ul>
+<li><p>Lives on commodity hardware.</p></li>
+<li><p>Ten $1000 Hadoop nodes rather than one $10,000 SQL server.</p></li>
+<li><p>Assumes high failure rate.</p></li>
+<li><p>Automatic replication.</p></li>
+<li><p>No need for expensive RAID, replication makes it already redundant.</p></li>
+<li><p>Striping is slower than JBOD as speed is as fast as the slowest device.</p></li>
+<li><p>Disk Ops are independent in JBOD.</p></li>
+<li><p>Yahoo test showed JBOD 10-30% faster than R0.</p></li>
+<li><p>Default is replication is 3, can be set per file.</p></li>
+<li><p>More replication == better processing concurrency.</p></li>
+<li><p>FS is write once, no append in in 0.20/CDH3</p></li>
+<li><p>Good for large files (100MB to Brontobytes).</p></li>
+<li><p>Bad for small files.</p></li>
+<li><p>Better for large streaming reads.</p></li>
+<li><p>Less efficient for random access.</p></li>
+</ul>
+
+
+<p><strong>NameNode:</strong></p>
+
+<ul>
+<li><p>Tracks all metadata and co-ordinates access.</p></li>
+<li><p>Holds filenames, block locations on slave nodes, as well as ownership info.</p></li>
+<li><p>The whole filesystem is stored in RAM for fast look-up.</p></li>
+<li><p>Thus, filesystem size and metadata capacity is limited to the amount of available RAM on the NN.</p></li>
+<li><p>Back this guy up and don&#8217;t use commodity hardware here.  If you lose the metadata, absolutely nothing can be done, you&#8217;ve just got a lot of useless 1&#8217;s &amp; 0&#8217;s on your datanodes.</p></li>
+<li><p>Works like a journaling file system, fsimage and edits files.</p></li>
+<li><p>Backup is as easy as curl&#8217;ing a url to download the fsimage and edits files.</p></li>
+<li><p>Some people use DRDB and heartbeat for a manual fail-over situation.</p></li>
+<li><p>We have the NN write the metadata to two different drives locally as well as to an NFS mount off of the machine.</p></li>
+<li><p>There are a few projects on making a federated namenode, but nothing ready for primetime yet.</p></li>
+<li><p>HDFS doesn’t like lots of small files because it wastes A LOT of RAM on the NN.</p></li>
+<li><p>Default blocksize is 64M, but if you have lots of files smaller than 64M the files may be physically smaller than 64M on the disk (they won’t be padded), the block, as stored in the NN&#8217;s RAM will be the same size regardless.</p></li>
+<li><p>Example:  A single 64M file will use one block and one &#8216;slot&#8217; in the NameNodes fsimage, where 64 * 1M files will use 64 slots.  Further extrapolated, it can hose a name node.</p></li>
+</ul>
+
+
+<p><strong>DataNodes (DN):</strong></p>
+
+<ul>
+<li><p>Holds data in &#8216;blocks&#8217; stored on the local file system.</p></li>
+<li><p>DNs send heartbeats to the NN and after a period without any the DN is assumed lost.  In that case:</p></li>
+<li><p>The NN determines what blocks were lost on that node.</p></li>
+<li><p>The NN finds other DN&#8217;s with copies of those blocks and tells the DN&#8217;s to copies the blocks to other DNs.</p></li>
+<li><p>None of the transferring is done through the NN, but direct DN to DN.</p></li>
+<li><p>This is all automatic. With a default replication level of 3, you can lose 2 nodes simultaneously without even worrying about losing any data.</p></li>
+</ul>
+
+
+<p><strong>The Secondary NameNode (SNN):</strong></p>
+
+<ul>
+<li><p>Is a very unfortunately named process!</p></li>
+<li><p>It is NOT a failover node for the NN.</p></li>
+<li><p>HDFS works like any other journaling filesystem.</p></li>
+<li><p>The NN keeps the filesystem image in RAM (based off of the fsimage file it started with) and appends changes to a journal (the edits file).</p></li>
+<li><p>The SNN periodically grabs the fsimage and edits files from the NN, replays the edits in RAM and combines it with the fsimage to make a new fsimage, then ships it back to the NN.</p></li>
+<li><p>The SNN should have it&#8217;s own machine because it requires as much RAM as the NN to replay and merge the file system image.</p></li>
+</ul>
+
+
+<p><strong>Job Workflow:</strong></p>
+
+<ul>
+<li><p>A user runs a client on a client computer.</p></li>
+<li><p>The client submits a Job (a mapper, a reducer and a list of inputs).</p></li>
+<li><p>The Job is sent to the JobTracker (JT), which is the master process that coordinates all the action.  Typically there is only one JT and usually (except in big clusters) is run on the same machine as the NN process.</p></li>
+<li><p>The process that does the actual work is the TaskTracker (TT) and usually resides on the same machines as the DN process, soo&#8230;</p></li>
+<li><p>Usually a DN/TT pair is a slave and a JT/NN pair is a master.</p></li>
+<li><p>The JT instructs the TT&#8217;s to run a task&#8230; a part of a Job.</p></li>
+<li><p>The TT will spawn child processes to run a task attempt, an instance of a task running on a slave.  If it fails it can be restarted.</p></li>
+<li><p>Task child-processes send heartbeats to the TT which in turn sends heartbeats to the JT.  If a task doesn&#8217;t send a heartbeat in 10 minutes it is assumed dead and the TT kills its’ JVM.</p></li>
+<li><p>Additionally, any task that throws an exception is considered to have failed.</p></li>
+<li><p>The TT then reports failures to the JT which in turn tries to reschedule the task (preferable on the same TT)</p></li>
+<li><p>Similarly, any TT that fails to send a heartbeat in 10 minutes is assumed to be dead and the JT schedules it&#8217;s tasks elsewhere.</p></li>
+<li><p>Any TT that fails enough times is blacklisted from that specific Job and furthermore any TT that fails across multiple Jobs is added to a global blacklist.</p></li>
+</ul>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Nathan Milford</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-01-09T12:39:43-05:00" pubdate data-updated="true">Jan 9<span>th</span>, 2011</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://code.milford.io/2011/01/slides-and-notes-from-my-recent-hadoop-talk-in-israel/" data-via="NathanMilford" data-counturl="http://code.milford.io/2011/01/slides-and-notes-from-my-recent-hadoop-talk-in-israel/" >Tweet</a>
+  
+  
+  
+</div>
+
+
+
+
+<div class="OUTBRAIN" data-src="http://code.milford.io/2011/01/slides-and-notes-from-my-recent-hadoop-talk-in-israel/"></div>
+<script type="text/javascript" async="async" src="http://widgets.outbrain.com/outbrain.js"></script> 
+
+
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/2010/10/simple-hadoop-namenode-backup-script/" title="Previous Post: Simple Hadoop NameNode Backup Script.">&laquo; Simple Hadoop NameNode Backup Script.</a>
+      
+      
+        <a class="basic-alignment right" href="/2011/01/linux-mint-debian-edition-fixing-the-clockapplet/" title="Next Post: Linux Mint Debian Edition - Fixing the Clock Applet">Linux Mint Debian Edition - Fixing the Clock Applet &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2012/03/getting-a-basic-cobbler-server-going-on-centos/">Getting a Basic Cobbler server going on CentOS.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/making-a-local-centos-mirror/">Making a local CentOS mirror.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/making-a-simple-yum-repository/">Making a simple Yum repository.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/now-hiring-now-right-now-were-hiring-now/">Now Hiring Now, Right Now We're Hiring Now.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/the-dell-c6220-and-an-ode-to-my-dell-dcs-team/">The Dell C6220 and an Ode to my Dell DCS Team.</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Tag Cloud</h1>
+    <span id="tag-cloud"></span>
+</section>
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("NathanMilford", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/NathanMilford" class="twitter-follow-button" data-show-count="false">Follow @NathanMilford</a>
+  
+</section>
+
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/nmilford">@nmilford</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'nmilford',
+            count: 6,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Coderwall</h1>
+  <ul id="cw_badges">
+    <li class="loading">Status updating...</li>
+  </ul>
+
+  <script type="text/javascript">
+    var coderwall = (function(){
+      function render(options, badges){
+        var fragment = '',
+            t = $(options.target)[0],
+            height = 65,
+            width = 65,
+            index;
+
+        for (index in badges) {
+          fragment += '<a class="cw_badge"title="' + badges[index].description + '" href="http://coderwall.com/' + options.user + '">';
+          fragment +=   '<img alt="' + badges[index].description + '" height="' + width + '" width="' + height + '" src="' + badges[index].badge + '"/>';
+          fragment += '</a>';
+        }
+
+        t.innerHTML = fragment;
+      }
+      return {
+        showBadges: function(options){
+          $.ajax({
+              url: 'http://coderwall.com/' + options.user + '.json?callback=?'
+            , type: 'jsonp'
+            , error: function (err) { $(options.target + ' li.loading').addClass('error').text("Error loading feed"); }
+            , success: function(res) {
+                render(options, res.data.badges);
+            }
+          });
+        }
+      };
+    })();
+
+    $.domReady(function(){
+      if (!window.jXHR){
+        var jxhr = document.createElement('script');
+        jxhr.type = 'text/javascript';
+        jxhr.src = '/javascripts/libs/jXHR.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(jxhr, s);
+      }
+      if (!window.$){
+        var b = document.createElement('script');
+        b.type = 'text/javascript';
+        b.src = '/javascripts/ender.js';
+        var sc = document.getElementsByTagName('script')[0];
+        sc.parentNode.insertBefore(jxhr, s);
+      }
+      coderwall.showBadges({
+        user: 'nmilford',
+        target: '#cw_badges'
+      });
+    });
+  </script>
+  <style type="text/css">
+    .cw_badge img {
+      padding: 5px;
+      border: 0 none !important;
+      -moz-box-shadow: none !important;
+      -webkit-box-shadow: none !important;
+      -o-box-shadow: none !important;
+      box-shadow: none !important;
+    }
+  </style>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - Nathan Milford -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+
+<input type="hidden" name="OBKey" value=''/> 
+<script LANGUAGE="JavaScript">
+var OBCTm='';
+</script>
+<script LANGUAGE="JavaScript" src="http://widgets.outbrain.com/claim.js"></script>
+
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'code-milford-io';
+      
+        
+        var disqus_script = 'count.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

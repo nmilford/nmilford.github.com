@@ -1,0 +1,820 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>blog.milford.io</title>
+  <meta name="author" content="Nathan Milford">
+
+  
+  <meta name="description" content="Earlier I showed you how to setup Hadoop, then how to setup Hive to use a MySQL-backed Metastore. These notes presume that you have setup your Hive &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://code.milford.io/page/6/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="blog.milford.io" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">blog.milford.io</a></h1>
+  
+    <h2>a personal knowledge dump.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:code.milford.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/cassandra-token-calculator">Cassandra Token Calculator</a></li>
+  <li><a href="/about">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div class="blog-index">
+  
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2010/06/daemonizing-the-apache-hive-thrift-server-on-centos/">Daemonizing the Apache Hive Thrift Server on CentOS</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2010-06-21T22:42:15-04:00" pubdate data-updated="true">Jun 21<span>st</span>, 2010</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Earlier I showed you how to setup Hadoop, then how to <a href="http://blog.milford.io/2010/06/installing-apache-hive-with-a-mysql-metastore-in-centos/">setup Hive to use a MySQL-backed Metastore</a>.</p>
+
+<p>These notes presume that you have setup your Hive metastore to use MySQL.  If you don&#8217;t you&#8217;ll only be able to have one Hive instance running at a time (so no CLI while the HWI or thrift server is a-runnin&#8217;)</p>
+
+<p><img class="center" src="/images/daemontar.jpg">
+Got carried away, I daemonized myself :P</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/2010/06/daemonizing-the-apache-hive-thrift-server-on-centos/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2010/06/getting-the-hive-web-interface-hwi-to-work-on-centos/">Getting the Hive Web Interface (HWI) to Work on CentOS</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2010-06-21T22:17:27-04:00" pubdate data-updated="true">Jun 21<span>st</span>, 2010</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>The <a href="http://wiki.apache.org/hadoop/Hive/HiveWebInterface">Hive Web Interface</a> is a pretty sweet deal.  It is what it sounds like, a web interface that abstracts the user from the CLI.  It allows all your busy little business bees to make data warehouse honey without getting thier hands dirty.</p>
+
+<p><img class="center" src="/images/bees.jpg"></p>
+
+<p>The one in the yellow stripes is the COO&#8230;</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/2010/06/getting-the-hive-web-interface-hwi-to-work-on-centos/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2010/06/installing-apache-hive-with-a-mysql-metastore-in-centos/">Installing Apache Hive With a MySQL Metastore in CentOS</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2010-06-21T18:37:32-04:00" pubdate data-updated="true">Jun 21<span>st</span>, 2010</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img class="center" src="/images/hive_logo_medium.jpg"></p>
+
+<p><a href="http://hadoop.apache.org/hive/">Hive</a> is a pretty nifty data warehousing extension of <a href="http://hadoop.apache.org/">Hadoop</a> that lets you dump structured data into HDFS and query it using a SQL-like language called HiveQL which runs all the map/reduce junk for you.</p>
+
+<p>It&#8217;s pretty darn simple to install, but if you want to really free it up you need to do some tweaking.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/2010/06/installing-apache-hive-with-a-mysql-metastore-in-centos/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2010/06/in-the-hackers-bazaar-my-favorite-short-story/">In the Hacker&#8217;s Bazaar - My Favorite Short Story.</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2010-06-20T23:01:23-04:00" pubdate data-updated="true">Jun 20<span>th</span>, 2010</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I am pretty lucky to be married.</p>
+
+<p>My wife, <a href="http://clockworkfoundry.com/">Kate</a>, is a writer and her first young adult novel, <a href="http://clockworkfoundry.com/limberleg/">The Boneshaker</a>, is out in stores now.</p>
+
+<p><img class="center" src="/images/The-Boneshaker.jpg"></p>
+
+<p>As seen on <a href="http://www.boingboing.net/2010/05/21/the-boneshaker-magic.html">Boing Boing</a>.</p>
+
+<p>If anyone finds my configuration notes on this site helpful, the best way to repay me is to buy a copy of my wife&#8217;s wonderful book <a href="http://www.amazon.com/Boneshaker-Kate-Milford/dp/0547241879">here</a> and post a review to Amazon.  You&#8217;ll be happy, I promise.</p>
+
+<p>A while back, my wife started writing stories that take place in the city of Nagspeake.  It&#8217;s a weird place where they burn all the city&#8217;s archives every so often and you can read more about it at the <a href="http://www.nagspeake.com/">Nagspeake Board of Tourism and Travel</a>.  Kate&#8217;s next novel is going to take place there!</p>
+
+<p>One of my favorite things she has written has got to be <a href="http://theexpat.nagspeake.com/2009/06/in-the-hackers-bazaar/">In The Hacker&#8217;s Bazaar</a>, a story that takes place in Nagspeake.  She found inspiration from:</p>
+
+<ul>
+<li><p>my <a href="http://freeciv.wikia.com">Freeciv</a> addiction.</p></li>
+<li><p>an article I found (can&#8217;t find it now) about kids in the third world learning to solder spare parts to keep their <a href="http://laptop.org/">OLPC</a> laptops running.</p></li>
+<li><p>corresponding images of the Bladerunner parts market.</p></li>
+<li><p>my explanation to her about the differences between computer viruses, trojans and worms.</p></li>
+<li><p>my obsession with self-unaware AI stories.</p></li>
+<li><p>her obsession with seedy underworlds.</p></li>
+</ul>
+
+
+<p>Basically, I love dumping a bunch of knowledge on her and see what comes out.  It is one of my favorite pass times.  I&#8217;m not sure she is aware how much <a href="http://boingboing.net">Boing Boing</a> and <a href="http://reddit.com">Reddit</a> influence her writing using me as a conduit.</p>
+
+<p>Anyway, I think it is just great.  So I present unto thee:</p>
+
+<p><a href="http://theexpat.nagspeake.com/2009/06/in-the-hackers-bazaar/">In The Hacker&#8217;s Bazaar</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2010/06/setting-up-clouderas-hadoop-cdh2-distribution-on-centos/">Setting Up Cloudera&#8217;s Hadoop CDH2 Distribution on CentOS</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2010-06-20T22:05:11-04:00" pubdate data-updated="true">Jun 20<span>th</span>, 2010</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img class="center" src="/images/hadoop-logo.jpg"></p>
+
+<p>From <a href="http://hadoop.apache.org/">Hadoop</a>’s homepage:</p>
+
+<blockquote><p>Apache Hadoop is a framework for running applications on large clusters built of commodity hardware. The Hadoop framework transparently provides applications both reliability and data motion. Hadoop implements a computational paradigm named Map/Reduce, where the application is divided into many small fragments of work, each of which may be executed or reexecuted on any node in the cluster. In addition, it provides a distributed file system (HDFS) that stores data on the compute nodes, providing very high aggregate bandwidth across the cluster. Both Map/Reduce and the distributed file system are designed so that node failures are automatically handled by the framework.</p></blockquote>
+
+<p>In short it’s a distributed batch processing mechanism that stores data across an array of nodes. Computing of that data is done on or near the node with the data and is reported back to a master. You can run other apps on top of that batch processing interface.</p>
+
+<p>At Outbrain we are in the process moving our data warehouse over to a <a href="http://hadoop.apache.org/">Hadoop</a>/<a href="http://hadoop.apache.org/hive">Hive</a> setup and we currently use it in production to serve <a href="http://blog.outbrain.com/2010/05/new-reporting-system/">reports to our users</a>.</p>
+
+<p>Hadoop provides the tools to:</p>
+
+<ul>
+<li><p>store data distributed over several nodes with a configurable level of redundancy</p></li>
+<li><p>farm out that processing of that data to the nodes storing it by mapping the task into a bunch of smaller jobs then combing the results returned into a coherent result.</p></li>
+</ul>
+
+
+<p>Installing and setting up Hadoop isn’t too difficult, but there are a few intial pitfalls with the initial provided configuration files.</p>
+
+<p>The real pain is tweaking it, which will be another article in the future if I ever get a handle on it all. There are so many knobs and dials to adjust globally and per job and so many things to take into account when creating a cluster it just depresses a border-line obsessive compulsive with control issues, like myself. The options are staggering and you can really mung up performance once you start to scale up. I am by no means a Hadoop specialist, but I can show you how to get it up and running.</p>
+
+<p>Many of the other tutorials you might come across will guide you through setting up a standalone or psuedo-distributed config first. In this tutorial, I’m just dumping my notes from when I was kicking the tires on our cluster and adding some annotations.  Good luck, sucker!</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/2010/06/setting-up-clouderas-hadoop-cdh2-distribution-on-centos/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2010/06/alt-installing-python-2-6-from-source-in-centos/">Alt-Installing Python 2.6 From Source in CentOS</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2010-06-20T17:22:21-04:00" pubdate data-updated="true">Jun 20<span>th</span>, 2010</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img class="center" src="/images/python-logo.gif"></p>
+
+<p>I work with some smart folks who need the latest stuff to get the job done.  However, this can sometimes be a problem when you use a more conservative (read: stable) Linux distribution like <a href="http://www.centos.org">CentOS</a>.</p>
+
+<p>You see, CentOS 5 comes bundled with Python 2.4 where Fedora or Ubuntu (or Linux Mint) ships with Python 2.6.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>(nathan@citadel:~)$ cat /etc/issue
+</span><span class='line'>Linux Mint 9 Gloria - Main Edition \n \l
+</span><span class='line'>(nathan@citadel:~)$ python
+</span><span class='line'>Python 2.6.4 (r264:75706, Dec  7 2009, 18:45:15)</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>(nathan@test1:~)$ cat /etc/issue
+</span><span class='line'>CentOS release 5.5 (Final)
+</span><span class='line'>(nathan@test1:~)$ python
+</span><span class='line'>Python 2.4.3 (#1, Sep  3 2009, 15:37:37)</span></code></pre></td></tr></table></div></figure>
+
+
+<p>CentOS has several subsystems (like yum) and a whole pool of packages which expect and rely on Python 2.4 to be installed.  I&#8217;d really hate to mess with that, so when <a href="http://www.outbrain.com">Outbrain</a>&#8217;s braintrust (har har) says they need a particular <a href="http://docs.python.org/whatsnew/2.6.html">functionality</a> from Python 2.6 I choose to alt-install thus:</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/2010/06/alt-installing-python-2-6-from-source-in-centos/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2010/06/installing-apache-cassandra-on-centos/">Installing Apache Cassandra on CentOS</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2010-06-19T17:06:20-04:00" pubdate data-updated="true">Jun 19<span>th</span>, 2010</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img class="center" src="/images/apache-cassandra.gif"></p>
+
+<p>From <a href="http://cassandra.apache.org/">Cassandra</a>’s site:</p>
+
+<blockquote><p>The Apache Cassandra Project develops a highly scalable second-generation distributed database, bringing together Dynamo’s fully distributed design and Bigtable’s ColumnFamily-based data model.</p></blockquote>
+
+<p>It’s one of the more popular NoSQL data stores out there and at Outbrain we’ve been moving some parts of our service from MySQL to it.</p>
+
+<p>I love it as an Ops guy because it just works… I set it up, fire it up and it goes.  Mind that you need to set it up right in the beginning, but that is another thing all together and I won’t get into configuration and implementation, just deployment.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/2010/06/installing-apache-cassandra-on-centos/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2010/06/installing-diggs-log4j-appender-for-scribe/">Installing Digg&#8217;s Log4j Appender for Scribe</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2010-06-19T14:50:34-04:00" pubdate data-updated="true">Jun 19<span>th</span>, 2010</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img class="center" src="/images/log4j.jpg"></p>
+
+<p>So far, I&#8217;ve shown two different ways (from <a href="http://blog.milford.io/2010/06/building-scribe-from-silas-sewells-source-rpms-for-centos-rhel-5/">source</a> or <a href="http://blog.milford.io/2010/06/building-scribe-from-silas-sewells-source-rpms-for-centos-rhel-5/">RPM</a>) of getting Scribe installed on your CentOS / RHEL 5 server and soon I&#8217;ll write more on configuration.</p>
+
+<p>For now let&#8217;s just get it running with our JVM-based app.  In this scenario we&#8217;re going to set it up to log a <a href="http://cassandra.apache.org/">Cassandra</a> instance to a scribe instance on the same server, which is setup to log to a buffer store locally if the remote scribe master should become unavailable.</p>
+
+<p>So we&#8217;ll assume you&#8217;ve got git installed (you can get it from <a href="https://fedoraproject.org/wiki/EPEL/FAQ#howtouse">EPEL</a>), you have log4j properly installed in your JVM-based application and you have local and remote scribe instances setup.</p>
+
+<p>Here is the config (based on the example1 &amp; 2 configs that come with scribe) for the central server:</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/2010/06/installing-diggs-log4j-appender-for-scribe/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2010/06/building-scribe-from-silas-sewells-source-rpms-for-centos-rhel-5/">Building Scribe From Silas Sewell&#8217;s Source RPMs for CentOS</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2010-06-19T10:15:03-04:00" pubdate data-updated="true">Jun 19<span>th</span>, 2010</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Before, I wrote about <a href="http://blog.milford.io/blog/2010/06/19/building-scribe-from-silas-sewells-source-rpms-for-centos-rhel-5/">how to build Scribe 2.1</a> and its&#8217; dependencies on CentOS from source by hand.</p>
+
+<p>I&#8217;m not a life long Linux admin, only been at it for a few years, so the process of discovery involved in getting it built made my hairline recede a bit&#8230;</p>
+
+<p><img class="center" src="/images/monkey.jpg"></p>
+
+<p>The author just after running  <code>make install</code></p>
+
+<p>However, you&#8217;re in luck if you want to avoid all that and keep your hair, if you&#8217;re willing to make a few compromises.</p>
+
+<p><a href="http://www.silassewell.com/">Silas Sewell</a> was awesome enough to share his own <a href="http://www.silassewell.com/blog/2009/05/07/scribe-scalable-real-time-log-aggregation-for-centos-5-rhel-5/">source RPMS</a> with the world!</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/2010/06/building-scribe-from-silas-sewells-source-rpms-for-centos-rhel-5/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2010/06/building-facebook-scribe-2-1-on-centos-5-5/">Building Facebook Scribe 2.1 on CentOS 5.5</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2010-06-18T09:43:43-04:00" pubdate data-updated="true">Jun 18<span>th</span>, 2010</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>At <a href="http://www.outbrain.com">Outbrain</a>, I&#8217;ve recently been tasked with setting up and testing Facebook&#8217;s <a href="http://highscalability.com/blog/2008/11/24/product-scribe-facebooks-scalable-logging-system.html">Scribe</a> log aggregation server for collecting clicks, impressions and other data for eventual loading into our data warehouse.</p>
+
+<p>From the <a href="http://github.com/facebook/scribe#readme">README</a>:</p>
+
+<blockquote><p>Scribe is a server for aggregating log data that&#8217;s streamed in realtime from clients. It is designed to be scalable and reliable.</p></blockquote>
+
+<p>Facebook Scribe can be found <a href="http://github.com/facebook/scribe">here</a>.</p>
+
+<p>Here is an ancient access_log from from a Sumerian web server dating from the 26th century BC. If you read cuneiform, you&#8217;d clearly see the entries from when <a href="http://en.wikipedia.org/wiki/Enki">Enki </a>thought it was a cool idea to release his <a href="http://en.wikipedia.org/wiki/Code_Red_%28computer_worm%29">code red</a> <a href="http://en.wikipedia.org/wiki/Asaruludu">nam shub</a> on the world.</p>
+
+<p><img class="center" src="/images/cuneiform.jpg"></p>
+
+<p>Obviously, if they had proper, scalable log aggregation and analytics they might have nipped that in the bud before it turned into the <a href="http://www.livius.org/fa-fn/flood/flood2.html">great pre-biblical DDoS</a>.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/2010/06/building-facebook-scribe-2-1-on-centos-5-5/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  <div class="pagination">
+    
+    <a href="/blog/archives">Blog Archives</a>
+    
+    <a class="next" href="/page/5/">Newer &rarr;</a>
+    
+  </div>
+</div>
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2012/03/getting-a-basic-cobbler-server-going-on-centos/">Getting a Basic Cobbler server going on CentOS.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/making-a-local-centos-mirror/">Making a local CentOS mirror.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/making-a-simple-yum-repository/">Making a simple Yum repository.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/now-hiring-now-right-now-were-hiring-now/">Now Hiring Now, Right Now We&#8217;re Hiring Now.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/the-dell-c6220-and-an-ode-to-my-dell-dcs-team/">The Dell C6220 and an Ode to my Dell DCS Team.</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Tag Cloud</h1>
+    <span id="tag-cloud"></span>
+</section>
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("NathanMilford", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/NathanMilford" class="twitter-follow-button" data-show-count="false">Follow @NathanMilford</a>
+  
+</section>
+
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="https://github.com/nmilford">@nmilford</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'nmilford',
+            count: 6,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Coderwall</h1>
+  <ul id="cw_badges">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+
+  <script type="text/javascript">
+    var coderwall = (function(){
+      function render(options, badges){
+        var fragment = '',
+            t = $(options.target)[0],
+            height = 65,
+            width = 65,
+            index;
+
+        for (index in badges) {
+          fragment += '<a class="cw_badge"title="' + badges[index].description + '" href="http://coderwall.com/' + options.user + '">';
+          fragment +=   '<img alt="' + badges[index].description + '" height="' + width + '" width="' + height + '" src="' + badges[index].badge + '"/>';
+          fragment += '</a>';
+        }
+
+        t.innerHTML = fragment;
+      }
+      return {
+        showBadges: function(options){
+          $.ajax({
+              url: 'http://coderwall.com/' + options.user + '.json?callback=?'
+            , type: 'jsonp'
+            , error: function (err) { $(options.target + ' li.loading').addClass('error').text("Error loading feed"); }
+            , success: function(res) {
+                render(options, res.data.badges);
+            }
+          });
+        }
+      };
+    })();
+
+    $.domReady(function(){
+      if (!window.jXHR){
+        var jxhr = document.createElement('script');
+        jxhr.type = 'text/javascript';
+        jxhr.src = '/javascripts/libs/jXHR.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(jxhr, s);
+      }
+      if (!window.$){
+        var b = document.createElement('script');
+        b.type = 'text/javascript';
+        b.src = '/javascripts/ender.js';
+        var sc = document.getElementsByTagName('script')[0];
+        sc.parentNode.insertBefore(jxhr, s);
+      }
+      coderwall.showBadges({
+        user: 'nmilford',
+        target: '#cw_badges'
+      });
+    });
+  </script>
+  <style type="text/css">
+    .cw_badge img {
+      padding: 5px;
+      border: 0 none !important;
+      -moz-box-shadow: none !important;
+      -webkit-box-shadow: none !important;
+      -o-box-shadow: none !important;
+      box-shadow: none !important;
+    }
+  </style>
+</section>
+
+
+  
+</aside>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - Nathan Milford -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+
+<input type="hidden" name="OBKey" value=''/> 
+<script LANGUAGE="JavaScript">
+var OBCTm='';
+</script>
+<script LANGUAGE="JavaScript" src="http://widgets.outbrain.com/claim.js"></script>
+
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'code-milford-io';
+      
+        
+        var disqus_script = 'count.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

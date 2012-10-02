@@ -1,0 +1,536 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Automating Some Cassandra Maintenance - blog.milford.io</title>
+  <meta name="author" content="Nathan Milford">
+
+  
+  <meta name="description" content="Lets talk about Cassandra maintenance. Nothing crazy here&#8230; these are just some notes I jotted down for folks I work with explaining a cronjob &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://code.milford.io/2012/01/automating-some-cassandra-maintenance/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="blog.milford.io" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">blog.milford.io</a></h1>
+  
+    <h2>a personal knowledge dump.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:code.milford.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/cassandra-token-calculator">Cassandra Token Calculator</a></li>
+  <li><a href="/about">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Automating Some Cassandra Maintenance</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-01-29T22:55:39-05:00" pubdate data-updated="true">Jan 29<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p><img class="center" src="/images//MaintenanceMania.gif"></p>
+
+<p>Lets talk about Cassandra maintenance.</p>
+
+<p>Nothing crazy here&#8230; these are just some notes I jotted down for folks I work with explaining a cronjob I put into production as well as providing the simple script.  Thought some other people might benefit.</p>
+
+<!-- more -->
+
+
+<p><strong>Why do regular repairs?</strong></p>
+
+<p>From the Cassandra Operations Wiki:</p>
+
+<blockquote><p>Unless your application performs no deletes, it is vital that production clusters run nodetool repair periodically on all nodes in the cluster. The hard requirement for repair frequency is the value used for GCGraceSeconds (see <a href="http://wiki.apache.org/cassandra/DistributedDeletes">DistributedDeletes</a>). Running nodetool repair often enough to guarantee that all nodes have performed a repair in a given period GCGraceSeconds long, ensures that deletes are not &#8220;forgotten&#8221; in the cluster.</p></blockquote>
+
+<p>This is best expressed from this excerpt by Konstantin Naryshkin from the Cassandra mailing list (source is <a href="http://mail-archives.apache.org/mod_mbox/cassandra-user/201106.mbox/%3Cb4905f9f-7aa0-458c-9736-c9f8f61c3f2c@mail-1.01.com%3E">here</a>)</p>
+
+<p>The query:</p>
+
+<blockquote><p>I am little confused of the reason why nodetool repair has to run within GCGraceSeconds.</p>
+
+<p>The documentation at: <a href="http://wiki.apache.org/cassandra/Operations#Frequency_of_nodetool_repair">http://wiki.apache.org/cassandra/Operations#Frequency_of_nodetool_repair</a>
+is not very clear to me.</p>
+
+<p>How can a delete be &#8216;unforgotten&#8217; if I don&#8217;t run nodetool repair? (I understand that if a node is down for more than GCGraceSeconds, I should not get it up without resynching is completely. Otherwise deletes may reappear. But not sure how exactly nodetool repair ties into this mechanism ofdistributed deletes.</p></blockquote>
+
+<p>The Answer:</p>
+
+<blockquote><p>As I understand, it has to do with a node being up but missing the delete message (remember, if you apply the delete at CL.QUORUM, you can have almost half the replicas miss it and still succeed). Imagine that you have 3 nodes A, B, and C, each of which has a column &#8216;foo&#8217; witha value &#8216;bar&#8217;. Their state would be:</p>
+
+<p>A: &#8216;foo&#8217;:&#8217;bar&#8217; B: &#8216;foo&#8217;:&#8217;bar&#8217; C: &#8216;foo&#8217;:&#8217;bar&#8217;</p>
+
+<p>We attempt to delete column &#8216;foo&#8217;, and it succeeds on nodes A and B (meaning that we succeeded on CL.QUORUM). Unfortunately the packet going to node C runs afoul of the network gods and gets zapped in transit. The state is now:</p>
+
+<p>A: &#8216;foo&#8217;:deleted B: &#8216;foo&#8217;:deleted C: &#8216;foo&#8217;:&#8217;bar&#8217;</p>
+
+<p>If we try a read at this point, at CL.QUORUM, we are guaranteed to get at least one record that &#8216;foo&#8217; was deleted and because of timestamps we know to tell the client as much.</p>
+
+<p>After GCGraceSeconds and a compaction, the state of the nodes will be:</p>
+
+<p>A: None B: None C: &#8216;foo&#8217;:&#8217;bar&#8217;</p>
+
+<p>Some time later, we attempt a read and just happen to get C&#8217;s response first. The response will be that &#8216;foo&#8217; is storing &#8216;bar&#8217;. Not only that, but read repair happens as well, so the state will become:</p>
+
+<p>A: &#8216;foo&#8217;:&#8217;bar&#8217; B: &#8216;foo&#8217;:&#8217;bar&#8217; C: &#8216;foo&#8217;:&#8217;bar&#8217;</p>
+
+<p>We have the infamous undelete.</p></blockquote>
+
+<p><strong>The Script.</strong></p>
+
+<p>I have all of my Cassandra nodes run a simple script weekly.  Each node runs at a different time on a different day of the week.</p>
+
+<p>The script is <a href="https://github.com/nmilford/scripts/blob/master/Cassandra/cassandraMaintenance.sh">here</a>.</p>
+
+<p>The script is run thus:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>usage: ./cassandraMaintenance.sh -k keyspace -c [ columnfamily or 'all']</span></code></pre></td></tr></table></div></figure>
+
+
+<p>It also drops a log at: <code>/var/log/cassandra/mainenance.log</code></p>
+
+<p><strong>What does the script do exactly?</strong></p>
+
+<p>The script does three things for each ColumnFamily it is run against:</p>
+
+<ul>
+<li>Runs repair against the column family to force all nodes&#8217; data is in sync.
+
+<ul>
+<li>Node will exchange it&#8217;s inventory with other nodes with replicas of same data.</li>
+<li>Other replicas will &#8216;stream&#8217; sstables to this node with Keys this node may have missed or may have an older value so it can have a complete consistent set.</li>
+<li>Additionally, just as active data is made consistent, it makes sure keys marked as tombstoned are made consistent, so they don&#8217;t magically pop back into existence as described above.</li>
+<li>One downside is that, because sstable files are immutable, if you need only one Key out of a 20G file, you still have to get the whole 20G file. This causes two drawbacks.
+
+<ul>
+<li>How long it takes to move files across datacenters,</li>
+<li>Having multiple copies of the same Key in multiple sstable files on your one node. This is helped in the next step.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Runs a major compaction against the ColumnFamily to strip away excess.
+
+<ul>
+<li>It takes all of the sstables on the node, even the redundant ones and merge/sorts them into a single large sstable file. This benefits thus:
+
+<ul>
+<li>Improves performance through limiting seeks on disk through multiple files.</li>
+<li>The act of merge/sorting and creating a new sstable strips out all of the old tombstoned files.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Runs a cleanup on the column family.
+
+<ul>
+<li>Deletes all of the redundant/old sstable files leaving only the new relevant ones.</li>
+<li>All of these processes run in the background on node and are throttled. Depending on the size of the data set and the quality of the link between datacenters the whole cycle can last 5 minutes or 5 hours.</li>
+</ul>
+</li>
+</ul>
+
+
+<p><strong>Monitoring the process.</strong></p>
+
+<p>Firstly you can follow the script itself via its&#8217; log.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tail -f /var/log/cassandra/mainenance.log</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Secondly, you can see what files are streaming where using nodetool:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># nodetool -h $HOSTNAME -p 8080 netstats
+</span><span class='line'>Mode: Normal
+</span><span class='line'>Streaming to: /192.168.x.x
+</span><span class='line'>/var/lib/cassandra/data/outbrain_kvdb/KvImpressions-g-2045-Data.db sections=4227 progress=0/10811259 - 0%
+</span><span class='line'>Streaming to: /192.168.x.x
+</span><span class='line'>/var/lib/cassandra/data/outbrain_kvdb/KvImpressions-g-2003-Data.db sections=2175 progress=0/5533079 - 0%
+</span><span class='line'>/var/lib/cassandra/data/outbrain_kvdb/KvImpressions-g-1989-Data.db sections=2179 progress=0/16699525 - 0%
+</span><span class='line'>/var/lib/cassandra/data/outbrain_kvdb/KvImpressions-g-1618-Data.db sections=2179 progress=0/31682653 - 0%
+</span><span class='line'>/var/lib/cassandra/data/outbrain_kvdb/KvImpressions-g-2045-Data.db sections=2157 progress=0/5267750 - 0%
+</span><span class='line'>/var/lib/cassandra/data/outbrain_kvdb/KvImpressions-g-1618-Data.db sections=4328 progress=22770607/65975034 - 34%
+</span><span class='line'>/var/lib/cassandra/data/outbrain_kvdb/KvImpressions-g-2045-Data.db sections=4288 progress=0/11004297 - 0%
+</span><span class='line'>Streaming to: /192.168.x.x
+</span><span class='line'>/var/lib/cassandra/data/outbrain_kvdb/KvImpressions-g-2003-Data.db sections=2340 progress=0/5969050 - 0%
+</span><span class='line'>/var/lib/cassandra/data/outbrain_kvdb/KvImpressions-g-1989-Data.db sections=2344 progress=0/18059904 - 0%
+</span><span class='line'>/var/lib/cassandra/data/outbrain_kvdb/KvImpressions-g-1618-Data.db sections=2344 progress=0/34242610 - 0%
+</span><span class='line'>/var/lib/cassandra/data/outbrain_kvdb/KvImpressions-g-2045-Data.db sections=2321 progress=0/5689294 - 0%
+</span><span class='line'>Not receiving any streams.
+</span><span class='line'>Pool Name Active Pending Completed
+</span><span class='line'>Commands n/a 0 1713477766
+</span><span class='line'>Responses n/a 0 746604055</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Additionally, you can follow progress of the command with watch:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>watch -n5 nodetool -h $HOSTNAME -p 8080 netstats</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Lastly you can get a birds eye view from <a href="http://www.datastax.com/products/opscenter">DataStax&#8217;s OpsCenter</a>, an epic free tool for watching your cluster purr:</p>
+
+<p><img class="center" src="/images/opsctr.png"></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Nathan Milford</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-01-29T22:55:39-05:00" pubdate data-updated="true">Jan 29<span>th</span>, 2012</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://code.milford.io/2012/01/automating-some-cassandra-maintenance/" data-via="NathanMilford" data-counturl="http://code.milford.io/2012/01/automating-some-cassandra-maintenance/" >Tweet</a>
+  
+  
+  
+</div>
+
+
+
+
+<div class="OUTBRAIN" data-src="http://code.milford.io/2012/01/automating-some-cassandra-maintenance/"></div>
+<script type="text/javascript" async="async" src="http://widgets.outbrain.com/outbrain.js"></script> 
+
+
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/2012/01/in-which-i-give-a-server-to-some-kids/" title="Previous Post: In which I give a server to some kids.">&laquo; In which I give a server to some kids.</a>
+      
+      
+        <a class="basic-alignment right" href="/2012/01/i-wield-the-mysql-hammer-of-zeus-mass-killing-queries-by-host/" title="Next Post: I wield the MySQL hammer of Thor! Mass killing queries by host.">I wield the MySQL hammer of Thor! Mass killing queries by host. &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2012/03/getting-a-basic-cobbler-server-going-on-centos/">Getting a Basic Cobbler server going on CentOS.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/making-a-local-centos-mirror/">Making a local CentOS mirror.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/making-a-simple-yum-repository/">Making a simple Yum repository.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/now-hiring-now-right-now-were-hiring-now/">Now Hiring Now, Right Now We're Hiring Now.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/the-dell-c6220-and-an-ode-to-my-dell-dcs-team/">The Dell C6220 and an Ode to my Dell DCS Team.</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Tag Cloud</h1>
+    <span id="tag-cloud"></span>
+</section>
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("NathanMilford", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/NathanMilford" class="twitter-follow-button" data-show-count="false">Follow @NathanMilford</a>
+  
+</section>
+
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/nmilford">@nmilford</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'nmilford',
+            count: 6,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Coderwall</h1>
+  <ul id="cw_badges">
+    <li class="loading">Status updating...</li>
+  </ul>
+
+  <script type="text/javascript">
+    var coderwall = (function(){
+      function render(options, badges){
+        var fragment = '',
+            t = $(options.target)[0],
+            height = 65,
+            width = 65,
+            index;
+
+        for (index in badges) {
+          fragment += '<a class="cw_badge"title="' + badges[index].description + '" href="http://coderwall.com/' + options.user + '">';
+          fragment +=   '<img alt="' + badges[index].description + '" height="' + width + '" width="' + height + '" src="' + badges[index].badge + '"/>';
+          fragment += '</a>';
+        }
+
+        t.innerHTML = fragment;
+      }
+      return {
+        showBadges: function(options){
+          $.ajax({
+              url: 'http://coderwall.com/' + options.user + '.json?callback=?'
+            , type: 'jsonp'
+            , error: function (err) { $(options.target + ' li.loading').addClass('error').text("Error loading feed"); }
+            , success: function(res) {
+                render(options, res.data.badges);
+            }
+          });
+        }
+      };
+    })();
+
+    $.domReady(function(){
+      if (!window.jXHR){
+        var jxhr = document.createElement('script');
+        jxhr.type = 'text/javascript';
+        jxhr.src = '/javascripts/libs/jXHR.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(jxhr, s);
+      }
+      if (!window.$){
+        var b = document.createElement('script');
+        b.type = 'text/javascript';
+        b.src = '/javascripts/ender.js';
+        var sc = document.getElementsByTagName('script')[0];
+        sc.parentNode.insertBefore(jxhr, s);
+      }
+      coderwall.showBadges({
+        user: 'nmilford',
+        target: '#cw_badges'
+      });
+    });
+  </script>
+  <style type="text/css">
+    .cw_badge img {
+      padding: 5px;
+      border: 0 none !important;
+      -moz-box-shadow: none !important;
+      -webkit-box-shadow: none !important;
+      -o-box-shadow: none !important;
+      box-shadow: none !important;
+    }
+  </style>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - Nathan Milford -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+
+<input type="hidden" name="OBKey" value=''/> 
+<script LANGUAGE="JavaScript">
+var OBCTm='';
+</script>
+<script LANGUAGE="JavaScript" src="http://widgets.outbrain.com/claim.js"></script>
+
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'code-milford-io';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://code.milford.io/2012/01/automating-some-cassandra-maintenance/';
+        var disqus_url = 'http://code.milford.io/2012/01/automating-some-cassandra-maintenance/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

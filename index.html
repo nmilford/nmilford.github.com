@@ -408,7 +408,166 @@
 
     </article>
   
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2012/03/installing-graylog2-0-9-6-elasticsearch-0-18-7-mongodb-2-0-3-on-centos-5-with-rvm/">Installing Graylog2 0.9.6, ElasticSearch 0.18.7, & MongoDB 2.0.3 on CentOS 5 (With RVM)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-17T17:03:45-04:00" pubdate data-updated="true">Mar 17<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img class="right" src="/images/partygorillasquare.png"></p>
+
+<p>Gorilla Party Rocking your logs like an open-source mogul.  </p>
+
+<p><a href="http://www.graylog2.org/">Graylog2</a>&#8217;s moto should be LMFAO (logging my freaking apps off).</p>
+
+<p>Graylog2 is lovely little <a href="http://www.splunk.com/">Splunk</a>-like server that collects your logs and provides a nice interface for searching and analyzing them.</p>
+
+<p>From the site</p>
+
+<blockquote><p>Graylog2 is an open source log management solution that stores your logs in ElasticSearch. It consists of a server written in Java that accepts your syslog messages via TCP, UDP or AMQP and stores it in the database. The second part is a web interface that allows you to manage the log messages from your web browser.</p></blockquote>
+
+<p>They have lovely screen shots <a href="http://www.graylog2.org/about">here</a>.</p>
+
+<p>The only problem with it is it has quite a few moving parts that need to be installed that are not traditionally easy to get going on CentOS.</p>
+
+<p>So, here is my guide.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/2012/03/installing-graylog2-0-9-6-elasticsearch-0-18-7-mongodb-2-0-3-on-centos-5-with-rvm/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2012/03/keepalived-1-1-20-rpms-for-centos-5/">Keepalived 1.1.20 RPMs for CentOS 5</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-17T14:20:06-04:00" pubdate data-updated="true">Mar 17<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img class="left" src="/images/keepalived.png"></p>
+
+<p><a href="http://www.keepalived.org/">Keepalived</a> is a very handy piece of ops-sauce.  Dash some on your operations project and it adds a bit of tangy high availability and an aroma of robust fail-over.</p>
+
+<p>It implements a VRRPv2 stack to handle LVS director failover and acts as a userspace daemon for LVS cluster nodes healthchecks and LVS directors failover.</p>
+
+<p>While trying to reverse engineer how a previous co-worker setup a MySQL load balancing scheme using keepalived I discovered how difficult it was to find rpms for it (I found 1.1.10 out there).  I&#8217;ll be posting later on the MySQL HA scheme later.</p>
+
+<p>I tried building the latest version (1.2.2) which continually broke in RHEL5 (despite there being a RHEL6 rpm)&#8230; so I gave in and built the latest version of the previous release (1.1.20).</p>
+
+<p>Here we go&#8230;</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/2012/03/keepalived-1-1-20-rpms-for-centos-5/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2012/03/a-new-cassandra-chef-cookbook-for-handling-multiple-clusters/">A New Cassandra Chef Cookbook for Handling Multiple Clusters.</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-15T10:21:46-04:00" pubdate data-updated="true">Mar 15<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img class="center" src="/images/chef.gif"></p>
+
+<p>I find myself running more and more Cassandra clusters and when we were on Chef 0.9.8 I was being lazy and just cloning my Cassandra cookbook per cluster.  Not exactly a way to scale the manageability of your config :P</p>
+
+<p>Now I&#8217;ve refactored the cookbook to allow me to manage multiple clusters by extracting the <code>cluster_name</code> and <code>initial_token</code> from a databag. Once we start implementing the new Environments feature in Chef 0.10 I&#8217;ll be able to simplify this further. :)</p>
+
+<p>I&#8217;m debating having the cookbook auto-generate tokens and assign them as well as re-generate/nodetool move/re-balance when I&#8217;ve added another node with that cluster specified in the databag. That&#8217;s a big project and for now I&#8217;m too much of a control freak to automate that, but I&#8217;m thinking on it.</p>
+
+<p>I&#8217;ve also made it so the cookbook auto-generates the <code>cassandra-topology.properties</code> for the <code>PropertyFileSnitch</code> based off of location info stored in the databag.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/2012/03/a-new-cassandra-chef-cookbook-for-handling-multiple-clusters/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
   <div class="pagination">
+    
+      <a class="prev" href="/page/2/">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
@@ -444,7 +603,7 @@
 </section>
 <section>
   <h1>Tag Cloud</h1>
-    <span id="tag-cloud"><a href='/categories/automation' style='font-size: 115.0%'>Automation(1)</a> <a href='/categories/awesome-' style='font-size: 115.0%'>Awesome!(1)</a> <a href='/categories/configuration' style='font-size: 115.0%'>Configuration(1)</a> <a href='/categories/configurations' style='font-size: 160.0%'>Configurations(4)</a> <a href='/categories/networking' style='font-size: 115.0%'>Networking(1)</a> </span>
+    <span id="tag-cloud"></span>
 </section>
 
 <section>

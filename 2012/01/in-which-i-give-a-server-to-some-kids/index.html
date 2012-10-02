@@ -1,0 +1,455 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>In which I give a server to some kids. - blog.milford.io</title>
+  <meta name="author" content="Nathan Milford">
+
+  
+  <meta name="description" content="So, I am at one of my data centers late last Friday night bringing up some new Hadoop nodes when I look up to see Atlantic Metro&#8217;s eminent &# &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://code.milford.io/2012/01/in-which-i-give-a-server-to-some-kids/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="blog.milford.io" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">blog.milford.io</a></h1>
+  
+    <h2>a personal knowledge dump.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:code.milford.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/cassandra-token-calculator">Cassandra Token Calculator</a></li>
+  <li><a href="/about">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">In Which I Give a Server to Some Kids.</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-01-29T21:08:44-05:00" pubdate data-updated="true">Jan 29<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p><img class="right" src="/images/funny-celebrity-pictures-i-believe-the-children-are-our-future-not-these-better-ones.jpg"></p>
+
+<p>So, I am at one of my data centers late last Friday night bringing up some new Hadoop nodes when I look up to see <a href="atlanticmetro.ne">Atlantic Metro</a>&#8217;s eminent &#8216;head cheese of facilities&#8217; <a href="https://twitter.com/ckvibes">Christian</a> walk by at the lead of a crew of 3 kids and their parents carrying a little 1U server.</p>
+
+<p>Odd, I thought, so I asked Christian what they were doing.  These kids were racking thier first server. They are starting a game company!</p>
+
+<p>How cool is that!?! How cool are these kids!?!  How fantastic are these kid&#8217;s parents?!</p>
+
+<p>Here I am, impressed as hell by these short entrepreneurs, sitting next to a stack of 4 year old servers that we&#8217;ve recently decommissioned and I&#8217;ve freshly wiped.  We still haven&#8217;t figured out what to do with them, where to donate them, since their resell value is ~3-5% of their original purchase price and I&#8217;m too lazy to put them up on eBay for the company only to have the company make ~$100 bucks for my time.</p>
+
+<p>So, I asked them if they wanted a server.</p>
+
+<p>They did.</p>
+
+<p>I chatted with their parents for a few minutes, gave them my card and the server and sent them on their way.</p>
+
+<p>The next day I got a thank you email:</p>
+
+<blockquote><p>Hey Nathan this is <redacted>, We met in the Atlantic Metro Communications Data Center a few days ago with my family and I, we were setting up our server with Christian. I really appreciate that you gave us the opportunity to succeed in our careers by giving us one of your servers. I would never expect someone to do that, honestly I thought that I would drive to the data center and drop off a server at a desk, instead we walk in, install the server on the racks and meet awesome people like you :D</p>
+
+<p>I would really like to learn more about how you got started in the Job. Because a person giving servers away like that isn&#8217;t the average &#8216;Joe&#8217; ;) So for you to do something like that is just showing that you care and I really appreciate it.</p>
+
+<p>So tell me, how did you get started? :D</p>
+
+<p>Thanks,
+-<redacted></p></blockquote>
+
+<p>Below is my reply.  I am conscious that it seems a bit arrogant and self indulgent, but it is how I feel:</p>
+
+<blockquote><p>Ahoy,</p>
+
+<p>I was just impressed that you and your cohorts were taking the step to co-lo a server, and that your interest in technology and computers extends beyond just playing games or tinkering with iPhones to doing something practical with it and taking the next logical step. Racking your first server is a pretty awesome thing to be doing at 15. That experience and a few other bits of basic know-how and you’ll be qualified for a $20-25/hr job as a NOC Technician.</p>
+
+<p>For a lot of people, their interest ends with what technology can do for them. Your actions suggest that you&#8217;re more interested in what you can do with technology. That&#8217;s pretty flipping awesome!</p>
+
+<p>To answer your question about how I got started and what I do: I&#8217;m an Operations Engineer for a startup here in NYC. An Operations Engineer is akin to a sysadmin, but Ops Engineers usually work in web companies and do much more interesting work (IMHO). But I don&#8217;t have any formal training in technology. I have a Film Production degree and before that I studied linguistics and theater. I learned all of this myself. I know how to do diverse things from scripting in Python to how to crimp Cat5 cables. I know high-level networking, routing, switching and low level hardware stuff. I am great at a lot of diverse technology disciplines but a master at none.</p>
+
+<p>90% of my job and why I’m good at it is not what I know, or the depth to which I know it. It is my potential to know something. How quickly can I google an idea or software, and how rapidly can I make that knowledge useful. This is why companies want to hire me for <em>me</em> and not my skillset or certifications.</p>
+
+<p>I&#8217;m not particularly smart. I know way smarter people than me. I&#8217;m just engaged and interested in what I do and my liberal arts education (rather than purely CS) gives me powerful intellectual tools to model and create metaphors for new ideas and technologies that are not merely framed in math or engineering technobabble. Whether or not you get an engineering degree, dipping your intellectual toes in the humanities makes you a better technologist. It gives you a framework to connect diverse ideas together and make them work for you and equips you to relate to others who are not technologists.</p>
+
+<p>When I was 12 I broke my family computer, so I had to fix it before anyone noticed. The computer itself ceased to be an unknowable black box. I became interested in it and how it worked, I joined dial-up BBS systems, played games, met other kids like me from around the world. Installed Linux and NetBSD and Windows NT. Spent a lot of time on Internet Relay Chat with others like me to the wee hours in the morning on school nights. Did some unethical stuff I regret, but got out of it before I got into real trouble. Worked various IT jobs while putting myself through college. In college, while studying theater, I took a bunch of old 486 desktops out of a dumpster and turned them into a small beowolf cluster. After ~15 years I am where I am now. And. It. Is. Awesome.</p>
+
+<p>My day-to-day work consists of working with bleeding edge distributed systems. This is not the normal boring Microsoft/Cisco Certified stuff a regular sysadmin works with. There are thousands of regular enterprise sysadmins making sure people&#8217;s Windows laptops work, but there are maybe 100-150 Ops guys like us in NYC building awesome scaling infrastructures for high volume web sites to run on. The infrastructure my team and I work on handles 1 billion requests a day.</p>
+
+<p>The things I work with are incredibly powerful but they don&#8217;t necessarily have documentation or support numbers. They are not things you can take a class on or get a college degree in. They are things you need to actually be personally interested in, engage in a community for and go dumpster diving through code to know. To be able to do what I do you need 1) to have an overall sense of how things work, preferably which you’ve acquired by doing them, failing, breaking stuff and doing it again (you also need to have a healthy attitude toward failure); and 2) enough interest to read blogs, whitepapers, journals, go to tech meetups and involve yourself in opensource communities.</p>
+
+<p>To keep up with it all, you need to have a genuine interest in it. It’s also best if you take advantage of the operations community to contribute and learn. I run two technology meetups in NYC, am an internationally acknowledged expert in distributed systems such as Hadoop (http://hadoop.apache.org/) and Cassandra (http://cassandra.apache.org/); I commit small bits of code to Open Source Projects (thought I am not a developer), I engage and foster relationships with other people doing what I&#8217;m doing and my Google Reader queue consists of hundreds of technology blogs. I myself write a technology blog (http://blog.milford.io/) whose aim is to share what I learn with others, and it gets a significant amount of traffic.</p>
+
+<p>Here’s another good reason to consider operations: the technology community is desperate for people like me, and there aren’t a lot of us out there. I get recruiters contacting me every other day from places like Google, Facebook, Yahoo etc. When I moved to New York City twelve years ago I had a basic IT support job that paid $32000. Now, having switched my focus to operations, I make six figures a year with benefits and stock options and get to work at an incredible company. My wife is a young adult novelist (http://www.amazon.com/Boneshaker-Kate-Milford/dp/0547241879) and my salary allows her to write full-time without having to hold down a second job. We’ve also been able to save enough to adopt a child from China :)</p>
+
+<p>I&#8217;m doing pretty good. :)</p>
+
+<p>If I were a suit-n-tie IT guy only interested in getting this or that certification, or point-n-click administering a vanilla Microsoft world I&#8217;m sure I would be doing ok&#8230;and I don’t remotely want to diminish the incredibly difficult and often thankless jobs IT guys do, but for me, at least, it would just be a job. Instead I have a career doing something I truly love and where I get to travel the world, be a sought-after expert, play with the latest stuff and do all sorts of cool shit with the hottest gear.</p>
+
+<p>Many people go into technology because they have a passing interest with gadgets. For many, a technology career choice stems from the fact that they&#8217;re not smart enough to be a doctor, or have enough money for law school, so IT looks like an stable, reasonably respectable career. They like what technology does for them and they learn this or that technology stack (usually Microsoft), maybe get some certifications and then they&#8217;re done. Then they get stuck in an enterprise cul-de-sac. They keep re-implementing the same setup at this company or that company. They&#8217;re solving the same problems over and over and they stagnate, feeling like they know it all in their field.</p>
+
+<p>I have been sitting through dozens of interviews for positions I am trying to fill and am confronted with hordes of uninspired people with no curiosity, who tell me to implement a white paper or technology without even knowing my problem set. People who say I should &#8216;Virtualize&#8217; or move to the &#8216;Cloud&#8217; and throw lots of technobabble at me. Please don&#8217;t be that guy. Be the guy I want to hire because of your curiosity and intuitiveness.</p>
+
+<p>Operations Engineers (and developers at companies like mine) need to implement large changes fast and continuously make paradigm shifts in our thinking. We have to be flexible. We&#8217;re making the Internet. There is no blueprint. When we run into a problem, we have to pivot and find a new tack that may take us 180 degrees away from where we were. The stakes are always high. We are always learning and ravenous for what our peers are doing to solve these same problems.</p>
+
+<p>We are cowboys of the Internet&#8217;s Wild West. We’re doing what others cannot. :)</p>
+
+<p>You don&#8217;t become one of us without a genuine interest in technology and its power, and a drive to be constantly learning more so you can make the technologies bend to your will and serve the ultimate ends of society—whether that end is a mechanism for parsing large amounts of data to cure cancer, or making a more efficient way of sharing cat pictures. :P</p>
+
+<p>I know there’s a fine line between sounding inspiring and just sounding arrogant. I’m shooting for inspiring, because there are just not enough of us, and because when Christian told me what you guys were doing I thought that it was pretty cool and I’m hoping that by giving you guys a bit of support and a server one or more of you might consider a future in operations someday. No matter what, keep up your enthusiasm and your curiosity and your self-motivation, and you’ve got a career :)</p>
+
+<p>Even if you don&#8217;t become world-class developers or ops guys, your entrepreneurial instincts are just as important. Guys like you will be giants in the coming decades and more likely than not, guys like you will be my bosses. You will be coming up with the solutions to our problems and creating jobs. Also, your parents are awesome rarities and you are incredibly lucky that they&#8217;re encouraging you.</p>
+
+<p>So, enjoy the server. Learn on it (I&#8217;m partial to Linux&#8230;:P) and do something mind-blowing/world-changing with it. You have my email and my phone number, so don’t be a stranger. I am available to answer any technology questions you want. And when you guys are next in NYC I&#8217;ll buy you lunch/dinner and we can talk tech.</p></blockquote>
+
+<p>As I was composing this blog entry I got an email from another one of the kids:</p>
+
+<blockquote><p>This is <redacted> the person you met at the data center Friday along with <redacted>, just wanted to say thanks again for the server, its funny how me and <redacted> both had thought it would be years until we got another server. Looks like Christmas has come early haha. You really made that whole trip one of the best I have ever taken, I expected to just walk in there drop it off and wave goodbye but it turned into something I am going to remember forever. I cant wait to find out how we are going to utilize the server and really make great use of it. My one question was what exactly was this server used for before it was taken off the rack? We were really thinking about starting up a web server on it and running our website and all of our MySQL databases and everything on it as the stuff we do requires ALOT of database usage.</p></blockquote>
+
+<p>How cool is that?  These kids are going to learn how to measure IOPs and spec out a MySQL instance.  If his data needs are so high, maybe he should try Cassandra or Mongo so he can scale out?  I&#8217;m waiting to hear back from him with his description of his data and usage patterns.</p>
+
+<p><img class="center" src="/images/n170496_watch-out-we-got-a-badass-over-here-meme_large.png"></p>
+
+<p>I&#8217;ve had a lot of really exciting moments in this job and I&#8217;ve met a lot of really incredible people as well as had a chance to talk to some of the world most brilliant engineers. But, this was really special.</p>
+
+<p>The world, to say nothing of our industry, needs more kids and parents like these.</p>
+
+<p><img class="center" src="/images/Feels_good_man_2.jpg"></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Nathan Milford</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-01-29T21:08:44-05:00" pubdate data-updated="true">Jan 29<span>th</span>, 2012</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://code.milford.io/2012/01/in-which-i-give-a-server-to-some-kids/" data-via="NathanMilford" data-counturl="http://code.milford.io/2012/01/in-which-i-give-a-server-to-some-kids/" >Tweet</a>
+  
+  
+  
+</div>
+
+
+
+
+<div class="OUTBRAIN" data-src="http://code.milford.io/2012/01/in-which-i-give-a-server-to-some-kids/"></div>
+<script type="text/javascript" async="async" src="http://widgets.outbrain.com/outbrain.js"></script> 
+
+
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/2012/01/adjust-your-slab-memcached-1-4-11-rpms-on-centos-5-7/" title="Previous Post: Adjust your slab! Memcached 1.4.12 RPMs on CentOS 5.7.">&laquo; Adjust your slab! Memcached 1.4.12 RPMs on CentOS 5.7.</a>
+      
+      
+        <a class="basic-alignment right" href="/2012/01/automating-some-cassandra-maintenance/" title="Next Post: Automating Some Cassandra Maintenance">Automating Some Cassandra Maintenance &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2012/03/getting-a-basic-cobbler-server-going-on-centos/">Getting a Basic Cobbler server going on CentOS.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/making-a-local-centos-mirror/">Making a local CentOS mirror.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/making-a-simple-yum-repository/">Making a simple Yum repository.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/now-hiring-now-right-now-were-hiring-now/">Now Hiring Now, Right Now We're Hiring Now.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/the-dell-c6220-and-an-ode-to-my-dell-dcs-team/">The Dell C6220 and an Ode to my Dell DCS Team.</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Tag Cloud</h1>
+    <span id="tag-cloud"></span>
+</section>
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("NathanMilford", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/NathanMilford" class="twitter-follow-button" data-show-count="false">Follow @NathanMilford</a>
+  
+</section>
+
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/nmilford">@nmilford</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'nmilford',
+            count: 6,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Coderwall</h1>
+  <ul id="cw_badges">
+    <li class="loading">Status updating...</li>
+  </ul>
+
+  <script type="text/javascript">
+    var coderwall = (function(){
+      function render(options, badges){
+        var fragment = '',
+            t = $(options.target)[0],
+            height = 65,
+            width = 65,
+            index;
+
+        for (index in badges) {
+          fragment += '<a class="cw_badge"title="' + badges[index].description + '" href="http://coderwall.com/' + options.user + '">';
+          fragment +=   '<img alt="' + badges[index].description + '" height="' + width + '" width="' + height + '" src="' + badges[index].badge + '"/>';
+          fragment += '</a>';
+        }
+
+        t.innerHTML = fragment;
+      }
+      return {
+        showBadges: function(options){
+          $.ajax({
+              url: 'http://coderwall.com/' + options.user + '.json?callback=?'
+            , type: 'jsonp'
+            , error: function (err) { $(options.target + ' li.loading').addClass('error').text("Error loading feed"); }
+            , success: function(res) {
+                render(options, res.data.badges);
+            }
+          });
+        }
+      };
+    })();
+
+    $.domReady(function(){
+      if (!window.jXHR){
+        var jxhr = document.createElement('script');
+        jxhr.type = 'text/javascript';
+        jxhr.src = '/javascripts/libs/jXHR.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(jxhr, s);
+      }
+      if (!window.$){
+        var b = document.createElement('script');
+        b.type = 'text/javascript';
+        b.src = '/javascripts/ender.js';
+        var sc = document.getElementsByTagName('script')[0];
+        sc.parentNode.insertBefore(jxhr, s);
+      }
+      coderwall.showBadges({
+        user: 'nmilford',
+        target: '#cw_badges'
+      });
+    });
+  </script>
+  <style type="text/css">
+    .cw_badge img {
+      padding: 5px;
+      border: 0 none !important;
+      -moz-box-shadow: none !important;
+      -webkit-box-shadow: none !important;
+      -o-box-shadow: none !important;
+      box-shadow: none !important;
+    }
+  </style>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - Nathan Milford -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+
+<input type="hidden" name="OBKey" value=''/> 
+<script LANGUAGE="JavaScript">
+var OBCTm='';
+</script>
+<script LANGUAGE="JavaScript" src="http://widgets.outbrain.com/claim.js"></script>
+
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'code-milford-io';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://code.milford.io/2012/01/in-which-i-give-a-server-to-some-kids/';
+        var disqus_url = 'http://code.milford.io/2012/01/in-which-i-give-a-server-to-some-kids/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

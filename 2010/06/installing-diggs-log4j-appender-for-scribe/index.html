@@ -1,0 +1,519 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Installing Digg's log4j appender for Scribe - blog.milford.io</title>
+  <meta name="author" content="Nathan Milford">
+
+  
+  <meta name="description" content="So far, I&#8217;ve shown two different ways (from source or RPM) of getting Scribe installed on your CentOS / RHEL 5 server and soon I&#8217;ll &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://code.milford.io/2010/06/installing-diggs-log4j-appender-for-scribe/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="blog.milford.io" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">blog.milford.io</a></h1>
+  
+    <h2>a personal knowledge dump.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:code.milford.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/cassandra-token-calculator">Cassandra Token Calculator</a></li>
+  <li><a href="/about">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Installing Digg's Log4j Appender for Scribe</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2010-06-19T14:50:34-04:00" pubdate data-updated="true">Jun 19<span>th</span>, 2010</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p><img class="center" src="/images/log4j.jpg"></p>
+
+<p>So far, I&#8217;ve shown two different ways (from <a href="http://blog.milford.io/2010/06/building-scribe-from-silas-sewells-source-rpms-for-centos-rhel-5/">source</a> or <a href="http://blog.milford.io/2010/06/building-scribe-from-silas-sewells-source-rpms-for-centos-rhel-5/">RPM</a>) of getting Scribe installed on your CentOS / RHEL 5 server and soon I&#8217;ll write more on configuration.</p>
+
+<p>For now let&#8217;s just get it running with our JVM-based app.  In this scenario we&#8217;re going to set it up to log a <a href="http://cassandra.apache.org/">Cassandra</a> instance to a scribe instance on the same server, which is setup to log to a buffer store locally if the remote scribe master should become unavailable.</p>
+
+<p>So we&#8217;ll assume you&#8217;ve got git installed (you can get it from <a href="https://fedoraproject.org/wiki/EPEL/FAQ#howtouse">EPEL</a>), you have log4j properly installed in your JVM-based application and you have local and remote scribe instances setup.</p>
+
+<p>Here is the config (based on the example1 &amp; 2 configs that come with scribe) for the central server:</p>
+
+<!-- more -->
+
+
+<p>Add this store to the <code>/etc/scribed/default.conf</code> on your scribe master:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;store&gt;
+</span><span class='line'>  category=Cassandra
+</span><span class='line'>  type=file
+</span><span class='line'>  fs_type=std
+</span><span class='line'>  file_path=/path/to/sweet/cassandra/log-action
+</span><span class='line'>  base_filename=thisisoverwritten
+</span><span class='line'>  max_size=1000000
+</span><span class='line'>&lt;/store&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And on the local scribe instance you can add this to your <code>/etc/scribed/default.conf</code>:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>port=1463
+</span><span class='line'>max_msg_per_second=2000000
+</span><span class='line'>check_interval=3
+</span><span class='line'>&lt;store&gt;
+</span><span class='line'>  category=default
+</span><span class='line'>  type=buffer
+</span><span class='line'>  target_write_size=20480
+</span><span class='line'>  max_write_interval=1
+</span><span class='line'>  buffer_send_rate=1
+</span><span class='line'>  retry_interval=30
+</span><span class='line'>  retry_interval_range=10
+</span><span class='line'>  &lt;primary&gt;
+</span><span class='line'>    type=network
+</span><span class='line'>    remote_host=scribe.yourcompany.com
+</span><span class='line'>    remote_port=1463
+</span><span class='line'>  &lt;/primary&gt;
+</span><span class='line'>  &lt;secondary&gt;
+</span><span class='line'>    type=file
+</span><span class='line'>    fs_type=std
+</span><span class='line'>    file_path=/tmp/scribebuffer
+</span><span class='line'>    base_filename=thisisoverwritten
+</span><span class='line'>    max_size=3000000
+</span><span class='line'>  &lt;/secondary&gt;
+</span><span class='line'>&lt;/store&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>With the above setup, anything logged to scribe will be fed to scribe.yourcompany.com.  If that host is down, or its scribe instance signals that it cannot collect data for any reason (full disk, maybe) the local scribe instance will spool the messages locally to <code>/tmp/scribebuffer</code>.  When it comes back, it&#8217;ll play back the messages in <code>/tmp/scribebuffer</code>.  Nothing is lost&#8230; hurray!</p>
+
+<p>Now let&#8217;s grab the appender and install it:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>yum -y install git
+</span><span class='line'>git clone http://github.com/lenn0x/Scribe-log4j-Appender.git
+</span><span class='line'>cd Scribe-log4j-Appender/
+</span><span class='line'>cp scribelog4j.jar /opt/cassandra/apache-cassandra-0.6.2/lib</span></code></pre></td></tr></table></div></figure>
+
+
+<p>NOTE: In addition to it&#8217;s own jar it comes with whatever stuff you may need in it&#8217;s <code>lib/</code> folder, but for this example cassandra already has everything so, yay Cassandra.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>libthrift-r808609.jar, log4j-1.2.15.jar, slf4j-api-1.5.8.jar, slf4j-log4j12-1.5.8.jar</span></code></pre></td></tr></table></div></figure>
+
+
+<p>So here we setup log4j.</p>
+
+<p>In <code>/opt/apache-cassandra-0.6.2/conf/log4j.properties</code>.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># Add scribe to the log4j.rootlogger
+</span><span class='line'>log4j.rootLogger=INFO,stdout,R,scribe
+</span><span class='line'>&lt; other junk here &gt;
+</span><span class='line'>log4j.appender.scribe=org.apache.log4j.scribe.ScribeAppender
+</span><span class='line'># It goes to localhost:1463 by default but you can override thus
+</span><span class='line'># log4j.appender.scribe.scribe_host=scribe.yourcompany.com
+</span><span class='line'># log4j.appender.scribe.scribe_port=1463
+</span><span class='line'>log4j.appender.scribe.scribe_category=Cassandra
+</span><span class='line'>log4j.appender.scribe.DatePattern='.'yyyy-MM-dd-HH
+</span><span class='line'>log4j.appender.scribe.layout=org.apache.log4j.PatternLayout
+</span><span class='line'>log4j.appender.scribe.layout.ConversionPattern=%5p [%t] %d{ISO8601} %F (line %L) %m%n</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Restart cassandra to have it pick up the new jar and config change and watch on the scribe master to see cassandra start up.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>(root@scribetest:~)$ tail -f /tmp/scribetest/Cassandra/Cassandra_current 
+</span><span class='line'>cass001.yourcompany.com  INFO [main] 2010-06-17 18:55:16,342 StorageService.java (line 326) Starting up server gossip
+</span><span class='line'>cass001.yourcompany.com  INFO [main] 2010-06-17 18:55:16,389 CassandraDaemon.java (line 112) Binding thrift service to cass001.yourcompany.com/192.168.1.33:9160
+</span><span class='line'>cass001.yourcompany.com  INFO [main] 2010-06-17 18:55:16,394 CassandraDaemon.java (line 152) Cassandra starting up...
+</span><span class='line'>cass001.yourcompany.com  INFO [COMPACTION-POOL:1] 2010-06-17 18:55:16,405 CompactionManager.java (line 326) Compacted to /outbrain/cassandra/data/system/LocationInfo-13-Data.db.  1833/523 bytes for 2 keys.  Time: 164ms.
+</span><span class='line'>cass001.yourcompany.com  INFO [main] 2010-06-17 18:55:16,431 CassandraDaemon.java (line 182) mx4j successfuly loaded</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Nathan Milford</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2010-06-19T14:50:34-04:00" pubdate data-updated="true">Jun 19<span>th</span>, 2010</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://code.milford.io/2010/06/installing-diggs-log4j-appender-for-scribe/" data-via="NathanMilford" data-counturl="http://code.milford.io/2010/06/installing-diggs-log4j-appender-for-scribe/" >Tweet</a>
+  
+  
+  
+</div>
+
+
+
+
+<div class="OUTBRAIN" data-src="http://code.milford.io/2010/06/installing-diggs-log4j-appender-for-scribe/"></div>
+<script type="text/javascript" async="async" src="http://widgets.outbrain.com/outbrain.js"></script> 
+
+
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/2010/06/building-scribe-from-silas-sewells-source-rpms-for-centos-rhel-5/" title="Previous Post: Building Scribe from Silas Sewell's source RPMs for CentOS">&laquo; Building Scribe from Silas Sewell's source RPMs for CentOS</a>
+      
+      
+        <a class="basic-alignment right" href="/2010/06/installing-apache-cassandra-on-centos/" title="Next Post: Installing Apache Cassandra on CentOS">Installing Apache Cassandra on CentOS &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2012/03/getting-a-basic-cobbler-server-going-on-centos/">Getting a Basic Cobbler server going on CentOS.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/making-a-local-centos-mirror/">Making a local CentOS mirror.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/making-a-simple-yum-repository/">Making a simple Yum repository.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/now-hiring-now-right-now-were-hiring-now/">Now Hiring Now, Right Now We're Hiring Now.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/the-dell-c6220-and-an-ode-to-my-dell-dcs-team/">The Dell C6220 and an Ode to my Dell DCS Team.</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Tag Cloud</h1>
+    <span id="tag-cloud"></span>
+</section>
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("NathanMilford", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/NathanMilford" class="twitter-follow-button" data-show-count="false">Follow @NathanMilford</a>
+  
+</section>
+
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/nmilford">@nmilford</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'nmilford',
+            count: 6,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Coderwall</h1>
+  <ul id="cw_badges">
+    <li class="loading">Status updating...</li>
+  </ul>
+
+  <script type="text/javascript">
+    var coderwall = (function(){
+      function render(options, badges){
+        var fragment = '',
+            t = $(options.target)[0],
+            height = 65,
+            width = 65,
+            index;
+
+        for (index in badges) {
+          fragment += '<a class="cw_badge"title="' + badges[index].description + '" href="http://coderwall.com/' + options.user + '">';
+          fragment +=   '<img alt="' + badges[index].description + '" height="' + width + '" width="' + height + '" src="' + badges[index].badge + '"/>';
+          fragment += '</a>';
+        }
+
+        t.innerHTML = fragment;
+      }
+      return {
+        showBadges: function(options){
+          $.ajax({
+              url: 'http://coderwall.com/' + options.user + '.json?callback=?'
+            , type: 'jsonp'
+            , error: function (err) { $(options.target + ' li.loading').addClass('error').text("Error loading feed"); }
+            , success: function(res) {
+                render(options, res.data.badges);
+            }
+          });
+        }
+      };
+    })();
+
+    $.domReady(function(){
+      if (!window.jXHR){
+        var jxhr = document.createElement('script');
+        jxhr.type = 'text/javascript';
+        jxhr.src = '/javascripts/libs/jXHR.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(jxhr, s);
+      }
+      if (!window.$){
+        var b = document.createElement('script');
+        b.type = 'text/javascript';
+        b.src = '/javascripts/ender.js';
+        var sc = document.getElementsByTagName('script')[0];
+        sc.parentNode.insertBefore(jxhr, s);
+      }
+      coderwall.showBadges({
+        user: 'nmilford',
+        target: '#cw_badges'
+      });
+    });
+  </script>
+  <style type="text/css">
+    .cw_badge img {
+      padding: 5px;
+      border: 0 none !important;
+      -moz-box-shadow: none !important;
+      -webkit-box-shadow: none !important;
+      -o-box-shadow: none !important;
+      box-shadow: none !important;
+    }
+  </style>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - Nathan Milford -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+
+<input type="hidden" name="OBKey" value=''/> 
+<script LANGUAGE="JavaScript">
+var OBCTm='';
+</script>
+<script LANGUAGE="JavaScript" src="http://widgets.outbrain.com/claim.js"></script>
+
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'code-milford-io';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://code.milford.io/2010/06/installing-diggs-log4j-appender-for-scribe/';
+        var disqus_url = 'http://code.milford.io/2010/06/installing-diggs-log4j-appender-for-scribe/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

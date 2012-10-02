@@ -1,0 +1,590 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Code Example: Using Python Suds to Access the Bronto API. - blog.milford.io</title>
+  <meta name="author" content="Nathan Milford">
+
+  
+  <meta name="description" content="For some internal notification system I was attempting to write a script that would occasionally clear a list in Bronto, our email delivery platform &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://code.milford.io/2011/11/code-example-using-python-suds-to-access-the-bronto-api/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="blog.milford.io" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">blog.milford.io</a></h1>
+  
+    <h2>a personal knowledge dump.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:code.milford.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/cassandra-token-calculator">Cassandra Token Calculator</a></li>
+  <li><a href="/about">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Code Example: Using Python Suds to Access the Bronto API.</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-11-01T15:19:31-04:00" pubdate data-updated="true">Nov 1<span>st</span>, 2011</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p><img class="right" src="/images/sudslogo-medium_ducky.png"></p>
+
+<p>For some internal notification system I was attempting to write a script that would occasionally clear a list in <a href="http://bronto.com/">Bronto</a>, our email delivery platform.</p>
+
+<p>They have a lovely little <a href="http://api.bronto.com/">SOAP API</a>, but almost all of the examples were in PHP or Java. Since I am running this as a cronjob, and me being more of a Pythonist, I thought Python was a better place for me to implement this.</p>
+
+<p>The Bronto team, while not terribly proficient in Python, were as helpful as they could be. My major stumbling blocks were getting the authentication mechanism to work correctly, then it took a while to discover how to properly pass arguments to the API.</p>
+
+<p>Eventually I&#8217;ll do more stuff with it, but for now, I thought I&#8217;d publish this in case it might be useful for someone else using Python with thier API.</p>
+
+<p>Code starts below. Mind you, I am not a developer, be kind :)</p>
+
+<!-- more -->
+
+
+<p>I&#8217;m using <a href="https://fedorahosted.org/suds/">Suds</a>, which is a really snappy SOAP client for Python.</p>
+
+<p>Code starts here.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">logging</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">optparse</span> <span class="kn">import</span> <span class="n">OptionParser</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">suds</span> <span class="kn">import</span> <span class="n">WebFault</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">suds.client</span> <span class="kn">import</span> <span class="n">Client</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>Get your Bronto API token <a href="http://brontoversity.com/2010/03/18/logging-into-the-new-api-v4-0/">thus</a> and add it below. Also define the group you want to clear.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="n">brontoWSDL</span>     <span class="o">=</span> <span class="s">&quot;https://api.bronto.com/v4?wsdl&quot;</span>
+</span><span class='line'><span class="n">brontoApiToken</span> <span class="o">=</span> <span class="s">&quot;12345678-1234-1234-1234-123456789ABC&quot;</span>
+</span><span class='line'><span class="n">myGroup</span>        <span class="o">=</span> <span class="s">&quot;Lamers&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>I make logging run on and off with a switch. What the Bronto guys lack in Python skills they make up for in ability to parse SOAL/XML logging output.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">enableLogging</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
+</span><span class='line'>  <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&#39;suds.client&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Here we using the API&#8217;s login service and pass it our token. It returns a session ID. We then call on the API to create a session header and attach the session ID to it. Finally we stuff it into the SOAP headers. With my lack of SOAP experience, this nearly broke my spirit&#8230; it looks so simple in retrospect.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">brontoLogin</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">token</span><span class="p">):</span>
+</span><span class='line'>  <span class="k">try</span><span class="p">:</span>
+</span><span class='line'>    <span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">session_id</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">session_header</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s">&quot;sessionHeader&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">session_header</span><span class="o">.</span><span class="n">sessionId</span> <span class="o">=</span> <span class="n">session_id</span>
+</span><span class='line'>    <span class="n">client</span><span class="o">.</span><span class="n">set_options</span><span class="p">(</span><span class="n">soapheaders</span><span class="o">=</span><span class="n">session_header</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">client</span>
+</span><span class='line'>  <span class="k">except</span> <span class="n">WebFault</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span>
+</span><span class='line'>    <span class="n">errors</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span class='line'>    <span class="k">print</span> <span class="n">f</span>
+</span><span class='line'>    <span class="k">print</span> <span class="n">f</span><span class="o">.</span><span class="n">fault</span>
+</span><span class='line'>  <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+</span><span class='line'>    <span class="n">errors</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span class='line'>    <span class="k">print</span> <span class="n">e</span>
+</span><span class='line'>    <span class="n">tb</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>Before we clear the list, we need to grab its list id. We page through the lists until we match the group name we want to clear and return the id.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">getListId</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">client</span><span class="p">):</span>
+</span><span class='line'>  <span class="k">try</span><span class="p">:</span>
+</span><span class='line'>    <span class="nb">filter</span>      <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s">&quot;contactFilter&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="nb">filter</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s">&quot;AND&quot;</span>
+</span><span class='line'>    <span class="n">totalLists</span>  <span class="o">=</span> <span class="mi">0</span>
+</span><span class='line'>    <span class="n">pageNumber</span>  <span class="o">=</span> <span class="mi">1</span>
+</span><span class='line'>    <span class="n">morePages</span>   <span class="o">=</span> <span class="bp">True</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">while</span> <span class="n">morePages</span><span class="p">:</span>
+</span><span class='line'>      <span class="n">lists</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">readLists</span><span class="p">(</span><span class="nb">filter</span><span class="p">,</span> <span class="n">pageNumber</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">for</span> <span class="nb">list</span> <span class="ow">in</span> <span class="n">lists</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">list_items</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span class='line'>        <span class="n">list_items</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="nb">list</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="nb">list</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">list</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="nb">list</span><span class="o">.</span><span class="n">activeCount</span><span class="p">,</span> <span class="nb">list</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="nb">list</span><span class="o">.</span><span class="n">visibility</span><span class="p">])</span>
+</span><span class='line'>        <span class="k">if</span> <span class="nb">list</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">group</span><span class="p">:</span>
+</span><span class='line'>          <span class="k">return</span> <span class="nb">list</span><span class="o">.</span><span class="n">id</span>
+</span><span class='line'>          <span class="k">break</span>
+</span><span class='line'>       <span class="n">pageNumber</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span class='line'>       <span class="n">totalLists</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lists</span><span class="p">)</span>
+</span><span class='line'>       <span class="n">morePages</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lists</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">except</span> <span class="n">WebFault</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span>
+</span><span class='line'>      <span class="n">errors</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span class='line'>      <span class="k">print</span> <span class="n">f</span>
+</span><span class='line'>      <span class="k">print</span> <span class="n">f</span><span class="o">.</span><span class="n">fault</span>
+</span><span class='line'>    <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+</span><span class='line'>      <span class="n">errors</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span class='line'>      <span class="k">print</span> <span class="n">e</span>
+</span><span class='line'>      <span class="n">tb</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And finally, we simply pass the list ID. The PHP examples use an array, but in Python using Suds you need to use a dictionary it seems with the first value being &#8216;id&#8217; or &#8216;name&#8217; as needed. Yes, you can actually just pass the name, but I needed to extract the id for another function I&#8217;m using elsewhere.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">clearList</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">client</span><span class="p">):</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">brontoList</span> <span class="o">=</span> <span class="p">{</span> <span class="s">&#39;id&#39;</span><span class="p">:</span><span class="nb">id</span><span class="p">,</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">try</span><span class="p">:</span>
+</span><span class='line'>    <span class="n">client</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">clearLists</span><span class="p">(</span><span class="n">brontoList</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">except</span> <span class="n">WebFault</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span>
+</span><span class='line'>      <span class="n">errors</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span class='line'>      <span class="k">print</span> <span class="n">f</span>
+</span><span class='line'>      <span class="k">print</span> <span class="n">f</span><span class="o">.</span><span class="n">fault</span>
+</span><span class='line'>    <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+</span><span class='line'>      <span class="n">errors</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span class='line'>      <span class="k">print</span> <span class="n">e</span>
+</span><span class='line'>      <span class="n">tb</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>All together now.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">if</span> <span class="s">&#39;__main__&#39;</span> <span class="o">==</span> <span class="n">__name__</span><span class="p">:</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">parser</span> <span class="o">=</span> <span class="n">OptionParser</span><span class="p">()</span>
+</span><span class='line'>  <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&#39;-v&#39;</span><span class="p">,</span> <span class="s">&#39;--verbose&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&#39;verbose&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">&#39;callback&#39;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="n">callback</span><span class="o">=</span><span class="n">enableLogging</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&quot;Verbose output.&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">opts</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">bronto</span> <span class="o">=</span> <span class="n">brontoLogin</span><span class="p">(</span><span class="n">brontoWSDL</span><span class="p">,</span> <span class="n">brontoApiToken</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">listId</span> <span class="o">=</span> <span class="n">getListId</span><span class="p">(</span><span class="n">myGroup</span><span class="p">,</span> <span class="n">bronto</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">clearList</span><span class="p">(</span><span class="n">listId</span><span class="p">,</span> <span class="n">bronto</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Nathan Milford</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-11-01T15:19:31-04:00" pubdate data-updated="true">Nov 1<span>st</span>, 2011</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://code.milford.io/2011/11/code-example-using-python-suds-to-access-the-bronto-api/" data-via="NathanMilford" data-counturl="http://code.milford.io/2011/11/code-example-using-python-suds-to-access-the-bronto-api/" >Tweet</a>
+  
+  
+  
+</div>
+
+
+
+
+<div class="OUTBRAIN" data-src="http://code.milford.io/2011/11/code-example-using-python-suds-to-access-the-bronto-api/"></div>
+<script type="text/javascript" async="async" src="http://widgets.outbrain.com/outbrain.js"></script> 
+
+
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/2011/10/building-rpms-for-and-setting-up-statsd-and-graphite-on-centos/" title="Previous Post: Building RPMs for and setting up StatsD and Graphite on CentOS.">&laquo; Building RPMs for and setting up StatsD and Graphite on CentOS.</a>
+      
+      
+        <a class="basic-alignment right" href="/2011/11/rolling-upgrades-for-cassandra/" title="Next Post: Rolling Upgrades for Cassandra">Rolling Upgrades for Cassandra &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2012/03/getting-a-basic-cobbler-server-going-on-centos/">Getting a Basic Cobbler server going on CentOS.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/making-a-local-centos-mirror/">Making a local CentOS mirror.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/making-a-simple-yum-repository/">Making a simple Yum repository.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/now-hiring-now-right-now-were-hiring-now/">Now Hiring Now, Right Now We're Hiring Now.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2012/03/the-dell-c6220-and-an-ode-to-my-dell-dcs-team/">The Dell C6220 and an Ode to my Dell DCS Team.</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Tag Cloud</h1>
+    <span id="tag-cloud"></span>
+</section>
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("NathanMilford", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/NathanMilford" class="twitter-follow-button" data-show-count="false">Follow @NathanMilford</a>
+  
+</section>
+
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/nmilford">@nmilford</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'nmilford',
+            count: 6,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Coderwall</h1>
+  <ul id="cw_badges">
+    <li class="loading">Status updating...</li>
+  </ul>
+
+  <script type="text/javascript">
+    var coderwall = (function(){
+      function render(options, badges){
+        var fragment = '',
+            t = $(options.target)[0],
+            height = 65,
+            width = 65,
+            index;
+
+        for (index in badges) {
+          fragment += '<a class="cw_badge"title="' + badges[index].description + '" href="http://coderwall.com/' + options.user + '">';
+          fragment +=   '<img alt="' + badges[index].description + '" height="' + width + '" width="' + height + '" src="' + badges[index].badge + '"/>';
+          fragment += '</a>';
+        }
+
+        t.innerHTML = fragment;
+      }
+      return {
+        showBadges: function(options){
+          $.ajax({
+              url: 'http://coderwall.com/' + options.user + '.json?callback=?'
+            , type: 'jsonp'
+            , error: function (err) { $(options.target + ' li.loading').addClass('error').text("Error loading feed"); }
+            , success: function(res) {
+                render(options, res.data.badges);
+            }
+          });
+        }
+      };
+    })();
+
+    $.domReady(function(){
+      if (!window.jXHR){
+        var jxhr = document.createElement('script');
+        jxhr.type = 'text/javascript';
+        jxhr.src = '/javascripts/libs/jXHR.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(jxhr, s);
+      }
+      if (!window.$){
+        var b = document.createElement('script');
+        b.type = 'text/javascript';
+        b.src = '/javascripts/ender.js';
+        var sc = document.getElementsByTagName('script')[0];
+        sc.parentNode.insertBefore(jxhr, s);
+      }
+      coderwall.showBadges({
+        user: 'nmilford',
+        target: '#cw_badges'
+      });
+    });
+  </script>
+  <style type="text/css">
+    .cw_badge img {
+      padding: 5px;
+      border: 0 none !important;
+      -moz-box-shadow: none !important;
+      -webkit-box-shadow: none !important;
+      -o-box-shadow: none !important;
+      box-shadow: none !important;
+    }
+  </style>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - Nathan Milford -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+
+<input type="hidden" name="OBKey" value=''/> 
+<script LANGUAGE="JavaScript">
+var OBCTm='';
+</script>
+<script LANGUAGE="JavaScript" src="http://widgets.outbrain.com/claim.js"></script>
+
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'code-milford-io';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://code.milford.io/2011/11/code-example-using-python-suds-to-access-the-bronto-api/';
+        var disqus_url = 'http://code.milford.io/2011/11/code-example-using-python-suds-to-access-the-bronto-api/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

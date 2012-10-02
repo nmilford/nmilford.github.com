@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<!--[if IE 6]>
+<html id="ie6" dir="ltr" lang="en-US">
+<![endif]-->
+<!--[if IE 7]>
+<html id="ie7" dir="ltr" lang="en-US">
+<![endif]-->
+<!--[if IE 8]>
+<html id="ie8" dir="ltr" lang="en-US">
+<![endif]-->
+<!--[if !(IE 6) | !(IE 7) | !(IE 8)  ]><!-->
+<html dir="ltr" lang="en-US">
+<!--<![endif]-->
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width" />
+<title>Page not found | blog.milford.io</title>
+<link rel="profile" href="http://gmpg.org/xfn/11" />
+<link rel="stylesheet" type="text/css" media="all" href="http://blog.milford.io/wp-content/themes/twentyeleven/style.css" />
+<link rel="pingback" href="http://blog.milford.io/xmlrpc.php" />
+<!--[if lt IE 9]>
+<script src="http://blog.milford.io/wp-content/themes/twentyeleven/js/html5.js" type="text/javascript"></script>
+<![endif]-->
+<meta name='OBKey' content='HvmInfbEypxWOr1wAoA2BA==' />
+<link rel="alternate" type="application/rss+xml" title="blog.milford.io &raquo; Feed" href="http://blog.milford.io/feed/" />
+<link rel="alternate" type="application/rss+xml" title="blog.milford.io &raquo; Comments Feed" href="http://blog.milford.io/comments/feed/" />
+<link rel='stylesheet' id='admin-bar-css'  href='http://blog.milford.io/wp-includes/css/admin-bar.css?ver=3.4.1' type='text/css' media='all' />
+<link rel='stylesheet' id='A2A_SHARE_SAVE-css'  href='http://blog.milford.io/wp-content/plugins/add-to-any/addtoany.min.css?ver=1.4' type='text/css' media='all' />
+<link rel='stylesheet' id='wp-pagenavi-css'  href='http://blog.milford.io/wp-content/plugins/wp-pagenavi/pagenavi-css.css?ver=2.70' type='text/css' media='all' />
+<script type='text/javascript' src='http://blog.milford.io/wp-includes/js/jquery/jquery.js?ver=1.7.2'></script>
+<script type='text/javascript' src='http://blog.milford.io/wp-content/plugins/google-analyticator/external-tracking.min.js?ver=6.2'></script>
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="http://blog.milford.io/xmlrpc.php?rsd" />
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="http://blog.milford.io/wp-includes/wlwmanifest.xml" /> 
+<meta name="generator" content="WordPress 3.4.1" />
+
+<script type="text/javascript"><!--
+var a2a_config=a2a_config||{},wpa2a={done:false,html_done:false,script_ready:false,script_load:function(){var a=document.createElement('script'),s=document.getElementsByTagName('script')[0];a.type='text/javascript';a.async=true;a.src='http://static.addtoany.com/menu/page.js';s.parentNode.insertBefore(a,s);wpa2a.script_load=function(){};},script_onready:function(){if(a2a.type=='page'){wpa2a.script_ready=true;if(wpa2a.html_done)wpa2a.init();}},init:function(){for(var i=0,el,target,targets=wpa2a.targets,length=targets.length;i<length;i++){el=document.getElementById('wpa2a_'+(i+1));target=targets[i];a2a_config.linkname=target.title;a2a_config.linkurl=target.url;if(el)a2a.init('page',{target:el});wpa2a.done=true;}}};a2a_config.tracking_callback=['ready',wpa2a.script_onready];
+//--></script>
+	<link type="text/css" rel="stylesheet" href="http://blog.milford.io/wp-content/plugins/syntax-highlighter-and-code-prettifier/styles/shCore.css" />
+	<link type="text/css" rel="stylesheet" href="http://blog.milford.io/wp-content/plugins/syntax-highlighter-and-code-prettifier/styles/shThemeDefault.css" />
+	<script type="text/javascript" src="http://blog.milford.io/wp-content/plugins/syntax-highlighter-and-code-prettifier/scripts/shCore.js"></script>
+	<script type="text/javascript" src="http://blog.milford.io/wp-content/plugins/syntax-highlighter-and-code-prettifier/scripts/shBrushBash.js"></script>
+	<script type="text/javascript" src="http://blog.milford.io/wp-content/plugins/syntax-highlighter-and-code-prettifier/scripts/shBrushCpp.js"></script>
+	<script type="text/javascript" src="http://blog.milford.io/wp-content/plugins/syntax-highlighter-and-code-prettifier/scripts/shBrushCSharp.js"></script>
+	<script type="text/javascript" src="http://blog.milford.io/wp-content/plugins/syntax-highlighter-and-code-prettifier/scripts/shBrushCss.js"></script>
+	<script type="text/javascript" src="http://blog.milford.io/wp-content/plugins/syntax-highlighter-and-code-prettifier/scripts/shBrushDelphi.js"></script>
+	<script type="text/javascript" src="http://blog.milford.io/wp-content/plugins/syntax-highlighter-and-code-prettifier/scripts/shBrushDiff.js"></script>
+	<script type="text/javascript" src="http://blog.milford.io/wp-content/plugins/syntax-highlighter-and-code-prettifier/scripts/shBrushGroovy.js"></script>
+	<script type="text/javascript" src="http://blog.milford.io/wp-content/plugins/syntax-highlighter-and-code-prettifier/scripts/shBrushJava.js"></script>
+	<script type="text/javascript" src="http://blog.milford.io/wp-content/plugins/syntax-highlighter-and-code-prettifier/scripts/shBrushJScript.js"></script>
+	<script type="text/javascript" src="http://blog.milford.io/wp-content/plugins/syntax-highlighter-and-code-prettifier/scripts/shBrushPerl.js"></script>
+	<script type="text/javascript" src="http://blog.milford.io/wp-content/plugins/syntax-highlighter-and-code-prettifier/scripts/shBrushPhp.js"></script>
+	<script type="text/javascript" src="http://blog.milford.io/wp-content/plugins/syntax-highlighter-and-code-prettifier/scripts/shBrushPlain.js"></script>
+	<script type="text/javascript" src="http://blog.milford.io/wp-content/plugins/syntax-highlighter-and-code-prettifier/scripts/shBrushPython.js"></script>
+	<script type="text/javascript" src="http://blog.milford.io/wp-content/plugins/syntax-highlighter-and-code-prettifier/scripts/shBrushRuby.js"></script>
+	<script type="text/javascript" src="http://blog.milford.io/wp-content/plugins/syntax-highlighter-and-code-prettifier/scripts/shBrushScala.js"></script>
+	<script type="text/javascript" src="http://blog.milford.io/wp-content/plugins/syntax-highlighter-and-code-prettifier/scripts/shBrushSql.js"></script>
+	<script type="text/javascript" src="http://blog.milford.io/wp-content/plugins/syntax-highlighter-and-code-prettifier/scripts/shBrushVb.js"></script>
+	<script type="text/javascript" src="http://blog.milford.io/wp-content/plugins/syntax-highlighter-and-code-prettifier/scripts/shBrushXml.js"></script>
+	<script type="text/javascript">		
+		SyntaxHighlighter.config.clipboardSwf = 'http://blog.milford.io/wp-content/plugins/syntax-highlighter-and-code-prettifier/scripts/clipboard.swf';
+		SyntaxHighlighter.all();
+	</script>
+	<style type="text/css" media="print">#wpadminbar { display:none; }</style>
+<style type="text/css" media="screen">
+	html { margin-top: 28px !important; }
+	* html body { margin-top: 28px !important; }
+</style>
+<!--[if IE]>
+<style type="text/css">
+.addtoany_list a img{filter:alpha(opacity=70)}
+.addtoany_list a:hover img,.addtoany_list a.addtoany_share_save img{filter:alpha(opacity=100)}
+</style>
+<![endif]-->
+<!-- Google Analytics Tracking by Google Analyticator 6.2: http://ronaldheft.com/code/analyticator/ -->
+<script type="text/javascript">
+	var analyticsFileTypes = [''];
+	var analyticsEventTracking = 'enabled';
+</script>
+<script type="text/javascript">
+	var _gaq = _gaq || [];
+	_gaq.push(['_setAccount', 'UA-17044984-1']);
+	_gaq.push(['_trackPageview']);
+	_gaq.push(['_trackPageLoadTime']);
+
+	(function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	})();
+</script>
+</head>
+
+<body class="error404 logged-in admin-bar single-author two-column right-sidebar">
+<div id="page" class="hfeed">
+	<header id="branding" role="banner">
+			<hgroup>
+				<h1 id="site-title"><span><a href="http://blog.milford.io/" title="blog.milford.io" rel="home">blog.milford.io</a></span></h1>
+				<h2 id="site-description">a personal knowledge dump.</h2>
+			</hgroup>
+
+						<a href="http://blog.milford.io/">
+									<img src="http://blog.milford.io/wp-content/themes/twentyeleven/images/headers/lanterns.jpg" width="1000" height="288" alt="" />
+							</a>
+			
+								<form method="get" id="searchform" action="http://blog.milford.io/">
+		<label for="s" class="assistive-text">Search</label>
+		<input type="text" class="field" name="s" id="s" placeholder="Search" />
+		<input type="submit" class="submit" name="submit" id="searchsubmit" value="Search" />
+	</form>
+			
+			<nav id="access" role="navigation">
+				<h3 class="assistive-text">Main menu</h3>
+								<div class="skip-link"><a class="assistive-text" href="#content" title="Skip to primary content">Skip to primary content</a></div>
+				<div class="skip-link"><a class="assistive-text" href="#secondary" title="Skip to secondary content">Skip to secondary content</a></div>
+								<div class="menu"><ul><li ><a href="http://blog.milford.io/" title="Home">Home</a></li><li class="page_item page-item-2"><a href="http://blog.milford.io/about/">About</a></li><li class="page_item page-item-486"><a href="http://blog.milford.io/cassandra-token-calculator/">Cassandra Token Calculator</a></li></ul></div>
+			</nav><!-- #access -->
+	</header><!-- #branding -->
+
+
+	<div id="main">
+	<div id="primary">
+		<div id="content" role="main">
+
+			<article id="post-0" class="post error404 not-found">
+				<header class="entry-header">
+					<h1 class="entry-title">This is somewhat embarrassing, isn&rsquo;t it?</h1>
+				</header>
+
+				<div class="entry-content">
+					<p>It seems we can&rsquo;t find what you&rsquo;re looking for. Perhaps searching, or one of the links below, can help.</p>
+
+						<form method="get" id="searchform" action="http://blog.milford.io/">
+		<label for="s" class="assistive-text">Search</label>
+		<input type="text" class="field" name="s" id="s" placeholder="Search" />
+		<input type="submit" class="submit" name="submit" id="searchsubmit" value="Search" />
+	</form>
+
+							<div class="widget widget_recent_entries">		<h2 class="widgettitle">Recent Posts</h2>		<ul>
+				<li><a href="http://blog.milford.io/2012/03/getting-a-basic-cobbler-server-going-on-centos/" title="Getting a Basic Cobbler server going on CentOS.">Getting a Basic Cobbler server going on CentOS.</a></li>
+				<li><a href="http://blog.milford.io/2012/03/making-a-local-centos-mirror/" title="Making a local CentOS mirror.">Making a local CentOS mirror.</a></li>
+				<li><a href="http://blog.milford.io/2012/03/making-a-simple-yum-repository/" title="Making a simple Yum repository.">Making a simple Yum repository.</a></li>
+				<li><a href="http://blog.milford.io/2012/03/now-hiring-now-right-now-were-hiring-now/" title="Now Hiring Now, Right Now We&#8217;re Hiring Now.">Now Hiring Now, Right Now We&#8217;re Hiring Now.</a></li>
+				<li><a href="http://blog.milford.io/2012/03/the-dell-c6220-and-an-ode-to-my-dell-dcs-team/" title="The Dell C6220 and an Ode to my Dell DCS Team.">The Dell C6220 and an Ode to my Dell DCS Team.</a></li>
+				<li><a href="http://blog.milford.io/2012/03/the-dell-c6100-and-ipmi-drac-megarac/" title="The Dell C6100 and IPMI / DRAC / MegaRAC">The Dell C6100 and IPMI / DRAC / MegaRAC</a></li>
+				<li><a href="http://blog.milford.io/2012/03/keepalived-for-mysql-high-availability-on-centos/" title="Keepalived for MySQL High Availability on CentOS">Keepalived for MySQL High Availability on CentOS</a></li>
+				<li><a href="http://blog.milford.io/2012/03/installing-graylog2-0-9-6-elasticsearch-0-18-7-mongodb-2-0-3-on-centos-5-with-rvm/" title="Installing Graylog2 0.9.6, ElasticSearch 0.18.7, &amp; MongoDB 2.0.3 on CentOS 5 (With RVM)">Installing Graylog2 0.9.6, ElasticSearch 0.18.7, &#038; MongoDB 2.0.3 on CentOS 5 (With RVM)</a></li>
+				<li><a href="http://blog.milford.io/2012/03/keepalived-1-1-20-rpms-for-centos-5/" title="Keepalived 1.1.20 RPMs for CentOS 5">Keepalived 1.1.20 RPMs for CentOS 5</a></li>
+				<li><a href="http://blog.milford.io/2012/03/a-new-cassandra-chef-cookbook-for-handling-multiple-clusters/" title="A new Cassandra Chef Cookbook for handling multiple clusters.">A new Cassandra Chef Cookbook for handling multiple clusters.</a></li>
+		    <script type="text/javascript">
+    // <![CDATA[
+        var disqus_shortname = 'blog-milford-io';
+        (function () {
+            var nodes = document.getElementsByTagName('span');
+            for (var i = 0, url; i < nodes.length; i++) {
+                if (nodes[i].className.indexOf('dsq-postid') != -1) {
+                    nodes[i].parentNode.setAttribute('data-disqus-identifier', nodes[i].getAttribute('rel'));
+                    url = nodes[i].parentNode.href.split('#', 1);
+                    if (url.length == 1) { url = url[0]; }
+                    else { url = url[1]; }
+                    nodes[i].parentNode.href = url + '#disqus_thread';
+                }
+            }
+            var s = document.createElement('script'); s.async = true;
+            s.type = 'text/javascript';
+                        s.src = 'http' + '://' + 'disqus.com/forums/' + disqus_shortname + '/count.js';
+            (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+        }());
+    //]]>
+    </script>
+		</ul>
+		</div>
+					<div class="widget">
+						<h2 class="widgettitle">Most Used Categories</h2>
+						<ul>
+							<li class="cat-item cat-item-3"><a href="http://blog.milford.io/category/getting-stuff-to-work/" title="View all posts filed under Configurations">Configurations</a> (36)
+</li>
+	<li class="cat-item cat-item-1"><a href="http://blog.milford.io/category/uncategorized/" title="View all posts filed under Uncategorized">Uncategorized</a> (22)
+</li>
+	<li class="cat-item cat-item-209"><a href="http://blog.milford.io/category/code-examples/" title="View all posts filed under Code">Code</a> (6)
+</li>
+	<li class="cat-item cat-item-34"><a href="http://blog.milford.io/category/life-the-universe-and-everything/" title="View all posts filed under Life, the Universe and Everything">Life, the Universe and Everything</a> (3)
+</li>
+	<li class="cat-item cat-item-46"><a href="http://blog.milford.io/category/literature/" title="View all posts filed under Literature">Literature</a> (2)
+</li>
+	<li class="cat-item cat-item-192"><a href="http://blog.milford.io/category/sysdrink/" title="View all posts filed under sysdrink">sysdrink</a> (2)
+</li>
+	<li class="cat-item cat-item-57"><a href="http://blog.milford.io/category/networking/" title="View all posts filed under Networking">Networking</a> (1)
+</li>
+	<li class="cat-item cat-item-70"><a href="http://blog.milford.io/category/cinema/" title="View all posts filed under Cinema">Cinema</a> (1)
+</li>
+	<li class="cat-item cat-item-133"><a href="http://blog.milford.io/category/beer/" title="View all posts filed under Beer">Beer</a> (1)
+</li>
+	<li class="cat-item cat-item-243"><a href="http://blog.milford.io/category/awesome-2/" title="View all posts filed under Awesome!">Awesome!</a> (1)
+</li>
+						</ul>
+					</div>
+
+					<div class="widget widget_archive"><h2 class="widgettitle">Archives</h2><p>Try looking in the monthly archives.  <img src='http://blog.milford.io/wp-includes/images/smilies/icon_smile.gif' alt=':)' class='wp-smiley' /> </p>		<select name="archive-dropdown" onchange='document.location.href=this.options[this.selectedIndex].value;'> <option value="">Select Month</option> 	<option value='http://blog.milford.io/2012/03/'> March 2012 </option>
+	<option value='http://blog.milford.io/2012/02/'> February 2012 </option>
+	<option value='http://blog.milford.io/2012/01/'> January 2012 </option>
+	<option value='http://blog.milford.io/2011/12/'> December 2011 </option>
+	<option value='http://blog.milford.io/2011/11/'> November 2011 </option>
+	<option value='http://blog.milford.io/2011/10/'> October 2011 </option>
+	<option value='http://blog.milford.io/2011/08/'> August 2011 </option>
+	<option value='http://blog.milford.io/2011/07/'> July 2011 </option>
+	<option value='http://blog.milford.io/2011/05/'> May 2011 </option>
+	<option value='http://blog.milford.io/2011/04/'> April 2011 </option>
+	<option value='http://blog.milford.io/2011/03/'> March 2011 </option>
+	<option value='http://blog.milford.io/2011/02/'> February 2011 </option>
+	<option value='http://blog.milford.io/2011/01/'> January 2011 </option>
+	<option value='http://blog.milford.io/2010/10/'> October 2010 </option>
+	<option value='http://blog.milford.io/2010/08/'> August 2010 </option>
+	<option value='http://blog.milford.io/2010/07/'> July 2010 </option>
+	<option value='http://blog.milford.io/2010/06/'> June 2010 </option>
+ </select>
+</div>
+					<div class="widget widget_tag_cloud"><h2 class="widgettitle">Tags</h2><div class="tagcloud"><a href='http://blog.milford.io/tag/amazon/' class='tag-link-61' title='2 topics' style='font-size: 10.5714285714pt;'>amazon</a>
+<a href='http://blog.milford.io/tag/apache/' class='tag-link-19' title='7 topics' style='font-size: 16.5714285714pt;'>apache</a>
+<a href='http://blog.milford.io/tag/awesome/' class='tag-link-132' title='2 topics' style='font-size: 10.5714285714pt;'>awesome</a>
+<a href='http://blog.milford.io/tag/backup/' class='tag-link-137' title='3 topics' style='font-size: 12.2857142857pt;'>backup</a>
+<a href='http://blog.milford.io/tag/bash/' class='tag-link-63' title='2 topics' style='font-size: 10.5714285714pt;'>bash</a>
+<a href='http://blog.milford.io/tag/boneshaker/' class='tag-link-36' title='3 topics' style='font-size: 12.2857142857pt;'>boneshaker</a>
+<a href='http://blog.milford.io/tag/boost/' class='tag-link-6' title='1 topic' style='font-size: 8pt;'>boost</a>
+<a href='http://blog.milford.io/tag/brisk/' class='tag-link-168' title='2 topics' style='font-size: 10.5714285714pt;'>brisk</a>
+<a href='http://blog.milford.io/tag/c6100/' class='tag-link-118' title='2 topics' style='font-size: 10.5714285714pt;'>c6100</a>
+<a href='http://blog.milford.io/tag/cassandra/' class='tag-link-14' title='13 topics' style='font-size: 20.1428571429pt;'>cassandra</a>
+<a href='http://blog.milford.io/tag/centos/' class='tag-link-5' title='18 topics' style='font-size: 22pt;'>centos</a>
+<a href='http://blog.milford.io/tag/chef/' class='tag-link-155' title='4 topics' style='font-size: 13.7142857143pt;'>chef</a>
+<a href='http://blog.milford.io/tag/cloudera/' class='tag-link-22' title='4 topics' style='font-size: 13.7142857143pt;'>cloudera</a>
+<a href='http://blog.milford.io/tag/dell/' class='tag-link-117' title='2 topics' style='font-size: 10.5714285714pt;'>dell</a>
+<a href='http://blog.milford.io/tag/fb303/' class='tag-link-9' title='2 topics' style='font-size: 10.5714285714pt;'>fb303</a>
+<a href='http://blog.milford.io/tag/hadoop/' class='tag-link-10' title='16 topics' style='font-size: 21.2857142857pt;'>hadoop</a>
+<a href='http://blog.milford.io/tag/hardware/' class='tag-link-169' title='2 topics' style='font-size: 10.5714285714pt;'>hardware</a>
+<a href='http://blog.milford.io/tag/hive/' class='tag-link-11' title='7 topics' style='font-size: 16.5714285714pt;'>hive</a>
+<a href='http://blog.milford.io/tag/kate/' class='tag-link-58' title='2 topics' style='font-size: 10.5714285714pt;'>kate</a>
+<a href='http://blog.milford.io/tag/keepalived/' class='tag-link-189' title='3 topics' style='font-size: 12.2857142857pt;'>keepalived</a>
+<a href='http://blog.milford.io/tag/kvm/' class='tag-link-122' title='2 topics' style='font-size: 10.5714285714pt;'>kvm</a>
+<a href='http://blog.milford.io/tag/linux/' class='tag-link-24' title='17 topics' style='font-size: 21.7142857143pt;'>linux</a>
+<a href='http://blog.milford.io/tag/linux-mint/' class='tag-link-146' title='2 topics' style='font-size: 10.5714285714pt;'>linux mint</a>
+<a href='http://blog.milford.io/tag/logging/' class='tag-link-18' title='2 topics' style='font-size: 10.5714285714pt;'>logging</a>
+<a href='http://blog.milford.io/tag/map/' class='tag-link-20' title='3 topics' style='font-size: 12.2857142857pt;'>map</a>
+<a href='http://blog.milford.io/tag/metastore/' class='tag-link-50' title='2 topics' style='font-size: 10.5714285714pt;'>metastore</a>
+<a href='http://blog.milford.io/tag/mint/' class='tag-link-147' title='2 topics' style='font-size: 10.5714285714pt;'>mint</a>
+<a href='http://blog.milford.io/tag/monitoring/' class='tag-link-198' title='2 topics' style='font-size: 10.5714285714pt;'>monitoring</a>
+<a href='http://blog.milford.io/tag/mx4j/' class='tag-link-25' title='2 topics' style='font-size: 10.5714285714pt;'>mx4j</a>
+<a href='http://blog.milford.io/tag/mysql/' class='tag-link-127' title='6 topics' style='font-size: 15.8571428571pt;'>mysql</a>
+<a href='http://blog.milford.io/tag/namenode/' class='tag-link-138' title='2 topics' style='font-size: 10.5714285714pt;'>namenode</a>
+<a href='http://blog.milford.io/tag/python/' class='tag-link-31' title='8 topics' style='font-size: 17.2857142857pt;'>python</a>
+<a href='http://blog.milford.io/tag/reduce/' class='tag-link-21' title='3 topics' style='font-size: 12.2857142857pt;'>reduce</a>
+<a href='http://blog.milford.io/tag/rhel/' class='tag-link-211' title='2 topics' style='font-size: 10.5714285714pt;'>rhel</a>
+<a href='http://blog.milford.io/tag/rpm/' class='tag-link-12' title='6 topics' style='font-size: 15.8571428571pt;'>rpm</a>
+<a href='http://blog.milford.io/tag/ruby/' class='tag-link-156' title='4 topics' style='font-size: 13.7142857143pt;'>ruby</a>
+<a href='http://blog.milford.io/tag/scribe/' class='tag-link-4' title='3 topics' style='font-size: 12.2857142857pt;'>scribe</a>
+<a href='http://blog.milford.io/tag/scripts/' class='tag-link-62' title='2 topics' style='font-size: 10.5714285714pt;'>scripts</a>
+<a href='http://blog.milford.io/tag/servers/' class='tag-link-223' title='2 topics' style='font-size: 10.5714285714pt;'>servers</a>
+<a href='http://blog.milford.io/tag/slides/' class='tag-link-191' title='2 topics' style='font-size: 10.5714285714pt;'>slides</a>
+<a href='http://blog.milford.io/tag/sysdrink/' class='tag-link-192' title='2 topics' style='font-size: 10.5714285714pt;'>sysdrink</a>
+<a href='http://blog.milford.io/tag/talks/' class='tag-link-210' title='2 topics' style='font-size: 10.5714285714pt;'>talks</a>
+<a href='http://blog.milford.io/tag/thrift/' class='tag-link-8' title='4 topics' style='font-size: 13.7142857143pt;'>thrift</a>
+<a href='http://blog.milford.io/tag/vim/' class='tag-link-54' title='2 topics' style='font-size: 10.5714285714pt;'>vim</a>
+<a href='http://blog.milford.io/tag/yum/' class='tag-link-244' title='2 topics' style='font-size: 10.5714285714pt;'>yum</a></div>
+</div>
+				</div><!-- .entry-content -->
+			</article><!-- #post-0 -->
+
+		</div><!-- #content -->
+	</div><!-- #primary -->
+
+
+	</div><!-- #main -->
+
+	<footer id="colophon" role="contentinfo">
+
+			
+			<div id="site-generator">
+								<a href="http://wordpress.org/" title="Semantic Personal Publishing Platform" rel="generator">Proudly powered by WordPress</a>
+			</div>
+	</footer><!-- #colophon -->
+</div><!-- #page -->
+
+
+<script type="text/javascript"><!--
+wpa2a.targets=[];
+wpa2a.html_done=true;if(wpa2a.script_ready&&!wpa2a.done)wpa2a.init();wpa2a.script_load();
+//--></script>
+<script type='text/javascript' src='http://blog.milford.io/wp-includes/js/admin-bar.js?ver=3.4.1'></script>
+	<script type="text/javascript">
+		(function() {
+			var request, b = document.body, c = 'className', cs = 'customize-support', rcs = new RegExp('(^|\\s+)(no-)?'+cs+'(\\s+|$)');
+
+			request = true;
+
+			b[c] = b[c].replace( rcs, '' );
+			b[c] += ( window.postMessage && request ? ' ' : ' no-' ) + cs;
+		}());
+	</script>
+			<div id="wpadminbar" class="nojq nojs" role="navigation">
+			<div class="quicklinks">
+				<ul id="wp-admin-bar-root-default" class="ab-top-menu">
+		<li id="wp-admin-bar-wp-logo" class="menupop"><a class="ab-item" tabindex="10" aria-haspopup="true" href="http://blog.milford.io/wp-admin/about.php" title="About WordPress"><span class="ab-icon"></span></a><div class="ab-sub-wrapper"><ul id="wp-admin-bar-wp-logo-default" class="ab-submenu">
+		<li id="wp-admin-bar-about" class=""><a class="ab-item" tabindex="10" href="http://blog.milford.io/wp-admin/about.php">About WordPress</a>		</li></ul><ul id="wp-admin-bar-wp-logo-external" class="ab-sub-secondary ab-submenu">
+		<li id="wp-admin-bar-wporg" class=""><a class="ab-item" tabindex="10" href="http://wordpress.org/">WordPress.org</a>		</li>
+		<li id="wp-admin-bar-documentation" class=""><a class="ab-item" tabindex="10" href="http://codex.wordpress.org/">Documentation</a>		</li>
+		<li id="wp-admin-bar-support-forums" class=""><a class="ab-item" tabindex="10" href="http://wordpress.org/support/">Support Forums</a>		</li>
+		<li id="wp-admin-bar-feedback" class=""><a class="ab-item" tabindex="10" href="http://wordpress.org/support/forum/requests-and-feedback">Feedback</a>		</li></ul></div>		</li>
+		<li id="wp-admin-bar-site-name" class="menupop"><a class="ab-item" tabindex="10" aria-haspopup="true" href="http://blog.milford.io/wp-admin/">blog.milford.io</a><div class="ab-sub-wrapper"><ul id="wp-admin-bar-site-name-default" class="ab-submenu">
+		<li id="wp-admin-bar-dashboard" class=""><a class="ab-item" tabindex="10" href="http://blog.milford.io/wp-admin/">Dashboard</a>		</li></ul><ul id="wp-admin-bar-appearance" class=" ab-submenu">
+		<li id="wp-admin-bar-themes" class=""><a class="ab-item" tabindex="10" href="http://blog.milford.io/wp-admin/themes.php">Themes</a>		</li>
+		<li id="wp-admin-bar-customize" class=" hide-if-no-customize"><a class="ab-item" tabindex="10" href="http://blog.milford.io/wp-admin/customize.php?url=http%3A%2F%2Fblog.milford.io%2Fwp-content%2Fuploads%2F2012%2F01%2Fringview.png">Customize</a>		</li>
+		<li id="wp-admin-bar-widgets" class=""><a class="ab-item" tabindex="10" href="http://blog.milford.io/wp-admin/widgets.php">Widgets</a>		</li>
+		<li id="wp-admin-bar-menus" class=""><a class="ab-item" tabindex="10" href="http://blog.milford.io/wp-admin/nav-menus.php">Menus</a>		</li>
+		<li id="wp-admin-bar-background" class=""><a class="ab-item" tabindex="10" href="http://blog.milford.io/wp-admin/themes.php?page=custom-background">Background</a>		</li>
+		<li id="wp-admin-bar-header" class=""><a class="ab-item" tabindex="10" href="http://blog.milford.io/wp-admin/themes.php?page=custom-header">Header</a>		</li></ul></div>		</li>
+		<li id="wp-admin-bar-updates" class=""><a class="ab-item" tabindex="10" href="http://blog.milford.io/wp-admin/update-core.php" title="7 Plugin Updates, 2 Theme Updates"><span class="ab-icon"></span><span class="ab-label">9</span></a>		</li>
+		<li id="wp-admin-bar-comments" class=""><a class="ab-item" tabindex="10" href="http://blog.milford.io/wp-admin/edit-comments.php" title="2 comments awaiting moderation"><span class="ab-icon"></span><span id="ab-awaiting-mod" class="ab-label awaiting-mod pending-count count-2">2</span></a>		</li>
+		<li id="wp-admin-bar-new-content" class="menupop"><a class="ab-item" tabindex="10" aria-haspopup="true" href="http://blog.milford.io/wp-admin/post-new.php" title="Add New"><span class="ab-icon"></span><span class="ab-label">New</span></a><div class="ab-sub-wrapper"><ul id="wp-admin-bar-new-content-default" class="ab-submenu">
+		<li id="wp-admin-bar-new-post" class=""><a class="ab-item" tabindex="10" href="http://blog.milford.io/wp-admin/post-new.php">Post</a>		</li>
+		<li id="wp-admin-bar-new-media" class=""><a class="ab-item" tabindex="10" href="http://blog.milford.io/wp-admin/media-new.php">Media</a>		</li>
+		<li id="wp-admin-bar-new-link" class=""><a class="ab-item" tabindex="10" href="http://blog.milford.io/wp-admin/link-add.php">Link</a>		</li>
+		<li id="wp-admin-bar-new-page" class=""><a class="ab-item" tabindex="10" href="http://blog.milford.io/wp-admin/post-new.php?post_type=page">Page</a>		</li>
+		<li id="wp-admin-bar-new-user" class=""><a class="ab-item" tabindex="10" href="http://blog.milford.io/wp-admin/user-new.php">User</a>		</li></ul></div>		</li>
+		<li id="wp-admin-bar-w3tc" class="menupop"><a class="ab-item" tabindex="10" aria-haspopup="true" href="http://blog.milford.io/wp-admin/admin.php?page=w3tc_general">Performance</a><div class="ab-sub-wrapper"><ul id="wp-admin-bar-w3tc-default" class="ab-submenu">
+		<li id="wp-admin-bar-w3tc-empty-caches" class=""><a class="ab-item" tabindex="10" href="http://blog.milford.io/wp-admin/admin.php?page=w3tc_general&#038;w3tc_flush_all&#038;_wpnonce=4c19e66190">Empty All Caches</a>		</li>
+		<li id="wp-admin-bar-w3tc-faq" class=""><a class="ab-item" tabindex="10" href="http://blog.milford.io/wp-admin/admin.php?page=w3tc_faq">FAQ</a>		</li>
+		<li id="wp-admin-bar-w3tc-support" class=""><a class="ab-item" tabindex="10" href="http://blog.milford.io/wp-admin/admin.php?page=w3tc_support"><span style="color: red; background: none;">Support</span></a>		</li></ul></div>		</li>
+		<li id="wp-admin-bar-delete-cache" class=""><a class="ab-item" tabindex="10" href="http://blog.milford.io/wp-admin/options-general.php?page=wpsupercache&#038;action=delete&#038;path=%2Fwp-content%2Fuploads%2F2012%2F01%2Fringview.png&#038;_wpnonce=a45310b0e6">Delete Cache</a>		</li></ul><ul id="wp-admin-bar-top-secondary" class="ab-top-secondary ab-top-menu">
+		<li id="wp-admin-bar-search" class=" admin-bar-search"><div class="ab-item ab-empty-item" tabindex="-1"><form action="http://blog.milford.io/" method="get" id="adminbarsearch"><input class="adminbar-input" name="s" id="adminbar-search" tabindex="10" type="text" value="" maxlength="150" /><input type="submit" class="adminbar-button" value="Search"/></form></div>		</li>
+		<li id="wp-admin-bar-my-account" class="menupop with-avatar"><a class="ab-item" tabindex="10" aria-haspopup="true" href="http://blog.milford.io/wp-admin/profile.php" title="My Account">Howdy, Nathan Milford<img alt='' src='/wp-content/profile-pics/1.jpg' class='avatar avatar-16 photo' height='16' width='16' /></a><div class="ab-sub-wrapper"><ul id="wp-admin-bar-user-actions" class=" ab-submenu">
+		<li id="wp-admin-bar-user-info" class=""><a class="ab-item" tabindex="-1" href="http://blog.milford.io/wp-admin/profile.php"><img alt='' src='/wp-content/profile-pics/1.jpg' class='avatar avatar-64 photo' height='64' width='64' /><span class='display-name'>Nathan Milford</span><span class='username'>nathan</span></a>		</li>
+		<li id="wp-admin-bar-edit-profile" class=""><a class="ab-item" tabindex="10" href="http://blog.milford.io/wp-admin/profile.php">Edit My Profile</a>		</li>
+		<li id="wp-admin-bar-logout" class=""><a class="ab-item" tabindex="10" href="http://blog.milford.io/wp-login.php?action=logout&#038;_wpnonce=4b6687ede3">Log Out</a>		</li></ul></div>		</li></ul>			</div>
+		</div>
+
+		
+</body>
+</html>
+<!-- Performance optimized by W3 Total Cache. Learn more: http://www.w3-edge.com/wordpress-plugins/
+
+Page Caching using disk: enhanced
+
+Served from: blog.milford.io @ 2012-10-01 21:16:35 -->
